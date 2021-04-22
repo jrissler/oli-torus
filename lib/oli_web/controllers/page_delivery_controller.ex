@@ -84,7 +84,6 @@ defmodule OliWeb.PageDeliveryController do
          section_slug,
          _
        ) do
-
     # Only consider graded attempts
     resource_attempts = Enum.filter(resource_attempts, fn a -> a.revision.graded == true end)
 

@@ -30,6 +30,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/atom-one-dark.min.css" integrity="sha512-Jlyabam8ztU2kOGN19fSzv1Go9nt9A43UA6vhmL1MPsQMeoPZd+p7pbmegAtyl8kulna0Cqwb7Pgj4adGTLCXA==" crossorigin="anonymous" media="screen and (prefers-color-scheme: dark)"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
 
+    <%= additional_stylesheets(assigns) %>
+
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script>
     window.MathJax = window.MathJax || {
