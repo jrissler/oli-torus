@@ -12,15 +12,6 @@ type AudioSettingsProps = {
   editMode: boolean;
 };
 
-// const onRemove = () => {
-//   ($('#remove-button') as any).tooltip('hide');
-
-//   const path = ReactEditor.findPath(editor, model);
-//   Transforms.removeNodes(editor, { at: path });
-
-//   setIsPopoverOpen(false);
-// };
-
 export const AudioSettings = (props: AudioSettingsProps) => {
   // Which selection is active, URL or in course page
   const [model, setModel] = useState(props.model);
@@ -78,7 +69,6 @@ export const AudioSettings = (props: AudioSettingsProps) => {
                 onClick={() =>
                   selectAudio(props.commandContext.projectSlug, model).then((img) => null)
                 }
-                // setSrc(img.src)
                 className="btn btn-outline-primary"
                 type="button"
               >

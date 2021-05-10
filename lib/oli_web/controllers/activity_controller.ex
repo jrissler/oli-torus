@@ -19,8 +19,6 @@ defmodule OliWeb.ActivityController do
     author = conn.assigns[:current_author]
     is_admin? = Accounts.is_admin?(author)
 
-    # full title, short title, link, action descriptions
-
     case ActivityEditor.create_context(project_slug, revision_slug, activity_slug, author) do
       {:ok, context} ->
         render(conn, "edit.html",

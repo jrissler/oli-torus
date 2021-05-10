@@ -1,28 +1,31 @@
 import { OrderingModelSchema as Ordering } from './schema';
 import {
   createRuleForIds,
-  fromText,
-  getChoice,
   getCorrectResponse,
-  getHint,
-  getResponse,
-  getChoiceIds,
   getCorrectOrdering,
   getIncorrectResponse,
-  getResponseId,
   invertRule,
   unionRules,
-  getResponses,
-  makeResponse,
   isSimpleOrdering,
-  getHints,
-  getChoiceIndex,
-  ChoiceMoveDirection,
-  canMoveChoiceUp,
-  canMoveChoiceDown,
+  getChoiceIds,
+  getResponseId,
 } from './utils';
-import { RichText, Hint as HintType, ChoiceId, Choice, ResponseId } from '../types';
-import { toSimpleText } from 'data/content/text';
+import { ChoiceId, ResponseId } from '../types';
+import {
+  getResponse,
+  getResponses,
+  makeChoice,
+  makeResponse,
+  moveChoice,
+} from 'components/activities/common/authoring/utils';
+import {
+  addHint,
+  editChoice,
+  editFeedback,
+  editHint,
+  editStem,
+  removeHint,
+} from 'components/activities/common/authoring/immerActions';
 
 export class Actions {
   static toggleType() {
@@ -38,17 +41,11 @@ export class Actions {
     };
   }
 
-  static editStem(content: RichText) {
-    return (model: Ordering) => {
-      model.stem.content = content;
-      const previewText = toSimpleText({ children: content.model } as any);
-      model.authoring.previewText = previewText;
-    };
-  }
+  static editStem = editStem;
 
   static addChoice() {
     return (model: Ordering) => {
-      const newChoice: Choice = fromText('');
+      const newChoice = makeChoice('');
 
       model.choices.push(newChoice);
       getChoiceIds(model.authoring.correct).push(newChoice.id);
@@ -56,11 +53,7 @@ export class Actions {
     };
   }
 
-  static editChoiceContent(id: string, content: RichText) {
-    return (model: Ordering) => {
-      getChoice(model, id).content = content;
-    };
-  }
+  static editChoice = editChoice;
 
   static removeChoice(id: ChoiceId) {
     return (model: Ordering) => {
@@ -90,32 +83,8 @@ export class Actions {
     };
   }
 
-  static moveChoice(direction: ChoiceMoveDirection, id: ChoiceId) {
-    return (model: Ordering) => {
-      const thisChoiceIndex = getChoiceIndex(model, id);
-
-      const swap = (index1: number, index2: number) => {
-        const temp = model.choices[index1];
-        model.choices[index1] = model.choices[index2];
-        model.choices[index2] = temp;
-      };
-      const moveUp = () => swap(thisChoiceIndex, thisChoiceIndex - 1);
-      const moveDown = () => swap(thisChoiceIndex, thisChoiceIndex + 1);
-
-      switch (direction) {
-        case 'up':
-          return canMoveChoiceUp(model, id) ? moveUp() : model;
-        case 'down':
-          return canMoveChoiceDown(model, id) ? moveDown() : model;
-      }
-    };
-  }
-
-  static editResponseFeedback(responseId: ResponseId, content: RichText) {
-    return (model: Ordering) => {
-      getResponse(model, responseId).feedback.content = content;
-    };
-  }
+  static moveChoice = moveChoice;
+  static editFeedback = editFeedback;
 
   static addTargetedFeedback() {
     return (model: Ordering) => {
@@ -124,10 +93,10 @@ export class Actions {
           return;
         case 'TargetedOrdering':
           // eslint-disable-next-line
-          const response = makeResponse(createRuleForIds([]), 0, '');
+          const newResponse = makeResponse(createRuleForIds([]), 0, '');
 
-          getResponses(model).push(response);
-          model.authoring.targeted.push([[], response.id]);
+          getResponses(model).push(newResponse);
+          model.authoring.targeted.push([[], newResponse.id]);
           return;
       }
     };
@@ -166,27 +135,9 @@ export class Actions {
     };
   }
 
-  static addHint() {
-    return (model: Ordering) => {
-      const newHint: HintType = fromText('');
-      // new hints are always cognitive hints. they should be inserted
-      // right before the bottomOut hint at the end of the list
-      const bottomOutIndex = getHints(model).length - 1;
-      getHints(model).splice(bottomOutIndex, 0, newHint);
-    };
-  }
-
-  static editHint(id: string, content: RichText) {
-    return (model: Ordering) => {
-      getHint(model, id).content = content;
-    };
-  }
-
-  static removeHint(id: string) {
-    return (model: Ordering) => {
-      model.authoring.parts[0].hints = getHints(model).filter((h) => h.id !== id);
-    };
-  }
+  static addHint = addHint;
+  static editHint = editHint;
+  static removeHint = removeHint;
 }
 
 // mutable

@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { ImageCodingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/Stem';
-import { Hints } from '../common/Hints';
+import { Stem } from '../common/authoring/Stem';
+import { Hints } from '../common/authoring/Hints';
 import { ICActions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
@@ -19,8 +19,8 @@ import { MediaItem } from 'types/media';
 import * as ContentModel from 'data/content/model';
 import { Feedback } from './sections/Feedback';
 import { lastPart } from './utils';
-import { CloseButton } from 'components/misc/CloseButton';
 import { ImageCodeEditor } from './sections/ImageCodeEditor';
+import { RemoveButton } from 'components/misc/RemoveButton';
 
 const store = configureStore();
 
@@ -114,13 +114,13 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
     });
   }
 
-  const addImage = (e: any) => {
+  const addImage: React.MouseEventHandler<HTMLButtonElement> = () => {
     selectImage(projectSlug, ContentModel.image()).then((img) => {
       dispatch(ICActions.addResourceURL(img.src));
     });
   };
 
-  const addSpreadsheet = (e: any) => {
+  const addSpreadsheet: React.MouseEventHandler<HTMLButtonElement> = () => {
     selectSpreadsheet(projectSlug, ContentModel.image()).then((img) => {
       dispatch(ICActions.addResourceURL(img.src));
     });
@@ -152,7 +152,7 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
             type="number"
             value={model.tolerance}
             disabled={!usesImage()}
-            onChange={(e: any) => dispatch(ICActions.editTolerance(e.target.value))}
+            onChange={(e) => dispatch(ICActions.editTolerance(Number(e.target.value)))}
           />
           &nbsp;(Average per-pixel error allowed.)
         </p>
@@ -165,7 +165,7 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
             type="text"
             value={model.regex}
             disabled={usesImage()}
-            onChange={(e: any) => dispatch(ICActions.editRegex(e.target.value))}
+            onChange={(e) => dispatch(ICActions.editRegex(e.target.value))}
           />
           &nbsp;Pattern for correct text output
         </p>
@@ -175,12 +175,7 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
 
   return (
     <React.Fragment>
-      <Stem
-        projectSlug={props.projectSlug}
-        editMode={props.editMode}
-        stem={model.stem}
-        onEditStem={(content) => dispatch(ICActions.editStem(content))}
-      />
+      <Stem stem={model.stem} onEditContent={(content) => dispatch(ICActions.editStem(content))} />
 
       <Heading title="Resources" id="images" />
       <div>
@@ -188,11 +183,7 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
           {model.resourceURLs.map((url, i) => (
             <li className="list-group-item" key={i}>
               {lastPart(url)}
-              <CloseButton
-                className="pl-3 pr-1"
-                editMode={props.editMode}
-                onClick={() => dispatch(ICActions.removeResourceURL(url))}
-              />
+              <RemoveButton onClick={() => dispatch(ICActions.removeResourceURL(url))} />
             </li>
           ))}
         </ul>
@@ -221,7 +212,7 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
           id="example-toggle"
           aria-label="Checkbox for example"
           checked={model.isExample}
-          onChange={(e: any) => dispatch(ICActions.editIsExample(e.target.checked))}
+          onChange={(e) => dispatch(ICActions.editIsExample(e.target.checked))}
         />
         <label className="form-check-label" htmlFor="example-toggle">
           <b>Example Only</b>

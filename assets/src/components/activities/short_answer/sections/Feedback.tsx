@@ -7,14 +7,15 @@ import { Description } from 'components/misc/Description';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { parseInputFromRule } from '../utils';
 import { ProjectSlug } from 'data/types';
-import { CloseButton } from 'components/misc/CloseButton';
+import { RemoveButton } from 'components/misc/RemoveButton';
+import { AuthoringButton } from 'components/misc/AuthoringButton';
 
-interface FeedbackProps extends ModelEditorProps {
+interface FeedbackProps {
   onEditResponse: (id: string, content: RichText) => void;
   onRemoveResponse: (id: string) => void;
   onAddResponse: () => void;
   onEditResponseRule: (id: string, rule: string) => void;
-  projectSlug: ProjectSlug;
+  model: any;
 }
 
 interface ItemProps extends FeedbackProps {
@@ -22,7 +23,7 @@ interface ItemProps extends FeedbackProps {
 }
 
 export const Item = (props: ItemProps) => {
-  const { response, editMode, onEditResponse } = props;
+  const { response, onEditResponse } = props;
   const [value, setValue] = useState(parseInputFromRule(response.rule));
 
   const onEditRule = (input: string) => {
@@ -45,13 +46,11 @@ export const Item = (props: ItemProps) => {
             type={props.model.inputType === 'numeric' ? 'number' : 'text'}
             className="form-control my-2"
             placeholder="Enter correct answer..."
-            onChange={(e: any) => onEditRule(e.target.value)}
+            onChange={(e) => onEditRule(e.target.value)}
             value={value}
           />
         </Description>
         <RichTextEditor
-          projectSlug={props.projectSlug}
-          editMode={editMode}
           text={response.feedback.content}
           onEdit={(content) => onEditResponse(response.id, content)}
         />
@@ -65,8 +64,6 @@ export const Item = (props: ItemProps) => {
           <IconIncorrect /> Feedback for any other Incorrect Answer
         </Description>
         <RichTextEditor
-          projectSlug={props.projectSlug}
-          editMode={editMode}
           text={response.feedback.content}
           onEdit={(content) => onEditResponse(response.id, content)}
         />
@@ -82,28 +79,22 @@ export const Item = (props: ItemProps) => {
           <input
             type={props.model.inputType === 'numeric' ? 'number' : 'text'}
             className="form-control"
-            onChange={(e: any) => onEditRule(e.target.value)}
+            onChange={(e) => onEditRule(e.target.value)}
             value={value}
           />
         </Description>
         <RichTextEditor
-          projectSlug={props.projectSlug}
-          editMode={editMode}
           text={response.feedback.content}
           onEdit={(content) => onEditResponse(response.id, content)}
         />
       </div>
-      <CloseButton
-        className="pl-3 pr-1"
-        onClick={() => props.onRemoveResponse(response.id)}
-        editMode={editMode}
-      />
+      <RemoveButton onClick={() => props.onRemoveResponse(response.id)} />
     </div>
   );
 };
 
 export const Feedback = (props: FeedbackProps) => {
-  const { model, editMode, onAddResponse } = props;
+  const { model, onAddResponse } = props;
   const {
     authoring: { parts },
   } = model;
@@ -117,13 +108,13 @@ export const Feedback = (props: FeedbackProps) => {
         id="feedback"
       />
 
-      {parts[0].responses.map((response: Response, index) => (
+      {parts[0].responses.map((response: Response) => (
         <Item key={response.id} {...props} response={response} />
       ))}
 
-      <button className="btn btn-sm btn-primary my-2" disabled={!editMode} onClick={onAddResponse}>
+      <AuthoringButton className="btn btn-sm btn-primary my-2" onClick={onAddResponse}>
         Add Feedback
-      </button>
+      </AuthoringButton>
     </div>
   );
 };

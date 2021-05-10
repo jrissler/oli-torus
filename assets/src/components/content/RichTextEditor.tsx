@@ -2,19 +2,25 @@ import React from 'react';
 import { RichText } from 'components/activities/types';
 import { Editor } from 'components/editing/editor/Editor';
 import { getToolbarForResourceType } from 'components/editing/toolbars/insertion/items';
-import { ProjectSlug } from 'data/types';
 import { ErrorBoundary } from 'components/common/ErrorBoundary';
 import { classNames } from 'utils/classNames';
+import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 
 type RichTextEditorProps = {
-  projectSlug: ProjectSlug;
-  editMode: boolean;
-  className?: string,
   text: RichText;
   onEdit: (text: RichText) => void;
+  placeholder?: string;
+  className?: string;
+  style?: React.CSSProperties;
 };
-export const RichTextEditor = ({ editMode, className, text, onEdit, projectSlug }:
-  React.PropsWithChildren<RichTextEditorProps>) => {
+export const RichTextEditor = ({
+  className,
+  text,
+  onEdit,
+  placeholder,
+  style,
+}: React.PropsWithChildren<RichTextEditorProps>) => {
+  const { editMode, projectSlug } = useAuthoringElementContext();
 
   return (
     <div className={classNames(['rich-text-editor', className])}>
@@ -26,6 +32,8 @@ export const RichTextEditor = ({ editMode, className, text, onEdit, projectSlug 
           onEdit={(model, selection) => onEdit({ model, selection })}
           selection={text.selection}
           toolbarItems={getToolbarForResourceType(1)}
+          placeholder={placeholder}
+          style={style}
         />
       </ErrorBoundary>
     </div>

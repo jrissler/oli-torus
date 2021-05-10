@@ -3,16 +3,15 @@ import { Heading } from 'components/misc/Heading';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { ModelEditorProps } from '../schema';
 import { ChoiceId, RichText } from '../../types';
-import { CloseButton } from 'components/misc/CloseButton';
-import { ProjectSlug } from 'data/types';
 import { isCorrectChoice } from '../utils';
+import { RemoveButton } from 'components/misc/RemoveButton';
+import { AuthoringButton } from 'components/misc/AuthoringButton';
 
 interface Props extends ModelEditorProps {
   onAddChoice: () => void;
   onEditChoiceContent: (id: string, content: RichText) => void;
   onToggleChoiceCorrectness: (choiceId: ChoiceId) => void;
   onRemoveChoice: (id: string) => void;
-  projectSlug: ProjectSlug;
 }
 export const Choices = (props: Props) => {
   const {
@@ -20,9 +19,7 @@ export const Choices = (props: Props) => {
     onEditChoiceContent,
     onRemoveChoice,
     onToggleChoiceCorrectness,
-    editMode,
     model,
-    projectSlug,
   } = props;
 
   const { choices } = model;
@@ -51,24 +48,16 @@ export const Choices = (props: Props) => {
           <div className="d-flex" style={{ flex: 1 }}>
             <RichTextEditor
               className="flex-fill"
-              projectSlug={projectSlug}
-              editMode={editMode}
               text={choice.content}
               onEdit={(content) => onEditChoiceContent(choice.id, content)}
             />
-            {index > 0 && (
-              <CloseButton
-                className="pl-3 pr-1"
-                onClick={() => onRemoveChoice(choice.id)}
-                editMode={editMode}
-              />
-            )}
+            {index > 0 && <RemoveButton onClick={() => onRemoveChoice(choice.id)} />}
           </div>
         </div>
       ))}
-      <button className="btn btn-sm btn-primary my-2" disabled={!editMode} onClick={onAddChoice}>
+      <AuthoringButton className="btn btn-sm btn-primary my-2" onClick={onAddChoice}>
         Add answer choice
-      </button>
+      </AuthoringButton>
     </div>
   );
 };

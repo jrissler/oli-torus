@@ -11,11 +11,11 @@ import { getCorrectResponse, getIncorrectResponse } from '../utils';
 
 interface FeedbackProps extends ModelEditorProps {
   onToggleFeedbackMode: () => void;
-  onEditResponseFeedback: (responseId: ResponseId, content: RichText) => void;
+  onEditFeedback: (responseId: ResponseId, content: RichText) => void;
   projectSlug: ProjectSlug;
 }
 export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
-  const { onEditResponseFeedback, onToggleFeedbackMode, model, editMode, projectSlug } = props;
+  const { onEditFeedback, onToggleFeedbackMode, model, editMode, projectSlug } = props;
 
   return (
     <div className={'mt-5 ' + classNames(['feedback'])}>
@@ -47,7 +47,7 @@ export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
           projectSlug={projectSlug}
           editMode={editMode}
           text={getCorrectResponse(model).feedback.content}
-          onEdit={(content) => onEditResponseFeedback(getCorrectResponse(model).id, content)}
+          onEdit={(content) => onEditFeedback(getCorrectResponse(model).id, content)}
         />
       </div>
       {props.children}
@@ -59,7 +59,7 @@ export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
           projectSlug={projectSlug}
           editMode={editMode}
           text={getIncorrectResponse(model).feedback.content}
-          onEdit={(content) => onEditResponseFeedback(getIncorrectResponse(model).id, content)}
+          onEdit={(content) => onEditFeedback(getIncorrectResponse(model).id, content)}
         />
       </div>
     </div>

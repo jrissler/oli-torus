@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { ShortAnswerModelSchema, InputType } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/Stem';
+import { Stem } from '../common/authoring/Stem';
 import { Feedback } from './sections/Feedback';
-import { Hints } from '../common/Hints';
+import { Hints } from '../common/authoring/Hints';
 import { ShortAnswerActions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
@@ -53,10 +53,8 @@ export const InputTypeDropdown = ({ onChange, editMode, inputType }: InputTypeDr
 };
 
 const ShortAnswer = (props: AuthoringElementProps<ShortAnswerModelSchema>) => {
-  const dispatch = (action: any) => {
-    const nextModel = produce(props.model, (draftState) => action(draftState));
-    props.onEdit(nextModel);
-  };
+  const dispatch = (action: (model: ShortAnswerModelSchema) => void) =>
+    props.onEdit(produce(props.model, action));
 
   const sharedProps = {
     model: props.model,

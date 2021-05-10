@@ -1,5 +1,5 @@
 import React from 'react';
-import * as ActivityTypes from '../types';
+import * as ActivityTypes from '../../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
 
@@ -9,7 +9,5 @@ interface StemProps {
 }
 
 export const Stem = ({ stem, context }: StemProps) => {
-  return (
-    <HtmlContentModelRenderer text={stem.content} context={context} />
-  );
+  return <HtmlContentModelRenderer text={stem.content} context={context} />;
 };

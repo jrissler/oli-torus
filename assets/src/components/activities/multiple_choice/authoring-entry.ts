@@ -26,7 +26,7 @@ import { defaultMCModel } from './utils';
 // eslint-disable-next-line
 const manifest: Manifest = require('./manifest.json');
 
-function createFn(content: CreationContext): Promise<MultipleChoiceModelSchema> {
+function createFn(context: CreationContext): Promise<MultipleChoiceModelSchema> {
   return Promise.resolve(Object.assign({}, defaultMCModel()));
 }
 

@@ -3,6 +3,7 @@ import { ID, Identifiable, ModelElement, Selection } from 'data/content/model';
 
 export type ChoiceId = ID;
 export type ResponseId = ID;
+export type HintId = ID;
 
 export type RichText = {
   model: ModelElement[];
@@ -22,13 +23,13 @@ export interface StudentResponse {
 }
 
 export type ModeSpecification = {
-  element: string,
-  entry: string,
+  element: string;
+  entry: string;
 };
 
 export type PartResponse = {
-  attemptGuid: string,
-  response: StudentResponse,
+  attemptGuid: string;
+  response: StudentResponse;
 };
 
 export type ClientEvaluation = {
@@ -40,11 +41,11 @@ export type ClientEvaluation = {
 };
 
 export type Manifest = {
-  id: ID,
-  friendlyName: string,
-  description: string,
-  delivery: ModeSpecification,
-  authoring: ModeSpecification,
+  id: ID;
+  friendlyName: string;
+  description: string;
+  delivery: ModeSpecification;
+  authoring: ModeSpecification;
 };
 
 export interface ActivityModelSchema {
@@ -79,23 +80,37 @@ export interface ActivityState {
   hasMoreHints: boolean;
 }
 
-export interface Choice extends Identifiable, HasContent { }
-export interface Stem extends Identifiable, HasContent { }
-export interface Hint extends Identifiable, HasContent { }
-export interface Feedback extends Identifiable, HasContent { }
+export interface ContentItem extends Identifiable, HasContent {}
+
+export type Choice = ContentItem;
+export interface HasChoices {
+  choices: Choice[];
+}
+
+export type Stem = ContentItem;
+export interface HasStem {
+  stem: Stem;
+}
+
+export type Hint = ContentItem;
+export interface HasHints {
+  hints: Hint[];
+}
+
+export type Feedback = ContentItem;
 export interface Transformation extends Identifiable {
   path: string;
   operation: Operation;
 }
+export interface HasTransformations {
+  transformations: Transformation[];
+}
 
 export interface Response extends Identifiable {
-
   // see `parser.ex` and `rule.ex`
   rule: string;
-
   // `score >= 0` indicates the feedback corresponds to a correct choice
   score: number;
-
   feedback: Feedback;
 }
 
@@ -152,12 +167,14 @@ export interface StateUpdateAction extends StateUpdateActionCore, IsAction {
   type: 'StateUpdateAction';
 }
 
-
 export interface Part extends Identifiable {
   responses: Response[];
   outcomes?: ConditionalOutcome[];
   hints: Hint[];
   scoringStrategy: ScoringStrategy;
+}
+export interface HasParts {
+  parts: Part[];
 }
 
 export enum ScoringStrategy {
@@ -176,6 +193,4 @@ export enum Operation {
   'shuffle' = 'shuffle',
 }
 // eslint-disable-next-line
-export interface CreationContext extends ResourceContext {
-
-}
+export interface CreationContext extends ResourceContext {}

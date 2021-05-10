@@ -3,23 +3,24 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { OrderingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/Stem';
-import { Choices } from './sections/Choices';
+import { Stem } from '../common/authoring/Stem';
+import { MovableChoices } from '../common/authoring/choices/MovableChoices';
 import { Feedback } from './sections/Feedback';
-import { Hints } from '../common/Hints';
+import { Hints } from '../common/authoring/Hints';
 import { Actions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
 import produce from 'immer';
 import { TargetedFeedback } from 'components/activities/ordering/sections/TargetedFeedback';
-import { canMoveChoice, getHints, isTargetedOrdering } from 'components/activities/ordering/utils';
+import { getHints } from 'components/activities/common/authoring/utils';
+import { isTargetedOrdering } from 'components/activities/ordering/utils';
 
 const store = configureStore();
 
 const Ordering = (props: AuthoringElementProps<OrderingModelSchema>) => {
-  const dispatch = (action: any) =>
-    props.onEdit(produce(props.model, (draftState) => action(draftState)));
+  const dispatch = (action: (model: OrderingModelSchema) => void) =>
+    props.onEdit(produce(props.model, action));
 
   const sharedProps = {
     model: props.model,
@@ -32,33 +33,31 @@ const Ordering = (props: AuthoringElementProps<OrderingModelSchema>) => {
       <Stem
         {...sharedProps}
         stem={props.model.stem}
-        onEditStem={(content) => dispatch(Actions.editStem(content))}
+        onEditContent={(content) => dispatch(Actions.editStem(content))}
       />
 
-      <Choices
+      <MovableChoices
         {...sharedProps}
-        onAddChoice={() => dispatch(Actions.addChoice())}
-        onEditChoiceContent={(id, content) => dispatch(Actions.editChoiceContent(id, content))}
-        onRemoveChoice={(id) => dispatch(Actions.removeChoice(id))}
-        canMoveChoiceUp={(id) => canMoveChoice(props.model, id, 'up')}
-        canMoveChoiceDown={(id) => canMoveChoice(props.model, id, 'down')}
-        onMoveChoiceUp={(id) => dispatch(Actions.moveChoice('up', id))}
-        onMoveChoiceDown={(id) => dispatch(Actions.moveChoice('down', id))}
+        onAdd={() => dispatch(Actions.addChoice())}
+        onEditContent={(id, content) => dispatch(Actions.editChoice(id, content))}
+        onRemove={(id) => dispatch(Actions.removeChoice(id))}
+        onMoveUp={(id) => dispatch(Actions.moveChoice('up', id))}
+        onMoveDown={(id) => dispatch(Actions.moveChoice('down', id))}
       />
 
       <Feedback
         {...sharedProps}
         onToggleFeedbackMode={() => dispatch(Actions.toggleType())}
-        onEditResponseFeedback={(responseId, feedbackContent) =>
-          dispatch(Actions.editResponseFeedback(responseId, feedbackContent))
+        onEditFeedback={(responseId, feedbackContent) =>
+          dispatch(Actions.editFeedback(responseId, feedbackContent))
         }
       >
-        {isTargetedOrdering(props.model) ? (
+        {isTargetedOrdering(props.model) && (
           <TargetedFeedback
             {...sharedProps}
             model={props.model}
-            onEditResponseFeedback={(responseId, feedbackContent) =>
-              dispatch(Actions.editResponseFeedback(responseId, feedbackContent))
+            onEditFeedback={(responseId, feedbackContent) =>
+              dispatch(Actions.editFeedback(responseId, feedbackContent))
             }
             onAddTargetedFeedback={() => dispatch(Actions.addTargetedFeedback())}
             onRemoveTargetedFeedback={(responseId: ActivityTypes.ResponseId) =>
@@ -69,7 +68,7 @@ const Ordering = (props: AuthoringElementProps<OrderingModelSchema>) => {
               choiceIds: ActivityTypes.ChoiceId[],
             ) => dispatch(Actions.editTargetedFeedbackChoices(responseId, choiceIds))}
           />
-        ) : null}
+        )}
       </Feedback>
 
       <Hints

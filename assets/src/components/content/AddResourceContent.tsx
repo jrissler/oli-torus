@@ -6,7 +6,7 @@ import {
   ActivityReference,
   createDefaultStructuredContent,
 } from 'data/content/resource';
-import { ActivityEditorMap, EditorDesc } from 'data/content/editors';
+import { activeActivityEntries, ActivityEditorMap, EditorDesc } from 'data/content/editors';
 import { ActivityModelSchema } from 'components/activities/types';
 import { invokeCreationFunc } from 'components/activities/creation';
 import { Objective, ResourceId } from 'data/content/objective';
@@ -99,8 +99,6 @@ export const AddResourceContent = ({
   onRegisterNewObjective,
   childrenObjectives,
 }: AddResourceContentProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const handleAdd = (editorDesc: EditorDesc) => {
     let model: ActivityModelSchema;
     let selectedObjectives: ResourceId[];
@@ -155,23 +153,17 @@ export const AddResourceContent = ({
     );
   };
 
-  const activityEntries = Object.keys(editorMap).map((k: string) => {
-    const editorDesc: EditorDesc = editorMap[k];
-    const enabled = editorDesc.globallyAvailable || editorDesc.enabledForProject;
-    return (
-      <React.Fragment key={editorDesc.slug}>
-        {enabled && (
-          <button
-            className="btn btn-sm insert-activity-btn"
-            key={editorDesc.slug}
-            onClick={handleAdd.bind(this, editorDesc)}
-          >
-            {editorDesc.friendlyName}
-          </button>
-        )}
-      </React.Fragment>
-    );
-  });
+  const activityEntries = activeActivityEntries(editorMap).map(([, editorDesc]) => (
+    <React.Fragment key={editorDesc.slug}>
+      <button
+        className="btn btn-sm insert-activity-btn"
+        key={editorDesc.slug}
+        onClick={handleAdd.bind(this, editorDesc)}
+      >
+        {editorDesc.friendlyName}
+      </button>
+    </React.Fragment>
+  ));
 
   const contentFn = () => (
     <div className="add-resource-popover-content">
@@ -190,6 +182,7 @@ export const AddResourceContent = ({
     </div>
   );
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [latestClickEvent, setLatestClickEvent] = useState<MouseEvent>();
   const togglePopover = (e: React.MouseEvent) => {
     setIsPopoverOpen(!isPopoverOpen);

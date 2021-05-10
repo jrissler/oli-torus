@@ -3,20 +3,25 @@ import * as ContentModel from 'data/content/model';
 import produce from 'immer';
 import { CheckAllThatApplyModelSchema } from 'components/activities/check_all_that_apply/schema';
 import {
-  createMatchRule, createRuleForIds, defaultCATAModel, getChoiceIds, getCorrectResponse,
+  createMatchRule,
+  createRuleForIds,
+  defaultCATAModel,
+  getChoiceIds,
+  getCorrectResponse,
   getHints,
-  getIncorrectResponse, getResponseId, getResponses, getTargetedResponses,
-  invertRule, unionRules,
+  getIncorrectResponse,
+  getResponseId,
+  getResponses,
+  getTargetedResponses,
+  invertRule,
+  unionRules,
 } from 'components/activities/check_all_that_apply/utils';
 
-const applyAction = (
-  model: CheckAllThatApplyModelSchema,
-  action: any) => {
-
-  return produce(model, draftState => action(draftState));
+const applyAction = (model: CheckAllThatApplyModelSchema, action: any) => {
+  return produce(model, (draftState) => action(draftState));
 };
 
-function testFromText(text: string) {
+function testContentFromText(text: string) {
   return {
     id: Math.random() + '',
     content: {
@@ -32,10 +37,10 @@ function testFromText(text: string) {
   };
 }
 
-function testResponse(text: string, rule: string, score: number = 0) {
+function testResponse(text: string, rule: string, score = 0) {
   return {
     id: Math.random() + '',
-    feedback: testFromText(text),
+    feedback: testContentFromText(text),
     rule,
     score,
   };
@@ -66,7 +71,7 @@ describe('check all that apply question functionality', () => {
   });
 
   it('can edit stem', () => {
-    const newStemContent = testFromText('new content').content;
+    const newStemContent = testContentFromText('new content').content;
     expect(applyAction(model, Actions.editStem(newStemContent)).stem).toMatchObject({
       content: newStemContent,
     });
@@ -88,19 +93,21 @@ describe('check all that apply question functionality', () => {
     // First choice is correct
     const firstChoice = model.choices[0];
     const modelWithFirstChoiceToggled = applyAction(
-      model, Actions.toggleChoiceCorrectness(firstChoice.id));
-    expect(getChoiceIds(modelWithFirstChoiceToggled.authoring.correct))
-      .not.toContain(firstChoice.id);
-    expect(getChoiceIds(modelWithFirstChoiceToggled.authoring.incorrect))
-      .toContain(firstChoice.id);
+      model,
+      Actions.toggleChoiceCorrectness(firstChoice.id),
+    );
+    expect(getChoiceIds(modelWithFirstChoiceToggled.authoring.correct)).not.toContain(
+      firstChoice.id,
+    );
+    expect(getChoiceIds(modelWithFirstChoiceToggled.authoring.incorrect)).toContain(firstChoice.id);
   });
 
   it('can edit a choice', () => {
-    const newChoiceContent = testFromText('new content').content;
+    const newChoiceContent = testContentFromText('new content').content;
     const firstChoice = model.choices[0];
-    expect(applyAction(model,
-      Actions.editChoiceContent(firstChoice.id, newChoiceContent)).choices[0])
-      .toHaveProperty('content', newChoiceContent);
+    expect(
+      applyAction(model, Actions.editChoiceContent(firstChoice.id, newChoiceContent)).choices[0],
+    ).toHaveProperty('content', newChoiceContent);
   });
 
   it('can remove a choice from simple CATA', () => {
@@ -129,11 +136,12 @@ describe('check all that apply question functionality', () => {
   });
 
   it('can edit feedback', () => {
-    const newFeedbackContent = testFromText('new content').content;
+    const newFeedbackContent = testContentFromText('new content').content;
     const firstResponse = model.authoring.parts[0].responses[0];
-    expect(applyAction(model, Actions.editResponseFeedback(firstResponse.id, newFeedbackContent))
-      .authoring.parts[0].responses[0].feedback)
-      .toHaveProperty('content', newFeedbackContent);
+    expect(
+      applyAction(model, Actions.editResponseFeedback(firstResponse.id, newFeedbackContent))
+        .authoring.parts[0].responses[0].feedback,
+    ).toHaveProperty('content', newFeedbackContent);
   });
 
   it('can add a targeted feedback in targeted mode', () => {
@@ -149,8 +157,10 @@ describe('check all that apply question functionality', () => {
     expect(applyAction(model, Actions.removeTargetedFeedback('id'))).toEqual(model);
     const toggled = applyAction(model, Actions.toggleType());
     const withNewResponse = applyAction(toggled, Actions.addTargetedFeedback());
-    const removed = applyAction(withNewResponse, Actions.removeTargetedFeedback(
-      getResponseId(withNewResponse.authoring.targeted[0])));
+    const removed = applyAction(
+      withNewResponse,
+      Actions.removeTargetedFeedback(getResponseId(withNewResponse.authoring.targeted[0])),
+    );
     expect(getResponses(removed)).toHaveLength(2);
     expect(getTargetedResponses(removed)).toHaveLength(0);
   });
@@ -164,15 +174,17 @@ describe('check all that apply question functionality', () => {
   });
 
   it('can union rules', () => {
-    expect(unionRules([createMatchRule('id1'), invertRule(createMatchRule('id2'))]))
-      .toBe('(!(input like {id2})) && (input like {id1})');
+    expect(unionRules([createMatchRule('id1'), invertRule(createMatchRule('id2'))])).toBe(
+      '(!(input like {id2})) && (input like {id1})',
+    );
   });
 
   it('can create rules to match certain ids and not match others', () => {
     const toMatch = ['id1', 'id2'];
     const notToMatch = ['id3'];
-    expect(createRuleForIds(toMatch, notToMatch))
-      .toEqual('(!(input like {id3})) && (input like {id2} && (input like {id1}))');
+    expect(createRuleForIds(toMatch, notToMatch)).toEqual(
+      '(!(input like {id3})) && (input like {id2} && (input like {id1}))',
+    );
   });
 
   it('has at least 3 hints', () => {
@@ -180,22 +192,21 @@ describe('check all that apply question functionality', () => {
   });
 
   it('can add a cognitive hint before the end of the array', () => {
-    expect(getHints(applyAction(model, Actions.addHint())).length)
-      .toBeGreaterThan(getHints(model).length);
+    expect(getHints(applyAction(model, Actions.addHint())).length).toBeGreaterThan(
+      getHints(model).length,
+    );
   });
 
   it('can edit a hint', () => {
-    const newHintContent = testFromText('new content').content;
+    const newHintContent = testContentFromText('new content').content;
     const firstHint = getHints(model)[0];
-    expect(getHints(applyAction(model,
-      Actions.editHint(firstHint.id, newHintContent)))[0])
-      .toHaveProperty('content', newHintContent);
+    expect(
+      getHints(applyAction(model, Actions.editHint(firstHint.id, newHintContent)))[0],
+    ).toHaveProperty('content', newHintContent);
   });
 
   it('can remove a hint', () => {
     const firstHint = getHints(model)[0];
-    expect(getHints(applyAction(model, Actions.removeHint(firstHint.id))))
-      .toHaveLength(2);
+    expect(getHints(applyAction(model, Actions.removeHint(firstHint.id)))).toHaveLength(2);
   });
-
 });

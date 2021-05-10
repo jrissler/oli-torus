@@ -3,22 +3,30 @@ import * as ContentModel from 'data/content/model';
 import produce from 'immer';
 import { OrderingModelSchema } from 'components/activities/ordering/schema';
 import {
-  canMoveChoiceUp, canMoveChoiceDown, createMatchRule, createRuleForIds,
-  defaultOrderingModel, getChoiceIds, getCorrectResponse,
-  getHints, getTargetedChoiceIds,
-  getIncorrectResponse, getResponseId, getResponses, getTargetedResponses,
-  invertRule, unionRules, getCorrectOrdering,
+  canMoveChoiceUp,
+  canMoveChoiceDown,
+  createMatchRule,
+  createRuleForIds,
+  defaultOrderingModel,
+  getChoiceIds,
+  getCorrectResponse,
+  getHints,
+  getTargetedChoiceIds,
+  getIncorrectResponse,
+  getResponseId,
+  getResponses,
+  getTargetedResponses,
+  invertRule,
+  unionRules,
+  getCorrectOrdering,
 } from 'components/activities/ordering/utils';
 import { Choice } from 'components/activities/types';
 
-const applyAction = (
-  model: OrderingModelSchema,
-  action: any) => {
-
-  return produce(model, draftState => action(draftState));
+const applyAction = (model: OrderingModelSchema, action: any) => {
+  return produce(model, (draftState) => action(draftState));
 };
 
-function testFromText(text: string) {
+function testContentFromText(text: string) {
   return {
     id: Math.random() + '',
     content: {
@@ -33,7 +41,6 @@ function testFromText(text: string) {
     },
   };
 }
-
 
 // Can move choice up
 // Move choice up
@@ -54,8 +61,9 @@ describe('ordering question', () => {
     expect(canMoveChoiceUp(model, lastChoice.id)).toBe(true);
 
     const firstMovedUp = applyAction(model, Actions.moveChoice('up', firstChoice.id));
-    expect(model.choices.findIndex(c => c === lastChoice))
-      .toEqual(firstMovedUp.choices.findIndex((c: Choice) => c === lastChoice));
+    expect(model.choices.findIndex((c) => c === lastChoice)).toEqual(
+      firstMovedUp.choices.findIndex((c: Choice) => c === lastChoice),
+    );
 
     const lastMovedUp = applyAction(model, Actions.moveChoice('up', lastChoice.id));
     expect(lastMovedUp.choices[lastMovedUp.choices.length - 2]).toBe(lastChoice);
@@ -72,8 +80,9 @@ describe('ordering question', () => {
     expect(firstMovedDown.choices[1]).toBe(firstChoice);
 
     const lastMovedDown = applyAction(model, Actions.moveChoice('down', lastChoice.id));
-    expect(model.choices.findIndex(c => c === lastChoice))
-      .toEqual(lastMovedDown.choices.findIndex((c: Choice) => c === lastChoice));
+    expect(model.choices.findIndex((c) => c === lastChoice)).toEqual(
+      lastMovedDown.choices.findIndex((c: Choice) => c === lastChoice),
+    );
   });
 
   it('has correct feedback that correspond to all choices', () => {
@@ -102,7 +111,7 @@ describe('ordering question', () => {
   });
 
   it('can edit stem', () => {
-    const newStemContent = testFromText('new content').content;
+    const newStemContent = testContentFromText('new content').content;
     expect(applyAction(model, Actions.editStem(newStemContent)).stem).toMatchObject({
       content: newStemContent,
     });
@@ -121,11 +130,11 @@ describe('ordering question', () => {
   });
 
   it('can edit a choice', () => {
-    const newChoiceContent = testFromText('new content').content;
+    const newChoiceContent = testContentFromText('new content').content;
     const firstChoice = model.choices[0];
-    expect(applyAction(model, Actions.editChoiceContent(firstChoice.id, newChoiceContent))
-      .choices[0])
-      .toHaveProperty('content', newChoiceContent);
+    expect(
+      applyAction(model, Actions.editChoiceContent(firstChoice.id, newChoiceContent)).choices[0],
+    ).toHaveProperty('content', newChoiceContent);
   });
 
   it('can remove a choice from simple Ordering', () => {
@@ -153,11 +162,12 @@ describe('ordering question', () => {
   });
 
   it('can edit feedback', () => {
-    const newFeedbackContent = testFromText('new content').content;
+    const newFeedbackContent = testContentFromText('new content').content;
     const firstResponse = model.authoring.parts[0].responses[0];
-    expect(applyAction(model, Actions.editResponseFeedback(firstResponse.id, newFeedbackContent))
-      .authoring.parts[0].responses[0].feedback)
-      .toHaveProperty('content', newFeedbackContent);
+    expect(
+      applyAction(model, Actions.editResponseFeedback(firstResponse.id, newFeedbackContent))
+        .authoring.parts[0].responses[0].feedback,
+    ).toHaveProperty('content', newFeedbackContent);
   });
 
   it('can add a targeted feedback in targeted mode', () => {
@@ -173,8 +183,10 @@ describe('ordering question', () => {
     expect(applyAction(model, Actions.removeTargetedFeedback('id'))).toEqual(model);
     const toggled = applyAction(model, Actions.toggleType());
     const withNewResponse = applyAction(toggled, Actions.addTargetedFeedback());
-    const removed = applyAction(withNewResponse, Actions.removeTargetedFeedback(
-      getResponseId(withNewResponse.authoring.targeted[0])));
+    const removed = applyAction(
+      withNewResponse,
+      Actions.removeTargetedFeedback(getResponseId(withNewResponse.authoring.targeted[0])),
+    );
     expect(getResponses(removed)).toHaveLength(2);
     expect(getTargetedResponses(removed)).toHaveLength(0);
   });
@@ -188,8 +200,9 @@ describe('ordering question', () => {
   });
 
   it('can union rules', () => {
-    expect(unionRules([createMatchRule('id1'), invertRule(createMatchRule('id2'))]))
-      .toBe('(!(input like {id2})) && (input like {id1})');
+    expect(unionRules([createMatchRule('id1'), invertRule(createMatchRule('id2'))])).toBe(
+      '(!(input like {id2})) && (input like {id1})',
+    );
   });
 
   it('can create rules to to match choice orderings', () => {
@@ -204,22 +217,21 @@ describe('ordering question', () => {
   });
 
   it('can add a cognitive hint before the end of the array', () => {
-    expect(getHints(applyAction(model, Actions.addHint())).length)
-      .toBeGreaterThan(getHints(model).length);
+    expect(getHints(applyAction(model, Actions.addHint())).length).toBeGreaterThan(
+      getHints(model).length,
+    );
   });
 
   it('can edit a hint', () => {
-    const newHintContent = testFromText('new content').content;
+    const newHintContent = testContentFromText('new content').content;
     const firstHint = getHints(model)[0];
-    expect(getHints(applyAction(model,
-      Actions.editHint(firstHint.id, newHintContent)))[0])
-      .toHaveProperty('content', newHintContent);
+    expect(
+      getHints(applyAction(model, Actions.editHint(firstHint.id, newHintContent)))[0],
+    ).toHaveProperty('content', newHintContent);
   });
 
   it('can remove a hint', () => {
     const firstHint = getHints(model)[0];
-    expect(getHints(applyAction(model, Actions.removeHint(firstHint.id))))
-      .toHaveLength(2);
+    expect(getHints(applyAction(model, Actions.removeHint(firstHint.id)))).toHaveLength(2);
   });
-
 });

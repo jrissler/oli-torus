@@ -118,7 +118,7 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
         acquireLock.bind(undefined, projectSlug, resourceSlug),
         releaseLock.bind(undefined, projectSlug, resourceSlug),
         // eslint-disable-next-line
-        () => { },
+        () => {},
         (failure) => this.publishErrorMessage(failure),
         (persistence) => this.setState({ persistence }),
       )
@@ -184,7 +184,8 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
         break;
       case 500:
       default:
-        message = 'there was a general problem on our end. Please try refreshing the page and trying again.';
+        message =
+          'there was a general problem on our end. Please try refreshing the page and trying again.';
         break;
     }
 
@@ -263,7 +264,10 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
       model: JSON.stringify(this.state.undoable.current.content),
       editMode: this.state.editMode,
       projectSlug: this.props.projectSlug,
+      editorMap: JSON.stringify(this.props.editorMap),
     };
+
+    console.log('webcomponentprops', webComponentProps);
 
     const parts = valueOr(this.state.undoable.current.content.authoring.parts, []);
     const partIds = parts.map((p: any) => p.id);
@@ -310,7 +314,7 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
   }
 }
 // eslint-disable-next-line
-interface StateProps { }
+interface StateProps {}
 
 interface DispatchProps {
   onLoadPreferences: () => void;

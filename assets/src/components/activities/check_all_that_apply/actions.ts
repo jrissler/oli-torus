@@ -1,11 +1,7 @@
 import { CheckAllThatApplyModelSchema as CATA, TargetedCATA } from './schema';
 import {
   createRuleForIds,
-  fromText,
-  getChoice,
   getCorrectResponse,
-  getHint,
-  getResponse,
   getChoiceIds,
   getCorrectChoiceIds,
   getIncorrectChoiceIds,
@@ -14,13 +10,29 @@ import {
   setDifference,
   invertRule,
   unionRules,
-  getResponses,
-  makeResponse,
   isSimpleCATA,
-  getHints,
 } from './utils';
 import { RichText, Hint as HintType, ChoiceId, Choice, ResponseId } from '../types';
 import { toSimpleText } from 'data/content/text';
+import {
+  getChoice,
+  getHint,
+  getHints,
+  getResponse,
+  getResponses,
+  makeChoice,
+  makeHint,
+  makeResponse,
+  moveChoice,
+} from 'components/activities/common/authoring/utils';
+import {
+  addHint,
+  editFeedback,
+  editHint,
+  editStem,
+  removeHint,
+  toggleAnswerChoiceShuffling,
+} from 'components/activities/common/authoring/immerActions';
 
 export class Actions {
   static toggleType() {
@@ -36,17 +48,11 @@ export class Actions {
     };
   }
 
-  static editStem(content: RichText) {
-    return (model: CATA) => {
-      model.stem.content = content;
-      const previewText = toSimpleText({ children: content.model } as any);
-      model.authoring.previewText = previewText;
-    };
-  }
+  static editStem = editStem;
 
   static addChoice() {
     return (model: CATA) => {
-      const newChoice: Choice = fromText('');
+      const newChoice = makeChoice('');
 
       model.choices.push(newChoice);
       getChoiceIds(model.authoring.incorrect).push(newChoice.id);
@@ -81,19 +87,14 @@ export class Actions {
   static toggleChoiceCorrectness(choiceId: ChoiceId) {
     return (model: CATA) => {
       const addOrRemoveId = (list: string[]) => addOrRemoveFromList(choiceId, list);
-      // targeted response choices do not need to change
-
       addOrRemoveId(getChoiceIds(model.authoring.correct));
       addOrRemoveId(getChoiceIds(model.authoring.incorrect));
       updateResponseRules(model);
     };
   }
 
-  static editResponseFeedback(responseId: ResponseId, content: RichText) {
-    return (model: CATA) => {
-      getResponse(model, responseId).feedback.content = content;
-    };
-  }
+  static editFeedback = editFeedback;
+  static moveChoice = moveChoice;
 
   static addTargetedFeedback() {
     return (model: CATA) => {
@@ -151,27 +152,11 @@ export class Actions {
     };
   }
 
-  static addHint() {
-    return (model: CATA) => {
-      const newHint: HintType = fromText('');
-      // new hints are always cognitive hints. they should be inserted
-      // right before the bottomOut hint at the end of the list
-      const bottomOutIndex = getHints(model).length - 1;
-      getHints(model).splice(bottomOutIndex, 0, newHint);
-    };
-  }
+  static addHint = addHint;
+  static editHint = editHint;
+  static removeHint = removeHint;
 
-  static editHint(id: string, content: RichText) {
-    return (model: CATA) => {
-      getHint(model, id).content = content;
-    };
-  }
-
-  static removeHint(id: string) {
-    return (model: CATA) => {
-      model.authoring.parts[0].hints = getHints(model).filter((h) => h.id !== id);
-    };
-  }
+  static toggleAnswerChoiceShuffling = toggleAnswerChoiceShuffling;
 }
 
 // mutable

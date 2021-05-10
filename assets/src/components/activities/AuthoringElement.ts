@@ -1,11 +1,26 @@
 import { ActivityModelSchema } from './types';
 import { ProjectSlug } from 'data/types';
+import React, { useContext } from 'react';
+import { ActivityEditorMap } from 'data/content/editors';
 
 export interface AuthoringElementProps<T extends ActivityModelSchema> {
   model: T;
   onEdit: (model: T) => void;
   editMode: boolean;
   projectSlug: ProjectSlug;
+  editorMap: ActivityEditorMap;
+}
+
+export const AuthoringElementContext = React.createContext<AuthoringElementProps<any> | undefined>(
+  undefined,
+);
+
+export function useAuthoringElementContext<T>() {
+  const context = useContext<AuthoringElementProps<T>>(AuthoringElementContext);
+  if (context === undefined) {
+    throw new Error('useAuthoringElementContext must be used within an AuthoringElementProvider');
+  }
+  return context;
 }
 
 // An abstract authoring web component, designed to delegate to
@@ -16,7 +31,6 @@ export interface AuthoringElementProps<T extends ActivityModelSchema> {
 // 'modelUpdated' CustomEvent.  It is this CustomEvent that is handled by
 // Torus to process updates from the authoring web component.
 export abstract class AuthoringElement<T extends ActivityModelSchema> extends HTMLElement {
-
   mountPoint: HTMLDivElement;
   connected: boolean;
 
@@ -26,26 +40,27 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     this.mountPoint = document.createElement('div');
   }
 
-  props() : AuthoringElementProps<T> {
-
+  props(): AuthoringElementProps<T> {
     const getProp = (key: string) => JSON.parse(this.getAttribute(key) as any);
     const model = getProp('model');
     const editMode: boolean = getProp('editMode');
     const projectSlug: ProjectSlug = this.getAttribute('projectSlug') as string;
+    const editorMap: ActivityEditorMap = getProp('editorMap');
+    console.log('editorMap', editorMap);
 
-    const onEdit = (model: any) => {
+    const onEdit = (model: any) =>
       this.dispatchEvent(new CustomEvent('modelUpdated', { bubbles: true, detail: { model } }));
-    };
 
     return {
       onEdit,
       model,
       editMode,
       projectSlug,
+      editorMap,
     };
   }
 
-  abstract render(mountPoint: HTMLDivElement, props: AuthoringElementProps<T>) : void;
+  abstract render(mountPoint: HTMLDivElement, props: AuthoringElementProps<T>): void;
 
   connectedCallback() {
     this.appendChild(this.mountPoint);
@@ -59,5 +74,7 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     }
   }
 
-  static get observedAttributes() { return ['model', 'editMode']; }
+  static get observedAttributes() {
+    return ['model', 'editMode'];
+  }
 }

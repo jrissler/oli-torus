@@ -12,7 +12,13 @@ export type EditorDesc = {
 };
 
 export interface ActivityEditorMap {
-
   // Index signature
   [prop: string]: EditorDesc;
 }
+
+export const activeActivityEntries = (
+  activityEditorMap: ActivityEditorMap,
+): [string, EditorDesc][] =>
+  Object.entries(activityEditorMap).filter(
+    ([, editorDesc]) => editorDesc.globallyAvailable || editorDesc.enabledForProject,
+  );

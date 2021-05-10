@@ -10,10 +10,10 @@ import {
 import { OrderingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
-import { Stem } from '../common/DisplayedStem';
-import { Hints } from '../common/DisplayedHints';
-import { Reset } from '../common/Reset';
-import { Evaluation } from '../common/Evaluation';
+import { Stem } from '../common/delivery/DisplayedStem';
+import { Hints } from '../common/delivery/DisplayedHints';
+import { Reset } from '../common/delivery/Reset';
+import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
 
@@ -110,11 +110,11 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
     props.state.parts[0].response === null
       ? []
       : props.state.parts[0].response.input
-        .split(' ')
-        .reduce(
-          (acc: ActivityTypes.ChoiceId[], curr: ActivityTypes.ChoiceId) => acc.concat([curr]),
-          [],
-        ),
+          .split(' ')
+          .reduce(
+            (acc: ActivityTypes.ChoiceId[], curr: ActivityTypes.ChoiceId) => acc.concat([curr]),
+            [],
+          ),
   );
 
   const { stem, choices } = model;
@@ -205,16 +205,16 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
   const ungradedDetails = props.graded
     ? null
     : [
-      evaluationSummary,
-      <Hints
-        key="hints"
-        onClick={onRequestHint}
-        hints={hints}
-        hasMoreHints={hasMoreHints}
-        isEvaluated={isEvaluated}
-        context={writerContext}
-      />,
-    ];
+        evaluationSummary,
+        <Hints
+          key="hints"
+          onClick={onRequestHint}
+          hints={hints}
+          hasMoreHints={hasMoreHints}
+          isEvaluated={isEvaluated}
+          context={writerContext}
+        />,
+      ];
 
   const gradedDetails =
     props.graded && props.progressState === 'in_review' ? [evaluationSummary] : null;
@@ -224,12 +224,12 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
   const gradedPoints =
     props.graded && props.progressState === 'in_review'
       ? [
-        <div key="reviewed" className=" text-info font-italic">
-          {correctnessIcon}
-          < span > Points: </span >
-          <span>{attemptState.score + ' out of ' + attemptState.outOf}</span>
-        </div >,
-      ]
+          <div key="reviewed" className=" text-info font-italic">
+            {correctnessIcon}
+            <span> Points: </span>
+            <span>{attemptState.score + ' out of ' + attemptState.outOf}</span>
+          </div>,
+        ]
       : null;
 
   const maybeSubmitButton = props.graded ? null : (

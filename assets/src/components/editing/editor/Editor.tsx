@@ -20,6 +20,7 @@ import { withInlines } from './overrides/inlines';
 import { withTables } from './overrides/tables';
 import { withMarkdown } from './overrides/markdown';
 import { onPaste } from './handlers/paste';
+import './Editor.scss';
 
 export type EditorProps = {
   // Callback when there has been any change to the editor (including selection state)
@@ -34,6 +35,8 @@ export type EditorProps = {
   editMode: boolean;
   commandContext: CommandContext;
   className?: string;
+  style?: React.CSSProperties;
+  placeholder?: string;
 };
 
 function areEqual(prevProps: EditorProps, nextProps: EditorProps) {
@@ -43,7 +46,8 @@ function areEqual(prevProps: EditorProps, nextProps: EditorProps) {
     prevProps.value === nextProps.value &&
     !!prevProps.selection &&
     !!nextProps.selection &&
-    Range.equals(prevProps.selection, nextProps.selection)
+    Range.equals(prevProps.selection, nextProps.selection) &&
+    prevProps.placeholder === nextProps.placeholder
   );
 }
 // eslint-disable-next-line
@@ -138,11 +142,12 @@ export const Editor = React.memo((props: EditorProps) => {
         </HoveringToolbar>
 
         <Editable
+          style={props.style}
           className={'slate-editor' + (props.className ? ' ' + props.className : '')}
           readOnly={!props.editMode}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
-          placeholder="Enter some content here..."
+          placeholder={props.placeholder || 'Enter some content here...'}
           onKeyDown={onKeyDown}
         />
       </Slate>

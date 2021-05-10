@@ -1,14 +1,10 @@
+import { ActivityModelSchema, HasStem, HasChoices, HasParts, HasTransformations } from '../types';
 
-import { Part, Transformation, ActivityModelSchema, Stem, Choice } from '../types';
-
-export interface MultipleChoiceModelSchema extends ActivityModelSchema {
-  stem: Stem;
-  choices: Choice[];
-  authoring: {
-    parts: Part[];
-    transformations: Transformation[];
-    previewText: string;
-  };
+interface Authoring extends HasParts, HasTransformations {
+  previewText: string;
+}
+export interface MultipleChoiceModelSchema extends ActivityModelSchema, HasStem, HasChoices {
+  authoring: Authoring;
 }
 
 export interface ModelEditorProps {

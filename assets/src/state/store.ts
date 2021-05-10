@@ -2,7 +2,7 @@ import { createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { createLogger } from 'redux-logger';
 import thunk from 'redux-thunk';
-import rootReducer, { State, initState } from 'state';
+import rootReducer, { initState } from 'state';
 import nextReducer from './index';
 
 export function configureStore(initialState?: any) {
@@ -12,7 +12,7 @@ export function configureStore(initialState?: any) {
 
       // automatically converts any immutablejs objects to JS representation
       for (const i of Object.keys(state)) {
-        if ((state[i]).toJS) {
+        if (state[i].toJS) {
           newState[i] = state[i].toJS();
         } else {
           newState[i] = state[i];
@@ -33,7 +33,6 @@ export function configureStore(initialState?: any) {
 
   if ((module as any).hot) {
     (module as any).hot.accept('./index', () => {
-
       store.replaceReducer(nextReducer);
     });
   }

@@ -1,4 +1,4 @@
-import { fromText } from 'components/activities/check_all_that_apply/utils';
+import { feedbackFromText, hintFromText } from 'components/activities/common/authoring/utils';
 import { EvaluationResponse, RequestHintResponse } from 'components/activities/DeliveryElement';
 import { Action, ActivityState, PartState } from 'components/activities/types';
 
@@ -14,7 +14,7 @@ const partState: PartState = {
   partId: 1,
   hasMoreAttempts: true,
   hasMoreHints: true,
-} as any;
+};
 
 export const attemptState: ActivityState = {
   attemptGuid: 'guid',
@@ -32,7 +32,7 @@ const feedbackAction: Action = {
   attempt_guid: '1',
   out_of: 1,
   score: 1,
-  feedback: fromText('correct feedback'),
+  feedback: feedbackFromText('correct feedback'),
 };
 
 const evaluationResponse: EvaluationResponse = {
@@ -42,7 +42,7 @@ const evaluationResponse: EvaluationResponse = {
 
 const requestHintResponse: RequestHintResponse = {
   type: 'success',
-  hint: fromText('hint'),
+  hint: hintFromText('hint'),
   hasMoreHints: false,
 };
 

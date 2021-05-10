@@ -4,14 +4,11 @@ import { MultipleChoiceModelSchema } from 'components/activities/multiple_choice
 import { Choice, ScoringStrategy } from 'components/activities/types';
 import produce from 'immer';
 
-const applyAction = (
-  model: MultipleChoiceModelSchema,
-  action: any) => {
-
-  return produce(model, draftState => action(draftState));
+const applyAction = (model: MultipleChoiceModelSchema, action: any) => {
+  return produce(model, (draftState) => action(draftState));
 };
 
-function testFromText(text: string) {
+function testContentFromText(text: string) {
   return {
     id: Math.random() + '',
     content: {
@@ -27,39 +24,32 @@ function testFromText(text: string) {
   };
 }
 
-function testResponse(text: string, rule: string, score: number = 0) {
+function testResponse(text: string, rule: string, score = 0) {
   return {
     id: Math.random() + '',
-    feedback: testFromText(text),
+    feedback: testContentFromText(text),
     rule,
     score,
   };
 }
 
 function testDefaultModel(): MultipleChoiceModelSchema {
-  const choiceA: Choice = testFromText('Choice A');
-  const choiceB: Choice = testFromText('Choice B');
+  const choiceA: Choice = testContentFromText('Choice A');
+  const choiceB: Choice = testContentFromText('Choice B');
 
   const responseA = testResponse('', `input like {${choiceA.id}}`, 1);
   const responseB = testResponse('', `input like {${choiceB.id}}`, 0);
 
   return {
-    stem: testFromText(''),
-    choices: [
-      choiceA,
-      choiceB,
-    ],
+    stem: testContentFromText(''),
+    choices: [choiceA, choiceB],
     authoring: {
       parts: [
         {
           id: Math.random() + '',
           scoringStrategy: ScoringStrategy.average,
           responses: [responseA, responseB],
-          hints: [
-            testFromText(''),
-            testFromText(''),
-            testFromText(''),
-          ],
+          hints: [testContentFromText(''), testContentFromText(''), testContentFromText('')],
         },
       ],
       transformations: [],
@@ -76,7 +66,7 @@ describe('multiple choice question', () => {
   });
 
   it('can edit stem', () => {
-    const newStemContent = testFromText('new content').content;
+    const newStemContent = testContentFromText('new content').content;
     expect(applyAction(model, MCActions.editStem(newStemContent)).stem).toMatchObject({
       content: newStemContent,
     });
@@ -89,15 +79,17 @@ describe('multiple choice question', () => {
 
   // Creating guids causes failures
   xit('can add a choice', () => {
-    expect(applyAction(model, MCActions.addChoice()).choices.length)
-      .toBeGreaterThan(model.choices.length);
+    expect(applyAction(model, MCActions.addChoice()).choices.length).toBeGreaterThan(
+      model.choices.length,
+    );
   });
 
   it('can edit a choice', () => {
-    const newChoiceContent = testFromText('new content').content;
+    const newChoiceContent = testContentFromText('new content').content;
     const firstChoice = model.choices[0];
-    expect(applyAction(model, MCActions.editChoice(firstChoice.id, newChoiceContent)).choices[0])
-    .toHaveProperty('content', newChoiceContent);
+    expect(
+      applyAction(model, MCActions.editChoice(firstChoice.id, newChoiceContent)).choices[0],
+    ).toHaveProperty('content', newChoiceContent);
   });
 
   it('can remove a choice', () => {
@@ -112,11 +104,12 @@ describe('multiple choice question', () => {
   });
 
   it('can edit feedback', () => {
-    const newFeedbackContent = testFromText('new content').content;
+    const newFeedbackContent = testContentFromText('new content').content;
     const firstFeedback = model.authoring.parts[0].responses[0];
-    expect(applyAction(model, MCActions.editFeedback(firstFeedback.id, newFeedbackContent))
-      .authoring.parts[0].responses[0].feedback)
-      .toHaveProperty('content', newFeedbackContent);
+    expect(
+      applyAction(model, MCActions.editFeedback(firstFeedback.id, newFeedbackContent)).authoring
+        .parts[0].responses[0].feedback,
+    ).toHaveProperty('content', newFeedbackContent);
   });
 
   it('has at least 3 hints', () => {
@@ -124,21 +117,24 @@ describe('multiple choice question', () => {
   });
 
   it('can add a cognitive hint before the end of the array', () => {
-    expect(applyAction(model, MCActions.addHint()).authoring.parts[0].hints.length)
-      .toBeGreaterThan(model.authoring.parts[0].hints.length);
+    expect(applyAction(model, MCActions.addHint()).authoring.parts[0].hints.length).toBeGreaterThan(
+      model.authoring.parts[0].hints.length,
+    );
   });
 
   it('can edit a hint', () => {
-    const newHintContent = testFromText('new content').content;
+    const newHintContent = testContentFromText('new content').content;
     const firstHint = model.authoring.parts[0].hints[0];
-    expect(applyAction(model,
-      MCActions.editHint(firstHint.id, newHintContent)).authoring.parts[0].hints[0])
-    .toHaveProperty('content', newHintContent);
+    expect(
+      applyAction(model, MCActions.editHint(firstHint.id, newHintContent)).authoring.parts[0]
+        .hints[0],
+    ).toHaveProperty('content', newHintContent);
   });
 
   it('can remove a hint', () => {
     const firstHint = model.authoring.parts[0].hints[0];
-    expect(applyAction(model,
-      MCActions.removeHint(firstHint.id)).authoring.parts[0].hints).toHaveLength(2);
+    expect(
+      applyAction(model, MCActions.removeHint(firstHint.id)).authoring.parts[0].hints,
+    ).toHaveLength(2);
   });
 });

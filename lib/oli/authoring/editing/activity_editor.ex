@@ -475,7 +475,8 @@ defmodule Oli.Authoring.Editing.ActivityEditor do
            Resources.get_resource_from_slug(activity_slug) |> trap_nil(),
          {:ok,
           %{activity_type: activity_type, content: model, title: title, objectives: objectives}} <-
-           get_latest_revision(publication.id, activity_id) |> trap_nil() do
+           get_latest_revision(publication.id, activity_id) |> trap_nil(),
+         editor_map = Activities.create_registered_activity_map(project_slug) do
       context = %ActivityContext{
         authoringScript: activity_type.authoring_script,
         authoringElement: activity_type.authoring_element,
@@ -491,7 +492,8 @@ defmodule Oli.Authoring.Editing.ActivityEditor do
         title: title,
         model: model,
         objectives: objectives,
-        allObjectives: PageEditor.construct_parent_references(all_objectives)
+        allObjectives: PageEditor.construct_parent_references(all_objectives),
+        editorMap: editor_map
       }
 
       {:ok, context}

@@ -9,10 +9,10 @@ import {
 } from '../DeliveryElement';
 import { ImageCodingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/DisplayedStem';
-import { Hints } from '../common/DisplayedHints';
-import { Reset } from '../common/Reset';
-import { Evaluation } from '../common/Evaluation';
+import { Stem } from '../common/delivery/DisplayedStem';
+import { Hints } from '../common/delivery/DisplayedHints';
+import { Reset } from '../common/delivery/Reset';
+import { Evaluation } from '../common/delivery/Evaluation';
 import { valueOr } from 'utils/common';
 import { Evaluator, EvalContext } from './Evaluator';
 import { lastPart } from './utils';

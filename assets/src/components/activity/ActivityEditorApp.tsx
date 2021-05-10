@@ -9,18 +9,19 @@ import { b64DecodeUnicode } from 'utils/decode';
 
 let store = configureStore();
 
-(window as any).oliMountApplication
-  = (mountPoint: any, paramString : any) => {
-    const params = JSON.parse(b64DecodeUnicode(paramString));
+(window as any).oliMountApplication = (mountPoint: any, paramString: any) => {
+  const params = JSON.parse(b64DecodeUnicode(paramString));
 
-    ReactDOM.render(
-      <Provider store={store}>
-        <ActivityEditor {...params} />
-        <ModalDisplay/>
-      </Provider>,
-      mountPoint,
-    );
-  };
+  console.log('params in ActivityEditorApp.tsx', params);
+
+  ReactDOM.render(
+    <Provider store={store}>
+      <ActivityEditor {...params} />
+      <ModalDisplay />
+    </Provider>,
+    mountPoint,
+  );
+};
 
 (window as any).store = {
   configureStore: (json: any) => {
