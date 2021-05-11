@@ -1,8 +1,13 @@
 import {
+  canMoveChoiceDown,
+  canMoveChoiceUp,
+  ChoiceMoveDirection,
   getChoice,
+  getChoiceIndex,
   getHint,
   getResponse,
   isShuffled,
+  isTargetedFeedbackEnabled,
   makeChoice,
   makeHint,
   transformation,
@@ -13,12 +18,23 @@ import {
   HasChoices,
   HasParts,
   HasStem,
+  HasTargetedFeedback,
   HasTransformations,
   Operation,
   Response,
   RichText,
 } from 'components/activities/types';
 import { toSimpleText } from 'data/content/text';
+
+export const toggleTargetedFeedback = () => {
+  return (model: { authoring: HasTargetedFeedback }) => {
+    if (isTargetedFeedbackEnabled(model)) {
+      model.authoring.targetedFeedback = undefined;
+      return;
+    }
+    model.authoring.targetedFeedback = [];
+  };
+};
 
 export const editStem = (content: RichText) => {
   return (model: HasStem & { authoring: { previewText: string } }) => {
@@ -28,17 +44,36 @@ export const editStem = (content: RichText) => {
 };
 
 // Only for activities with one part
-export const addChoice = (makeResponseCallback: (choice: Choice) => Response) => () => {
+export const addChoice = () => {
   return (model: HasChoices & { authoring: HasParts }) => {
-    const newChoice = makeChoice('');
-    model.choices.push(newChoice);
-    model.authoring.parts[0].responses.push(makeResponseCallback(newChoice));
+    model.choices.push(makeChoice(''));
   };
 };
 
 export const editChoice = (id: string, content: RichText) => {
   return (model: HasChoices) => {
     getChoice(model, id).content = content;
+  };
+};
+
+export const moveChoice = (direction: ChoiceMoveDirection, id: ChoiceId) => {
+  return (model: HasChoices) => {
+    const thisChoiceIndex = getChoiceIndex(model, id);
+
+    const swap = (index1: number, index2: number) => {
+      const temp = model.choices[index1];
+      model.choices[index1] = model.choices[index2];
+      model.choices[index2] = temp;
+    };
+    const moveUp = () => swap(thisChoiceIndex, thisChoiceIndex - 1);
+    const moveDown = () => swap(thisChoiceIndex, thisChoiceIndex + 1);
+
+    switch (direction) {
+      case 'up':
+        return canMoveChoiceUp(model, id) ? moveUp() : model;
+      case 'down':
+        return canMoveChoiceDown(model, id) ? moveDown() : model;
+    }
   };
 };
 
@@ -86,14 +121,11 @@ export const removeHint = (id: string) => {
 export const toggleAnswerChoiceShuffling = () => {
   return (model: { authoring: HasTransformations }) => {
     const transformations = model.authoring.transformations;
-    console.log(isShuffled(transformations));
 
     isShuffled(transformations)
-      ? console.log('removing shuffle') ||
-        (model.authoring.transformations = transformations.filter(
+      ? (model.authoring.transformations = transformations.filter(
           (xform) => xform.operation !== Operation.shuffle,
         ))
-      : console.log('adding shuffle') ||
-        model.authoring.transformations.push(transformation('choices', Operation.shuffle));
+      : model.authoring.transformations.push(transformation('choices', Operation.shuffle));
   };
 };

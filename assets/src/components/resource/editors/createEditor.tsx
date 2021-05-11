@@ -83,8 +83,6 @@ export const createEditor = (
       graded: false,
     };
 
-    console.log('editorProps', editorProps);
-
     return (
       <ActivityBlock
         {...editorProps}

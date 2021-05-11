@@ -267,8 +267,6 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
       editorMap: JSON.stringify(this.props.editorMap),
     };
 
-    console.log('webcomponentprops', webComponentProps);
-
     const parts = valueOr(this.state.undoable.current.content.authoring.parts, []);
     const partIds = parts.map((p: any) => p.id);
 

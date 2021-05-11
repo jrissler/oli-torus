@@ -9,9 +9,6 @@ interface Props {
   icon: string;
 }
 export const MoveButton = ({ choiceId, predicate, onClick, icon }: Props) => {
-  // if (!predicate(choiceId)) {
-  //   return <button className="btn p-0" style={{ height: '12px' }} disabled></button>;
-  // }
   return (
     <AuthoringButton
       disabled={!predicate(choiceId)}

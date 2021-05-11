@@ -6,8 +6,3 @@ interface Authoring extends HasParts, HasTransformations {
 export interface MultipleChoiceModelSchema extends ActivityModelSchema, HasStem, HasChoices {
   authoring: Authoring;
 }
-
-export interface ModelEditorProps {
-  model: MultipleChoiceModelSchema;
-  editMode: boolean;
-}

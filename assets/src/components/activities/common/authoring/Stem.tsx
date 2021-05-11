@@ -3,16 +3,16 @@ import { RichTextEditor } from 'components/content/RichTextEditor';
 import { RichText, Stem as StemType } from '../../types';
 
 interface Props {
-  onEditContent: (stem: RichText) => void;
+  onEdit: (stem: RichText) => void;
   stem: StemType;
 }
 
-export const Stem = ({ stem, onEditContent }: Props) => (
+export const Stem = ({ stem, onEdit }: Props) => (
   <div className="mb-2 flex-grow-1">
     <RichTextEditor
       style={{ backgroundColor: 'white', paddingTop: '16px', paddingBottom: '16px' }}
       text={stem.content}
-      onEdit={onEditContent}
+      onEdit={onEdit}
       placeholder="Question"
     />
   </div>

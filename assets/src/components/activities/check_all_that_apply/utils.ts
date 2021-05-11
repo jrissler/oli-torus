@@ -1,11 +1,13 @@
 import {
-  CheckAllThatApplyModelSchema as CATA,
+  Operation,
+  ScoringStrategy,
+  ChoiceId,
+  HasTargetedFeedback,
   ChoiceIdsToResponseId,
-  TargetedCATA,
-  SimpleCATA,
-} from './schema';
-import { Operation, ScoringStrategy, ChoiceId } from '../types';
-import { ID, Identifiable } from 'data/content/model';
+  HasTargetedFeedbackEnabled,
+  HasParts,
+} from '../types';
+import { ID } from 'data/content/model';
 import {
   getResponse,
   makeChoice,
@@ -14,21 +16,14 @@ import {
   makeStem,
   transformation,
 } from 'components/activities/common/authoring/utils';
-
-// Types
-export function isSimpleCATA(model: CATA): model is SimpleCATA {
-  return model.type === 'SimpleCATA';
-}
-export function isTargetedCATA(model: CATA): model is TargetedCATA {
-  return model.type === 'TargetedCATA';
-}
+import { CheckAllThatApplyModelSchema as CATA } from 'components/activities/check_all_that_apply/schema';
 
 // Choices
 export const getChoiceIds = ([choiceIds]: ChoiceIdsToResponseId) => choiceIds;
 export const getCorrectChoiceIds = (model: CATA) => getChoiceIds(model.authoring.correct);
 export const getIncorrectChoiceIds = (model: CATA) => getChoiceIds(model.authoring.incorrect);
-export const getTargetedChoiceIds = (model: TargetedCATA) =>
-  model.authoring.targeted.map(getChoiceIds);
+export const getTargetedChoiceIds = (model: { authoring: HasTargetedFeedbackEnabled }) =>
+  model.authoring.targetedFeedback.map(getChoiceIds);
 export const isCorrectChoice = (model: CATA, choiceId: ChoiceId) =>
   getCorrectChoiceIds(model).includes(choiceId);
 
@@ -38,8 +33,8 @@ export const getCorrectResponse = (model: CATA) =>
   getResponse(model, getResponseId(model.authoring.correct));
 export const getIncorrectResponse = (model: CATA) =>
   getResponse(model, getResponseId(model.authoring.incorrect));
-export const getTargetedResponses = (model: TargetedCATA) =>
-  model.authoring.targeted.map((assoc) => getResponse(model, getResponseId(assoc)));
+export const getTargetedResponses = (model: { authoring: HasTargetedFeedbackEnabled & HasParts }) =>
+  model.authoring.targetedFeedback.map((assoc) => getResponse(model, getResponseId(assoc)));
 
 // Rules
 export const createRuleForIds = (toMatch: ID[], notToMatch: ID[]) =>
@@ -69,10 +64,10 @@ export const defaultCATAModel: () => CATA = () => {
   const incorrectResponse = makeResponse(invertRule(correctResponse.rule), 0, '');
 
   return {
-    type: 'SimpleCATA',
     stem: makeStem(''),
     choices: [correctChoice, incorrectChoice],
     authoring: {
+      targetedFeedback: undefined,
       parts: [
         {
           id: '1', // a only has one part, so it is safe to hardcode the id

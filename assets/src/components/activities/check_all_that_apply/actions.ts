@@ -1,4 +1,4 @@
-import { CheckAllThatApplyModelSchema as CATA, TargetedCATA } from './schema';
+import { CheckAllThatApplyModelSchema as CATA } from './schema';
 import {
   createRuleForIds,
   getCorrectResponse,
@@ -10,44 +10,40 @@ import {
   setDifference,
   invertRule,
   unionRules,
-  isSimpleCATA,
 } from './utils';
-import { RichText, Hint as HintType, ChoiceId, Choice, ResponseId } from '../types';
+import {
+  RichText,
+  Hint as HintType,
+  ChoiceId,
+  Choice,
+  ResponseId,
+  Operation,
+  HasTargetedFeedback,
+  HasParts,
+  HasChoices,
+} from '../types';
 import { toSimpleText } from 'data/content/text';
 import {
-  getChoice,
-  getHint,
-  getHints,
-  getResponse,
-  getResponses,
-  makeChoice,
-  makeHint,
-  makeResponse,
-  moveChoice,
-} from 'components/activities/common/authoring/utils';
-import {
   addHint,
+  editChoice,
   editFeedback,
   editHint,
   editStem,
+  moveChoice,
   removeHint,
   toggleAnswerChoiceShuffling,
 } from 'components/activities/common/authoring/immerActions';
+import {
+  getResponse,
+  getResponses,
+  isShuffled,
+  isTargetedFeedbackEnabled,
+  makeChoice,
+  makeResponse,
+  transformation,
+} from 'components/activities/common/authoring/utils';
 
 export class Actions {
-  static toggleType() {
-    return (model: CATA) => {
-      if (isSimpleCATA(model)) {
-        (model as any).type = 'TargetedCATA';
-        (model as any).authoring.targeted = [];
-        return;
-      }
-
-      (model as any).type = 'SimpleCATA';
-      delete (model as any).authoring.targeted;
-    };
-  }
-
   static editStem = editStem;
 
   static addChoice() {
@@ -60,11 +56,7 @@ export class Actions {
     };
   }
 
-  static editChoiceContent(id: string, content: RichText) {
-    return (model: CATA) => {
-      getChoice(model, id).content = content;
-    };
-  }
+  static editChoiceContent = editChoice;
 
   static removeChoice(id: string) {
     return (model: CATA) => {
@@ -73,11 +65,8 @@ export class Actions {
       removeIdFrom(getChoiceIds(model.authoring.correct));
       removeIdFrom(getChoiceIds(model.authoring.incorrect));
 
-      switch (model.type) {
-        case 'SimpleCATA':
-          break;
-        case 'TargetedCATA':
-          model.authoring.targeted.forEach((assoc) => removeIdFrom(getChoiceIds(assoc)));
+      if (model.authoring.targetedFeedback !== undefined) {
+        model.authoring.targetedFeedback.forEach((assoc) => removeIdFrom(getChoiceIds(assoc)));
       }
 
       updateResponseRules(model);
@@ -86,76 +75,64 @@ export class Actions {
 
   static toggleChoiceCorrectness(choiceId: ChoiceId) {
     return (model: CATA) => {
-      const addOrRemoveId = (list: string[]) => addOrRemoveFromList(choiceId, list);
-      addOrRemoveId(getChoiceIds(model.authoring.correct));
-      addOrRemoveId(getChoiceIds(model.authoring.incorrect));
+      addOrRemoveFromList(choiceId, getChoiceIds(model.authoring.correct));
+      addOrRemoveFromList(choiceId, getChoiceIds(model.authoring.incorrect));
       updateResponseRules(model);
     };
   }
 
-  static editFeedback = editFeedback;
-  static moveChoice = moveChoice;
+  static editResponseFeedback = editFeedback;
 
   static addTargetedFeedback() {
-    return (model: CATA) => {
-      switch (model.type) {
-        case 'SimpleCATA':
-          return;
-        case 'TargetedCATA':
-          // eslint-disable-next-line
-          const response = makeResponse(
-            createRuleForIds(
-              [],
-              model.choices.map(({ id }) => id),
-            ),
-            0,
-            '',
-          );
+    return (model: { authoring: HasTargetedFeedback & HasParts } & HasChoices) => {
+      if (model.authoring.targetedFeedback !== undefined) {
+        const response = makeResponse(
+          createRuleForIds(
+            [],
+            model.choices.map(({ id }) => id),
+          ),
+          0,
+          '',
+        );
 
-          getResponses(model).push(response);
-          model.authoring.targeted.push([[], response.id]);
-          return;
+        getResponses(model).push(response);
+        model.authoring.targetedFeedback.push([[], response.id]);
       }
     };
   }
 
   static removeTargetedFeedback(responseId: ResponseId) {
     return (model: CATA) => {
-      switch (model.type) {
-        case 'SimpleCATA':
-          return;
-        case 'TargetedCATA':
-          removeFromList(getResponse(model, responseId), getResponses(model));
-          removeFromList(
-            model.authoring.targeted.find((assoc) => getResponseId(assoc) === responseId),
-            model.authoring.targeted,
-          );
+      if (model.authoring.targetedFeedback === undefined) {
+        return;
       }
+      removeFromList(getResponse(model, responseId), getResponses(model));
+      removeFromList(
+        model.authoring.targetedFeedback.find((assoc) => getResponseId(assoc) === responseId),
+        model.authoring.targetedFeedback,
+      );
     };
   }
 
   static editTargetedFeedbackChoices(responseId: ResponseId, choiceIds: ChoiceId[]) {
     return (model: CATA) => {
-      switch (model.type) {
-        case 'SimpleCATA':
-          break;
-        case 'TargetedCATA':
-          // eslint-disable-next-line
-          const assoc = model.authoring.targeted.find(
-            (assoc) => getResponseId(assoc) === responseId,
-          );
-          if (!assoc) break;
+      if (model.authoring.targetedFeedback !== undefined) {
+        const assoc = model.authoring.targetedFeedback.find(
+          (assoc) => getResponseId(assoc) === responseId,
+        );
+        if (assoc) {
           assoc[0] = choiceIds;
-          break;
+        }
       }
       updateResponseRules(model);
     };
   }
 
   static addHint = addHint;
-  static editHint = editHint;
-  static removeHint = removeHint;
 
+  static editHint = editHint;
+
+  static removeHint = removeHint;
   static toggleAnswerChoiceShuffling = toggleAnswerChoiceShuffling;
 }
 
@@ -182,26 +159,21 @@ const updateResponseRules = (model: CATA) => {
     getIncorrectChoiceIds(model),
   );
 
-  switch (model.type) {
-    case 'SimpleCATA':
-      getIncorrectResponse(model).rule = invertRule(getCorrectResponse(model).rule);
-      break;
-    case 'TargetedCATA':
-      // eslint-disable-next-line
-      const targetedRules: string[] = [];
-      // eslint-disable-next-line
-      const allChoiceIds = model.choices.map((choice) => choice.id);
-      model.authoring.targeted.forEach((assoc) => {
-        const targetedRule = createRuleForIds(
-          getChoiceIds(assoc),
-          setDifference(allChoiceIds, getChoiceIds(assoc)),
-        );
-        targetedRules.push(targetedRule);
-        getResponse(model, getResponseId(assoc)).rule = targetedRule;
-      });
-      getIncorrectResponse(model).rule = unionRules(
-        targetedRules.map(invertRule).concat([invertRule(getCorrectResponse(model).rule)]),
+  if (model.authoring.targetedFeedback === undefined) {
+    getIncorrectResponse(model).rule = invertRule(getCorrectResponse(model).rule);
+  } else {
+    const targetedRules: string[] = [];
+    const allChoiceIds = model.choices.map((choice) => choice.id);
+    model.authoring.targetedFeedback.forEach((assoc) => {
+      const targetedRule = createRuleForIds(
+        getChoiceIds(assoc),
+        setDifference(allChoiceIds, getChoiceIds(assoc)),
       );
-      break;
+      targetedRules.push(targetedRule);
+      getResponse(model, getResponseId(assoc)).rule = targetedRule;
+    });
+    getIncorrectResponse(model).rule = unionRules(
+      targetedRules.map(invertRule).concat([invertRule(getCorrectResponse(model).rule)]),
+    );
   }
 };

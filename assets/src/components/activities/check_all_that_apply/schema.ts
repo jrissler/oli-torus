@@ -1,11 +1,15 @@
+import {
+  Part,
+  Transformation,
+  ActivityModelSchema,
+  Stem,
 
-import { Part, Transformation, ActivityModelSchema, Stem, ChoiceId, ResponseId, Choice } from '../types';
+  ChoiceIdsToResponseId,
+  HasChoices,
+  HasStem,
+} from '../types';
 
-export type CheckAllThatApplyModelSchema = SimpleCATA | TargetedCATA;
-
-interface BaseCATA extends ActivityModelSchema {
-  stem: Stem;
-  choices: Choice[];
+export interface CheckAllThatApplyModelSchema extends ActivityModelSchema, HasStem, HasChoices {
   authoring: {
     // An association list of correct choice ids to the matching response id
     correct: ChoiceIdsToResponseId;
@@ -15,23 +19,4 @@ interface BaseCATA extends ActivityModelSchema {
     transformations: Transformation[];
     previewText: string;
   };
-}
-
-export type ChoiceIdsToResponseId = [ChoiceId[], ResponseId];
-
-export type SimpleCATA = BaseCATA & {
-  type: 'SimpleCATA';
-};
-
-export type TargetedCATA = BaseCATA & {
-  type: 'TargetedCATA';
-  authoring: {
-    // An association list of choice ids to the matching targeted response id
-    targeted: ChoiceIdsToResponseId[];
-  }
-};
-
-export interface ModelEditorProps {
-  model: CheckAllThatApplyModelSchema;
-  editMode: boolean;
 }

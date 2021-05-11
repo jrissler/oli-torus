@@ -1,49 +1,33 @@
 import React from 'react';
-import { Choice, ChoiceId, HasChoices, RichText } from 'components/activities/types';
+import { Choice, HasChoices, RichText } from 'components/activities/types';
 import { MoveButton } from 'components/activities/common/authoring/choices/MoveButton';
 import { canMoveChoiceDown, canMoveChoiceUp } from 'components/activities/common/authoring/utils';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { RemoveButton } from 'components/misc/RemoveButton';
-import { AuthoringButton } from 'components/misc/AuthoringButton';
+import { moveChoice } from 'components/activities/common/authoring/immerActions';
 
 interface Props {
   choice: Choice;
   model: HasChoices;
-  onMoveUp: (id: ChoiceId) => void;
-  onMoveDown: (id: ChoiceId) => void;
   onEditContent: (id: string, content: RichText) => void;
   onRemove: (id: string) => void;
   canRemove: boolean;
-  correctIcon: JSX.Element;
-  incorrectIcon: JSX.Element;
-  isCorrect: (model: HasChoices, choiceId: ChoiceId) => boolean;
-  toggleCorrect: (choiceId: string) => void;
+  icon: JSX.Element;
+  dispatch: (action: (model: HasChoices) => void) => void;
 }
 export const MovableChoice = ({
   model,
   choice,
-  onMoveUp,
-  onMoveDown,
   onEditContent,
   onRemove,
   canRemove,
-  correctIcon,
-  incorrectIcon,
-  isCorrect,
-  toggleCorrect,
+  icon,
+  dispatch,
 }: Props) => {
   return (
     <div key={choice.id} className="mb-2">
       <div className="d-flex" style={{ flex: 1 }}>
-        <div className="d-flex flex-column">
-          <AuthoringButton
-            className="btn mt-1 mr-2 p-0"
-            style={{ boxShadow: 'none' }}
-            onClick={() => toggleCorrect(choice.id)}
-          >
-            {isCorrect(model, choice.id) ? correctIcon : incorrectIcon}
-          </AuthoringButton>
-        </div>
+        <div className="d-flex flex-column">{icon}</div>
         <RichTextEditor
           placeholder="Answer choice"
           style={{ backgroundColor: 'white ' }}
@@ -56,13 +40,13 @@ export const MovableChoice = ({
             <MoveButton
               choiceId={choice.id}
               predicate={(id) => canMoveChoiceUp(model, id)}
-              onClick={onMoveUp}
+              onClick={() => dispatch(moveChoice('up', choice.id))}
               icon="arrow_drop_up"
             />
             <MoveButton
               choiceId={choice.id}
               predicate={(id) => canMoveChoiceDown(model, id)}
-              onClick={onMoveDown}
+              onClick={() => dispatch(moveChoice('down', choice.id))}
               icon="arrow_drop_down"
             />
           </div>

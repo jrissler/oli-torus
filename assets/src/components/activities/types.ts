@@ -97,6 +97,15 @@ export interface HasHints {
   hints: Hint[];
 }
 
+export type ChoiceIdsToResponseId = [ChoiceId[], ResponseId];
+
+export interface HasTargetedFeedback {
+  targetedFeedback: ChoiceIdsToResponseId[] | undefined;
+}
+export interface HasTargetedFeedbackEnabled {
+  targetedFeedback: ChoiceIdsToResponseId[];
+}
+
 export type Feedback = ContentItem;
 export interface Transformation extends Identifiable {
   path: string;

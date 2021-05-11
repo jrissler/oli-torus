@@ -9,66 +9,18 @@ import {
 } from '../DeliveryElement';
 import { CheckAllThatApplyModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
-import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
+import { defaultWriterContext } from 'data/content/writers/context';
 import { Stem } from '../common/delivery/DisplayedStem';
 import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
+import { DisplayedChoices } from 'components/activities/common/delivery/choices/DisplayedChoices';
 
 type Evaluation = {
   score: number;
   outOf: number;
   feedback: ActivityTypes.RichText;
-};
-
-interface ChoicesProps {
-  choices: ActivityTypes.Choice[];
-  selected: ActivityTypes.ChoiceId[];
-  context: WriterContext;
-  onSelect: (id: ActivityTypes.ChoiceId) => void;
-  isEvaluated: boolean;
-}
-const Choices = ({ choices, selected, context, onSelect, isEvaluated }: ChoicesProps) => {
-  const isSelected = (choiceId: ActivityTypes.ChoiceId) => !!selected.find((s) => s === choiceId);
-  return (
-    <div className="choices" aria-label="check all that apply choices">
-      {choices.map((choice, index) => (
-        <Choice
-          key={choice.id}
-          onClick={() => onSelect(choice.id)}
-          selected={isSelected(choice.id)}
-          choice={choice}
-          isEvaluated={isEvaluated}
-          index={index}
-          context={context}
-        />
-      ))}
-    </div>
-  );
-};
-
-interface ChoiceProps {
-  choice: ActivityTypes.Choice;
-  index: number;
-  selected: boolean;
-  context: WriterContext;
-  onClick: () => void;
-  isEvaluated: boolean;
-}
-const Choice = ({ choice, index, selected, context, onClick, isEvaluated }: ChoiceProps) => {
-  return (
-    <div
-      key={choice.id}
-      aria-label={`choice ${index + 1}`}
-      onClick={isEvaluated ? undefined : onClick}
-      className={`choice ${selected ? 'selected' : ''}`}
-    >
-      <span className="choice-index">{index + 1}</span>
-      <HtmlContentModelRenderer text={choice.content} context={context} />
-    </div>
-  );
 };
 
 export const CheckAllThatApplyComponent = (
@@ -226,7 +178,9 @@ export const CheckAllThatApplyComponent = (
         <div>
           <Stem stem={stem} context={writerContext} />
           {gradedPoints}
-          <Choices
+          <DisplayedChoices
+            unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}
+            selectedIcon={<i className="material-icons-outlined">check_box</i>}
             choices={choices}
             selected={selected}
             onSelect={onSelect}

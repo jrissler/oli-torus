@@ -14,6 +14,7 @@ import {
   HintId,
   HasTransformations,
   HasParts,
+  HasTargetedFeedback,
 } from '../../types';
 import guid from 'utils/guid';
 
@@ -78,26 +79,6 @@ export const canMoveChoice = (model: HasChoices, id: ChoiceId, direction: Choice
 export const canMoveChoiceUp = (model: HasChoices, id: ChoiceId) => canMoveChoice(model, id, 'up');
 export const canMoveChoiceDown = (model: HasChoices, id: ChoiceId) =>
   canMoveChoice(model, id, 'down');
-export const moveChoice = (direction: ChoiceMoveDirection, id: ChoiceId) => {
-  return (model: HasChoices) => {
-    const thisChoiceIndex = getChoiceIndex(model, id);
-
-    const swap = (index1: number, index2: number) => {
-      const temp = model.choices[index1];
-      model.choices[index1] = model.choices[index2];
-      model.choices[index2] = temp;
-    };
-    const moveUp = () => swap(thisChoiceIndex, thisChoiceIndex - 1);
-    const moveDown = () => swap(thisChoiceIndex, thisChoiceIndex + 1);
-
-    switch (direction) {
-      case 'up':
-        return canMoveChoiceUp(model, id) ? moveUp() : model;
-      case 'down':
-        return canMoveChoiceDown(model, id) ? moveDown() : model;
-    }
-  };
-};
 
 export const areAnswerChoicesShuffled = (model: { authoring: HasTransformations }): boolean =>
   !!model.authoring.transformations.find((xform) => xform.operation === Operation.shuffle);
@@ -116,3 +97,6 @@ export const getHint = (model: { authoring: HasParts }, id: HintId) =>
 
 export const isShuffled = (transformations: Transformation[]) =>
   !!transformations.find((xform) => xform.operation === Operation.shuffle);
+
+export const isTargetedFeedbackEnabled = (model: { authoring: HasTargetedFeedback }) =>
+  model.authoring.targetedFeedback !== undefined;
