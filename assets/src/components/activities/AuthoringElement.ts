@@ -2,6 +2,7 @@ import { ActivityModelSchema } from './types';
 import { ProjectSlug } from 'data/types';
 import React, { useContext } from 'react';
 import { ActivityEditorMap } from 'data/content/editors';
+import produce from 'immer';
 
 export interface AuthoringElementProps<T extends ActivityModelSchema> {
   model: T;
@@ -9,6 +10,7 @@ export interface AuthoringElementProps<T extends ActivityModelSchema> {
   editMode: boolean;
   projectSlug: ProjectSlug;
   editorMap: ActivityEditorMap;
+  dispatch: (action: (model: T) => void) => void;
 }
 
 export const AuthoringElementContext = React.createContext<AuthoringElementProps<any> | undefined>(
@@ -16,7 +18,7 @@ export const AuthoringElementContext = React.createContext<AuthoringElementProps
 );
 
 export function useAuthoringElementContext<T>() {
-  const context = useContext<AuthoringElementProps<T>>(AuthoringElementContext);
+  const context = useContext<AuthoringElementProps<T> | undefined>(AuthoringElementContext);
   if (context === undefined) {
     throw new Error('useAuthoringElementContext must be used within an AuthoringElementProvider');
   }
@@ -46,10 +48,9 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     const editMode: boolean = getProp('editMode');
     const projectSlug: ProjectSlug = this.getAttribute('projectSlug') as string;
     const editorMap: ActivityEditorMap = getProp('editorMap');
-    console.log('editorMap', editorMap);
-
     const onEdit = (model: any) =>
       this.dispatchEvent(new CustomEvent('modelUpdated', { bubbles: true, detail: { model } }));
+    const dispatch = (action: (model: T) => void) => onEdit(produce(model, action));
 
     return {
       onEdit,
@@ -57,6 +58,7 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
       editMode,
       projectSlug,
       editorMap,
+      dispatch,
     };
   }
 

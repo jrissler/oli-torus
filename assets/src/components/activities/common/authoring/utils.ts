@@ -15,6 +15,7 @@ import {
   HasTransformations,
   HasParts,
   HasTargetedFeedback,
+  ActivityModelSchema,
 } from '../../types';
 import guid from 'utils/guid';
 
@@ -45,7 +46,7 @@ export const makeResponse = (rule: string, score: number, text: ''): Response =>
   feedback: makeFeedback(text),
 });
 
-export const transformation = (path: string, operation: Operation): Transformation => ({
+export const makeTransformation = (path: string, operation: Operation): Transformation => ({
   id: guid(),
   path: 'choices',
   operation,
@@ -80,23 +81,19 @@ export const canMoveChoiceUp = (model: HasChoices, id: ChoiceId) => canMoveChoic
 export const canMoveChoiceDown = (model: HasChoices, id: ChoiceId) =>
   canMoveChoice(model, id, 'down');
 
-export const areAnswerChoicesShuffled = (model: { authoring: HasTransformations }): boolean =>
+export const areAnswerChoicesShuffled = (model: HasTransformations): boolean =>
   !!model.authoring.transformations.find((xform) => xform.operation === Operation.shuffle);
 
 // Responses
 // Only for activity types with one part
-export const getResponses = (model: { authoring: HasParts }) => model.authoring.parts[0].responses;
-export const getResponse = (model: { authoring: HasParts }, id: ResponseId) =>
+export const getResponses = (model: HasParts) => model.authoring.parts[0].responses;
+export const getResponse = (model: HasParts, id: ResponseId) =>
   unsafeGetById<Response>(getResponses(model), id);
 
 // Hints
 // Only for activity types with one part
-export const getHints = (model: { authoring: HasParts }) => model.authoring.parts[0].hints;
-export const getHint = (model: { authoring: HasParts }, id: HintId) =>
-  unsafeGetById<Hint>(getHints(model), id);
+export const getHints = (model: HasParts) => model.authoring.parts[0].hints;
+export const getHint = (model: HasParts, id: HintId) => unsafeGetById<Hint>(getHints(model), id);
 
 export const isShuffled = (transformations: Transformation[]) =>
   !!transformations.find((xform) => xform.operation === Operation.shuffle);
-
-export const isTargetedFeedbackEnabled = (model: { authoring: HasTargetedFeedback }) =>
-  model.authoring.targetedFeedback !== undefined;

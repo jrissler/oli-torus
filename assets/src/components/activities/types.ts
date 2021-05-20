@@ -100,11 +100,21 @@ export interface HasHints {
 export type ChoiceIdsToResponseId = [ChoiceId[], ResponseId];
 
 export interface HasTargetedFeedback {
-  targetedFeedback: ChoiceIdsToResponseId[] | undefined;
+  authoring: {
+    targeted: ChoiceIdsToResponseId[] | undefined; // [[...choiceIds], targetedResponseId][] | undefined when no targeted feedback
+    correct: ChoiceIdsToResponseId; // [[...correctChoiceIds], correctResponseId]
+    incorrect: ChoiceIdsToResponseId; // [[...incorrectChoiceIds], catchAllIncorrectResponseId]
+  };
 }
-export interface HasTargetedFeedbackEnabled {
-  targetedFeedback: ChoiceIdsToResponseId[];
-}
+export type TargetedFeedbackEnabled = HasTargetedFeedback & {
+  authoring: {
+    targeted: ChoiceIdsToResponseId[];
+  };
+};
+
+export const isTargetedFeedbackEnabled = (
+  model: HasTargetedFeedback,
+): model is TargetedFeedbackEnabled => model.authoring.targeted !== undefined;
 
 export type Feedback = ContentItem;
 export interface Transformation extends Identifiable {
@@ -112,7 +122,15 @@ export interface Transformation extends Identifiable {
   operation: Operation;
 }
 export interface HasTransformations {
-  transformations: Transformation[];
+  authoring: {
+    transformations: Transformation[];
+  };
+}
+
+export interface HasPreviewText {
+  authoring: {
+    previewText: string;
+  };
 }
 
 export interface Response extends Identifiable {
@@ -183,7 +201,9 @@ export interface Part extends Identifiable {
   scoringStrategy: ScoringStrategy;
 }
 export interface HasParts {
-  parts: Part[];
+  authoring: {
+    parts: Part[];
+  };
 }
 
 export enum ScoringStrategy {

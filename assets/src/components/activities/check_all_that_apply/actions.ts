@@ -1,179 +1,208 @@
-import { CheckAllThatApplyModelSchema as CATA } from './schema';
-import {
-  createRuleForIds,
-  getCorrectResponse,
-  getChoiceIds,
-  getCorrectChoiceIds,
-  getIncorrectChoiceIds,
-  getIncorrectResponse,
-  getResponseId,
-  setDifference,
-  invertRule,
-  unionRules,
-} from './utils';
-import {
-  RichText,
-  Hint as HintType,
-  ChoiceId,
-  Choice,
-  ResponseId,
-  Operation,
-  HasTargetedFeedback,
-  HasParts,
-  HasChoices,
-} from '../types';
-import { toSimpleText } from 'data/content/text';
-import {
-  addHint,
-  editChoice,
-  editFeedback,
-  editHint,
-  editStem,
-  moveChoice,
-  removeHint,
-  toggleAnswerChoiceShuffling,
-} from 'components/activities/common/authoring/immerActions';
-import {
-  getResponse,
-  getResponses,
-  isShuffled,
-  isTargetedFeedbackEnabled,
-  makeChoice,
-  makeResponse,
-  transformation,
-} from 'components/activities/common/authoring/utils';
+// import { CheckAllThatApplyModelSchemaV2 as CATA } from './schema';
+// import {
+//   createRuleForIds,
+//   getCorrectResponse,
+//   getChoiceIds,
+//   getCorrectChoiceIds,
+//   getIncorrectChoiceIds,
+//   getIncorrectResponse,
+//   getResponseId,
+//   setDifference,
+//   invertRule,
+//   unionRules,
+// } from './utils';
+// import { RichText, Hint as HintType, ChoiceId, Choice, ResponseId } from '../types';
+// import { getHints, getResponses, makeResponse } from 'components/activities/common/authoring/utils';
 
-export class Actions {
-  static editStem = editStem;
+// export const Actions = {
+//   toggleType: () => {
+//     return (model: CATA) => {
+//       if (isSimpleCATA(model)) {
+//         (model as any).type = 'TargetedCATA';
+//         (model as any).authoring.targeted = [];
+//         return;
+//       }
 
-  static addChoice() {
-    return (model: CATA) => {
-      const newChoice = makeChoice('');
+//       (model as any).type = 'SimpleCATA';
+//       delete (model as any).authoring.targeted;
+//     };
+//   },
 
-      model.choices.push(newChoice);
-      getChoiceIds(model.authoring.incorrect).push(newChoice.id);
-      updateResponseRules(model);
-    };
-  }
+//   editStem,
 
-  static editChoiceContent = editChoice;
+//   addChoice: () => {
+//     return (model: CATA) => {
+//       const newChoice: Choice = fromText('');
 
-  static removeChoice(id: string) {
-    return (model: CATA) => {
-      const removeIdFrom = (list: string[]) => removeFromList(id, list);
-      model.choices = model.choices.filter((choice) => choice.id !== id);
-      removeIdFrom(getChoiceIds(model.authoring.correct));
-      removeIdFrom(getChoiceIds(model.authoring.incorrect));
+//       model.choices.push(newChoice);
+//       getChoiceIds(model.authoring.incorrect).push(newChoice.id);
+//       updateResponseRules(model);
+//     };
+//   },
 
-      if (model.authoring.targetedFeedback !== undefined) {
-        model.authoring.targetedFeedback.forEach((assoc) => removeIdFrom(getChoiceIds(assoc)));
-      }
+//   editChoiceContent: (id: string, content: RichText) => {
+//     return (model: CATA) => {
+//       getChoice(model, id).content = content;
+//     };
+//   },
 
-      updateResponseRules(model);
-    };
-  }
+//   removeChoice: (id: string) => {
+//     return (model: CATA) => {
+//       const removeIdFrom = (list: string[]) => removeFromList(id, list);
+//       model.choices = model.choices.filter((choice) => choice.id !== id);
+//       removeIdFrom(getChoiceIds(model.authoring.correct));
+//       removeIdFrom(getChoiceIds(model.authoring.incorrect));
 
-  static toggleChoiceCorrectness(choiceId: ChoiceId) {
-    return (model: CATA) => {
-      addOrRemoveFromList(choiceId, getChoiceIds(model.authoring.correct));
-      addOrRemoveFromList(choiceId, getChoiceIds(model.authoring.incorrect));
-      updateResponseRules(model);
-    };
-  }
+//       switch (model.type) {
+//         case 'SimpleCATA':
+//           break;
+//         case 'TargetedCATA':
+//           model.authoring.targeted.forEach((assoc) => removeIdFrom(getChoiceIds(assoc)));
+//       }
 
-  static editResponseFeedback = editFeedback;
+//       updateResponseRules(model);
+//     };
+//   },
 
-  static addTargetedFeedback() {
-    return (model: { authoring: HasTargetedFeedback & HasParts } & HasChoices) => {
-      if (model.authoring.targetedFeedback !== undefined) {
-        const response = makeResponse(
-          createRuleForIds(
-            [],
-            model.choices.map(({ id }) => id),
-          ),
-          0,
-          '',
-        );
+//   toggleChoiceCorrectness: (choiceId: ChoiceId) => {
+//     return (model: CATA) => {
+//       const addOrRemoveId = (list: string[]) => addOrRemoveFromList(choiceId, list);
+//       // targeted response choices do not need to change
 
-        getResponses(model).push(response);
-        model.authoring.targetedFeedback.push([[], response.id]);
-      }
-    };
-  }
+//       addOrRemoveId(getChoiceIds(model.authoring.correct));
+//       addOrRemoveId(getChoiceIds(model.authoring.incorrect));
+//       updateResponseRules(model);
+//     };
+//   },
 
-  static removeTargetedFeedback(responseId: ResponseId) {
-    return (model: CATA) => {
-      if (model.authoring.targetedFeedback === undefined) {
-        return;
-      }
-      removeFromList(getResponse(model, responseId), getResponses(model));
-      removeFromList(
-        model.authoring.targetedFeedback.find((assoc) => getResponseId(assoc) === responseId),
-        model.authoring.targetedFeedback,
-      );
-    };
-  }
+//   editResponseFeedback: (responseId: ResponseId, content: RichText) => {
+//     return (model: CATA) => {
+//       getResponse(model, responseId).feedback.content = content;
+//     };
+//   },
 
-  static editTargetedFeedbackChoices(responseId: ResponseId, choiceIds: ChoiceId[]) {
-    return (model: CATA) => {
-      if (model.authoring.targetedFeedback !== undefined) {
-        const assoc = model.authoring.targetedFeedback.find(
-          (assoc) => getResponseId(assoc) === responseId,
-        );
-        if (assoc) {
-          assoc[0] = choiceIds;
-        }
-      }
-      updateResponseRules(model);
-    };
-  }
+//   addTargetedFeedback: () => {
+//     return (model: CATA) => {
+//       switch (model.type) {
+//         case 'SimpleCATA':
+//           return;
+//         case 'TargetedCATA':
+//           // eslint-disable-next-line
+//           const response = makeResponse(
+//             createRuleForIds(
+//               [],
+//               model.choices.map(({ id }) => id),
+//             ),
+//             0,
+//             '',
+//           );
 
-  static addHint = addHint;
+//           getResponses(model).push(response);
+//           model.authoring.targeted.push([[], response.id]);
+//           return;
+//       }
+//     };
+//   },
 
-  static editHint = editHint;
+//   removeTargetedFeedback: (responseId: ResponseId) => {
+//     return (model: CATA) => {
+//       switch (model.type) {
+//         case 'SimpleCATA':
+//           return;
+//         case 'TargetedCATA':
+//           removeFromList(getResponse(model, responseId), getResponses(model));
+//           removeFromList(
+//             model.authoring.targeted.find((assoc) => getResponseId(assoc) === responseId),
+//             model.authoring.targeted,
+//           );
+//       }
+//     };
+//   },
 
-  static removeHint = removeHint;
-  static toggleAnswerChoiceShuffling = toggleAnswerChoiceShuffling;
-}
+//   editTargetedFeedbackChoices: (responseId: ResponseId, choiceIds: ChoiceId[]) => {
+//     return (model: CATA) => {
+//       switch (model.type) {
+//         case 'SimpleCATA':
+//           break;
+//         case 'TargetedCATA':
+//           // eslint-disable-next-line
+//           const assoc = model.authoring.targeted.find(
+//             (assoc) => getResponseId(assoc) === responseId,
+//           );
+//           if (!assoc) break;
+//           assoc[0] = choiceIds;
+//           break;
+//       }
+//       updateResponseRules(model);
+//     };
+//   },
 
-// mutable
-function addOrRemoveFromList<T>(item: T, list: T[]) {
-  if (list.find((x) => x === item)) {
-    return removeFromList(item, list);
-  }
-  return list.push(item);
-}
-// mutable
-function removeFromList<T>(item: T, list: T[]) {
-  const index = list.findIndex((x) => x === item);
-  if (index > -1) {
-    list.splice(index, 1);
-  }
-}
+//   addHint: () => {
+//     return (model: CATA) => {
+//       const newHint: HintType = fromText('');
+//       // new hints are always cognitive hints. they should be inserted
+//       // right before the bottomOut hint at the end of the list
+//       const bottomOutIndex = getHints(model).length - 1;
+//       getHints(model).splice(bottomOutIndex, 0, newHint);
+//     };
+//   },
 
-// Update all response rules based on a model with new choices that
-// are not yet reflected by the rules.
-const updateResponseRules = (model: CATA) => {
-  getCorrectResponse(model).rule = createRuleForIds(
-    getCorrectChoiceIds(model),
-    getIncorrectChoiceIds(model),
-  );
+//   editHint: (id: string, content: RichText) => {
+//     return (model: CATA) => {
+//       getHint(model, id).content = content;
+//     };
+//   },
 
-  if (model.authoring.targetedFeedback === undefined) {
-    getIncorrectResponse(model).rule = invertRule(getCorrectResponse(model).rule);
-  } else {
-    const targetedRules: string[] = [];
-    const allChoiceIds = model.choices.map((choice) => choice.id);
-    model.authoring.targetedFeedback.forEach((assoc) => {
-      const targetedRule = createRuleForIds(
-        getChoiceIds(assoc),
-        setDifference(allChoiceIds, getChoiceIds(assoc)),
-      );
-      targetedRules.push(targetedRule);
-      getResponse(model, getResponseId(assoc)).rule = targetedRule;
-    });
-    getIncorrectResponse(model).rule = unionRules(
-      targetedRules.map(invertRule).concat([invertRule(getCorrectResponse(model).rule)]),
-    );
-  }
-};
+//   removeHint: (id: string) => {
+//     return (model: CATA) => {
+//       model.authoring.parts[0].hints = getHints(model).filter((h) => h.id !== id);
+//     };
+//   },
+// };
+
+// // mutable
+// function addOrRemoveFromList<T>(item: T, list: T[]) {
+//   if (list.find((x) => x === item)) {
+//     return removeFromList(item, list);
+//   }
+//   return list.push(item);
+// }
+// // mutable
+// function removeFromList<T>(item: T, list: T[]) {
+//   const index = list.findIndex((x) => x === item);
+//   if (index > -1) {
+//     list.splice(index, 1);
+//   }
+// }
+
+// // Update all response rules based on a model with new choices that
+// // are not yet reflected by the rules.
+// const updateResponseRules = (model: CATA) => {
+//   getCorrectResponse(model).rule = createRuleForIds(
+//     getCorrectChoiceIds(model),
+//     getIncorrectChoiceIds(model),
+//   );
+
+//   switch (model.type) {
+//     case 'SimpleCATA':
+//       getIncorrectResponse(model).rule = invertRule(getCorrectResponse(model).rule);
+//       break;
+//     case 'TargetedCATA':
+//       // eslint-disable-next-line
+//       const targetedRules: string[] = [];
+//       // eslint-disable-next-line
+//       const allChoiceIds = model.choices.map((choice) => choice.id);
+//       model.authoring.targeted.forEach((assoc) => {
+//         const targetedRule = createRuleForIds(
+//           getChoiceIds(assoc),
+//           setDifference(allChoiceIds, getChoiceIds(assoc)),
+//         );
+//         targetedRules.push(targetedRule);
+//         getResponse(model, getResponseId(assoc)).rule = targetedRule;
+//       });
+//       getIncorrectResponse(model).rule = unionRules(
+//         targetedRules.map(invertRule).concat([invertRule(getCorrectResponse(model).rule)]),
+//       );
+//       break;
+//   }
+// };

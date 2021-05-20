@@ -8,14 +8,13 @@ import {
   defaultCATAModel,
   getChoiceIds,
   getCorrectResponse,
-  getHints,
   getIncorrectResponse,
   getResponseId,
-  getResponses,
   getTargetedResponses,
   invertRule,
   unionRules,
 } from 'components/activities/check_all_that_apply/utils';
+import { getHints, getResponses } from 'components/activities/common/authoring/utils';
 
 const applyAction = (model: CheckAllThatApplyModelSchema, action: any) => {
   return produce(model, (draftState) => action(draftState));

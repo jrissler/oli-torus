@@ -16,34 +16,56 @@ const TabComponent: React.FunctionComponent<TabProps> = ({ index, children }) =>
   </div>
 );
 
-interface TabsProps {
-  children: React.ReactElement<TabProps>[];
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface TabsProps {}
 const TabsComponent: React.FunctionComponent<TabsProps> = ({ children }) => {
   return (
     <>
-      <ul className="nav nav-tabs" id="activity-authoring-tabs" role="tablist">
-        {children.map(({ props: { label } }, index) => (
-          <li key={label} className="nav-item" role="presentation">
-            <a
-              className={'nav-link' + (index === 0 ? ' active' : '')}
-              id={'link-tab-' + index}
-              data-toggle="tab"
-              href={'#tab-' + index}
-              role="tab"
-              aria-controls={'tab-' + index}
-              aria-selected="true"
-            >
-              {label}
-            </a>
-          </li>
-        ))}
+      <ul className="nav nav-tabs mb-4" id="activity-authoring-tabs" role="tablist">
+        {React.Children.map(children, (child, index) => {
+          if (React.isValidElement(child) && isValidChild(child, Panels)) {
+            return (
+              <li
+                key={child.props.label + '-' + index}
+                className="nav-item"
+                role="presentation"
+                style={{ marginBottom: '-2px' }}
+              >
+                <a
+                  className={'nav-link' + (index === 0 ? ' active' : '')}
+                  id={'link-tab-' + index}
+                  data-toggle="tab"
+                  href={'#tab-' + index}
+                  role="tab"
+                  aria-controls={'tab-' + index}
+                  aria-selected="true"
+                >
+                  {child.props.label}
+                </a>
+              </li>
+            );
+          }
+          return child;
+        })}
       </ul>
       <div className="tab-content">
-        {children.map((child, index) => React.cloneElement(child, { index }))}
+        {React.Children.map(
+          children,
+          (child, index) =>
+            React.isValidElement(child) &&
+            isValidChild(child, Panels) &&
+            React.cloneElement(child, { index, key: 'tab-content-' + index }),
+        )}
       </div>
     </>
   );
 };
+
+function isValidChild(child: any, component: any) {
+  return Object.keys(component).reduce(
+    (acc, key) => acc || child.type === (component as any)[key],
+    false,
+  );
+}
 
 export const Panels = { Tabs: TabsComponent, Tab: TabComponent };

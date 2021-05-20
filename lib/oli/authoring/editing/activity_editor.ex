@@ -477,6 +477,8 @@ defmodule Oli.Authoring.Editing.ActivityEditor do
           %{activity_type: activity_type, content: model, title: title, objectives: objectives}} <-
            get_latest_revision(publication.id, activity_id) |> trap_nil(),
          editor_map = Activities.create_registered_activity_map(project_slug) do
+      IO.inspect(activity_type, label: "Activity type")
+
       context = %ActivityContext{
         authoringScript: activity_type.authoring_script,
         authoringElement: activity_type.authoring_element,
@@ -490,7 +492,7 @@ defmodule Oli.Authoring.Editing.ActivityEditor do
         activityId: activity_id,
         activitySlug: activity_slug,
         title: title,
-        model: model,
+        model: ActivityContext.prepare_model(model, activity_type),
         objectives: objectives,
         allObjectives: PageEditor.construct_parent_references(all_objectives),
         editorMap: editor_map

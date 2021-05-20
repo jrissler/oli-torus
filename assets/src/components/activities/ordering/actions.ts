@@ -16,7 +16,6 @@ import {
   getResponses,
   makeChoice,
   makeResponse,
-  moveChoice,
 } from 'components/activities/common/authoring/utils';
 import {
   addHint,
@@ -24,6 +23,7 @@ import {
   editFeedback,
   editHint,
   editStem,
+  moveChoice,
   removeHint,
 } from 'components/activities/common/authoring/immerActions';
 

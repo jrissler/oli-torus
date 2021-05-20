@@ -1,8 +1,15 @@
-import { ActivityModelSchema, HasStem, HasChoices, HasParts, HasTransformations } from '../types';
+import {
+  ActivityModelSchema,
+  HasStem,
+  HasChoices,
+  HasParts,
+  HasTransformations,
+  HasPreviewText,
+} from '../types';
 
-interface Authoring extends HasParts, HasTransformations {
-  previewText: string;
-}
-export interface MultipleChoiceModelSchema extends ActivityModelSchema, HasStem, HasChoices {
-  authoring: Authoring;
-}
+export type MultipleChoiceModelSchema = ActivityModelSchema &
+  HasStem &
+  HasChoices &
+  HasParts &
+  HasTransformations &
+  HasPreviewText;

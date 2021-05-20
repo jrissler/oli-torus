@@ -4,7 +4,7 @@ import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { OrderingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
 import { Stem } from '../common/authoring/Stem';
-import { MovableChoices } from '../common/authoring/choices/MovableChoices';
+import { MovableChoices } from '../common/authoring/choices/Choices';
 import { Feedback } from './sections/Feedback';
 import { Hints } from '../common/authoring/Hints';
 import { Actions } from './actions';
@@ -13,8 +13,13 @@ import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
 import produce from 'immer';
 import { TargetedFeedback } from 'components/activities/ordering/sections/TargetedFeedback';
+<<<<<<< HEAD
 import { getHints } from 'components/activities/common/authoring/utils';
 import { isTargetedOrdering } from 'components/activities/ordering/utils';
+=======
+import { canMoveChoice, getHints, isTargetedOrdering } from 'components/activities/ordering/utils';
+import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
+>>>>>>> 7a3c8771a70ea05211cabad4ff92582849b55004
 
 const store = configureStore();
 
@@ -38,11 +43,22 @@ const Ordering = (props: AuthoringElementProps<OrderingModelSchema>) => {
 
       <MovableChoices
         {...sharedProps}
+<<<<<<< HEAD
         onAdd={() => dispatch(Actions.addChoice())}
         onEditContent={(id, content) => dispatch(Actions.editChoice(id, content))}
         onRemove={(id) => dispatch(Actions.removeChoice(id))}
         onMoveUp={(id) => dispatch(Actions.moveChoice('up', id))}
         onMoveDown={(id) => dispatch(Actions.moveChoice('down', id))}
+=======
+        onShuffle={() => dispatch(toggleAnswerChoiceShuffling())}
+        onAddChoice={() => dispatch(Actions.addChoice())}
+        onEditChoiceContent={(id, content) => dispatch(Actions.editChoiceContent(id, content))}
+        onRemoveChoice={(id) => dispatch(Actions.removeChoice(id))}
+        canMoveChoiceUp={(id) => canMoveChoice(props.model, id, 'up')}
+        canMoveChoiceDown={(id) => canMoveChoice(props.model, id, 'down')}
+        onMoveChoiceUp={(id) => dispatch(Actions.moveChoice('up', id))}
+        onMoveChoiceDown={(id) => dispatch(Actions.moveChoice('down', id))}
+>>>>>>> 7a3c8771a70ea05211cabad4ff92582849b55004
       />
 
       <Feedback

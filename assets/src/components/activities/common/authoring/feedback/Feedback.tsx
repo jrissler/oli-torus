@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { CheckAllThatApplyModelSchema } from '../../../check_all_that_apply/schema';
-import { ResponseId, RichText } from '../../../types';
+import { CheckAllThatApplyModelSchema } from '../../../check_all_that_apply/schema_old';
+import { HasChoices, ResponseId, RichText } from '../../../types';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { DisplayedChoices } from 'components/activities/common/delivery/choices/DisplayedChoices';
 import { Card } from 'components/activities/common/authoring/Card';
@@ -10,18 +10,19 @@ import {
   getCorrectResponse,
   getIncorrectResponse,
 } from 'components/activities/check_all_that_apply/utils';
+import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 
 interface FeedbackProps {
   onEditFeedback: (responseId: ResponseId, content: RichText) => void;
-  model: CheckAllThatApplyModelSchema;
   toggleCorrect: any;
   isCorrect: any;
 }
 export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
-  const { onEditFeedback, model } = props;
+  const { model, dispatch } = useAuthoringElementContext<HasChoices>();
+  const { onEditFeedback } = props;
   const writerContext = defaultWriterContext();
 
-  return (
+  return (null);
     <>
       <DisplayedChoices
         unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}

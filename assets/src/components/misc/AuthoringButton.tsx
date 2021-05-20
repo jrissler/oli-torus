@@ -10,7 +10,7 @@ export type Props = {
   disabled?: boolean;
 };
 
-export const AuthoringButton = (props: Props) => {
+export const AuthoringButton: React.FC<Props> = (props: Props) => {
   const { editMode } = useAuthoringElementContext();
 
   return (

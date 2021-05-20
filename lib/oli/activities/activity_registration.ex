@@ -13,6 +13,7 @@ defmodule Oli.Activities.ActivityRegistration do
     field :title, :string
     field :allow_client_evaluation, :boolean, default: false
     field :globally_available, :boolean, default: false
+    field :version, :integer, default: 1
 
     many_to_many :projects, Oli.Authoring.Course.Project,
       join_through: Oli.Activities.ActivityRegistrationProject
@@ -33,7 +34,8 @@ defmodule Oli.Activities.ActivityRegistration do
       :delivery_script,
       :authoring_script,
       :allow_client_evaluation,
-      :globally_available
+      :globally_available,
+      :version
     ])
     |> validate_required([
       :slug,

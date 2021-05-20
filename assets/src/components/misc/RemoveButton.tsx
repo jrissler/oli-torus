@@ -4,6 +4,7 @@ import React, { MouseEventHandler } from 'react';
 export type Props = {
   onClick: MouseEventHandler<HTMLButtonElement>;
   className?: string;
+  style?: React.CSSProperties;
 };
 
 export const RemoveButton = (props: Props) => (
@@ -12,6 +13,8 @@ export const RemoveButton = (props: Props) => (
       style={{
         cursor: 'default',
         pointerEvents: 'none',
+        display: 'block',
+        ...props.style,
       }}
       className="material-icons-outlined"
     >

@@ -303,9 +303,7 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
             onRegisterNewObjective={onRegisterNewObjective}
             onEdit={(objectives) => this.update({ objectives })}
           />
-          <div ref={this.ref}>
-            {React.createElement(authoringElement, webComponentProps as any)}
-          </div>
+          <div ref={this.ref}>{React.createElement(authoringElement, webComponentProps)}</div>
         </div>
       </div>
     );

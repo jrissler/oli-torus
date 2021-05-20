@@ -2,10 +2,9 @@ import {
   Operation,
   ScoringStrategy,
   ChoiceId,
-  HasTargetedFeedback,
   ChoiceIdsToResponseId,
-  HasTargetedFeedbackEnabled,
   HasParts,
+  TargetedFeedbackEnabled,
 } from '../types';
 import { ID } from 'data/content/model';
 import {
@@ -14,16 +13,17 @@ import {
   makeHint,
   makeResponse,
   makeStem,
-  transformation,
 } from 'components/activities/common/authoring/utils';
-import { CheckAllThatApplyModelSchema as CATA } from 'components/activities/check_all_that_apply/schema';
+import { CheckAllThatApplyModelSchema as CATA } from 'components/activities/check_all_that_apply/schema_old';
+import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
+import { makeTransformation } from 'components/activities/common/utils';
 
 // Choices
 export const getChoiceIds = ([choiceIds]: ChoiceIdsToResponseId) => choiceIds;
 export const getCorrectChoiceIds = (model: CATA) => getChoiceIds(model.authoring.correct);
 export const getIncorrectChoiceIds = (model: CATA) => getChoiceIds(model.authoring.incorrect);
-export const getTargetedChoiceIds = (model: { authoring: HasTargetedFeedbackEnabled }) =>
-  model.authoring.targetedFeedback.map(getChoiceIds);
+export const getTargetedChoiceIds = (model: TargetedFeedbackEnabled) =>
+  model.authoring.targeted.map(getChoiceIds);
 export const isCorrectChoice = (model: CATA, choiceId: ChoiceId) =>
   getCorrectChoiceIds(model).includes(choiceId);
 
@@ -33,8 +33,8 @@ export const getCorrectResponse = (model: CATA) =>
   getResponse(model, getResponseId(model.authoring.correct));
 export const getIncorrectResponse = (model: CATA) =>
   getResponse(model, getResponseId(model.authoring.incorrect));
-export const getTargetedResponses = (model: { authoring: HasTargetedFeedbackEnabled & HasParts }) =>
-  model.authoring.targetedFeedback.map((assoc) => getResponse(model, getResponseId(assoc)));
+export const getTargetedResponses = (model: TargetedFeedbackEnabled & HasParts) =>
+  model.authoring.targeted.map((assoc) => getResponse(model, getResponseId(assoc)));
 
 // Rules
 export const createRuleForIds = (toMatch: ID[], notToMatch: ID[]) =>
@@ -52,7 +52,38 @@ export function setDifference<T>(subtractedFrom: T[], toSubtract: T[]): T[] {
 }
 
 // Model creation
-export const defaultCATAModel: () => CATA = () => {
+// export const defaultCATAModel = (): CATA => {
+//   const correctChoice = makeChoice('Choice 1');
+//   const incorrectChoice = makeChoice('Choice 2');
+
+//   const correctResponse = makeResponse(
+//     createRuleForIds([correctChoice.id], [incorrectChoice.id]),
+//     1,
+//     '',
+//   );
+//   const incorrectResponse = makeResponse(invertRule(correctResponse.rule), 0, '');
+
+//   return {
+//     type: 'SimpleCATA',
+//     stem: makeStem(''),
+//     choices: [correctChoice, incorrectChoice],
+//     authoring: {
+//       parts: [
+//         {
+//           id: '1', // a only has one part, so it is safe to hardcode the id
+//           scoringStrategy: ScoringStrategy.average,
+//           responses: [correctResponse, incorrectResponse],
+//           hints: [makeHint(''), makeHint(''), makeHint('')],
+//         },
+//       ],
+//       correct: [[correctChoice.id], correctResponse.id],
+//       incorrect: [[incorrectChoice.id], incorrectResponse.id],
+//       transformations: [transformation('choices', Operation.shuffle)],
+//       previewText: '',
+//     },
+//   };
+// };
+export const defaultCATAModel = (): CheckAllThatApplyModelSchemaV2 => {
   const correctChoice = makeChoice('Choice 1');
   const incorrectChoice = makeChoice('Choice 2');
 
@@ -67,7 +98,6 @@ export const defaultCATAModel: () => CATA = () => {
     stem: makeStem(''),
     choices: [correctChoice, incorrectChoice],
     authoring: {
-      targetedFeedback: undefined,
       parts: [
         {
           id: '1', // a only has one part, so it is safe to hardcode the id
@@ -76,9 +106,10 @@ export const defaultCATAModel: () => CATA = () => {
           hints: [makeHint(''), makeHint(''), makeHint('')],
         },
       ],
-      correct: [[correctChoice.id], correctResponse.id],
-      incorrect: [[incorrectChoice.id], incorrectResponse.id],
-      transformations: [transformation('choices', Operation.shuffle)],
+      targeted: undefined,
+      correct: [[correctChoice.id], correctResponse.id] as ChoiceIdsToResponseId,
+      incorrect: [[incorrectChoice.id], incorrectResponse.id] as ChoiceIdsToResponseId,
+      transformations: [makeTransformation('choices', Operation.shuffle)],
       previewText: '',
     },
   };

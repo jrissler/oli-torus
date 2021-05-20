@@ -10,6 +10,9 @@
     "element": "oli-check-all-that-apply-authoring",
     "entry": "./authoring-entry.ts"
   },
+  "migration": {
+    "2": "./migration/2.ts"
+  },
   "schemaPruning": {
     "type": "keys",
     "keys": ["feedback"]

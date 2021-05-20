@@ -18,4 +18,12 @@ defmodule Oli.Authoring.Editing.ActivityContext do
     :allObjectives,
     :editorMap
   ]
+
+  def prepare_model(model, activity_type, _opts \\ []) do
+    upversion(model, activity_type)
+  end
+
+  def upversion(model, activity_type) do
+    model
+  end
 end
