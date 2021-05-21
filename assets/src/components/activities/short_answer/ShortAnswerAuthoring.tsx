@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { ShortAnswerModelSchema, InputType } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/authoring/Stem';
+import { Stem } from '../common/authoring/stem/Stem';
 import { Feedback } from './sections/Feedback';
 import { Hints } from '../common/authoring/Hints';
 import { ShortAnswerActions } from './actions';

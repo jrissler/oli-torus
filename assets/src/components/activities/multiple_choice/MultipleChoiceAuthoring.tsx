@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { MultipleChoiceModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/authoring/Stem';
+import { Stem } from '../common/authoring/stem/Stem';
 import { Choices } from './sections/Choices';
 import { Feedback } from './sections/Feedback';
 import { Hints } from '../common/authoring/Hints';

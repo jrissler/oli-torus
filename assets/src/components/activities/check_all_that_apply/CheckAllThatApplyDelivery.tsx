@@ -15,7 +15,7 @@ import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { DisplayedChoices } from 'components/activities/common/delivery/choices/DisplayedChoices';
-import { Stem } from 'components/activities/common/authoring/Stem';
+import { Stem } from 'components/activities/common/authoring/stem/Stem';
 
 type Evaluation = {
   score: number;
@@ -145,13 +145,12 @@ export const CheckAllThatApplyComponent = (
         />,
       ];
 
-  const gradedDetails =
-    props.graded && props.progressState === 'in_review' ? [evaluationSummary] : null;
+  const gradedDetails = props.graded && props.review ? [evaluationSummary] : null;
 
   const correctnessIcon = attemptState.score === 0 ? <IconIncorrect /> : <IconCorrect />;
 
   const gradedPoints =
-    props.graded && props.progressState === 'in_review'
+    props.graded && props.review
       ? [
           <div key="correct" className="text-info font-italic">
             {correctnessIcon}

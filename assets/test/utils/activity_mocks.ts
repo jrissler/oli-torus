@@ -1,6 +1,7 @@
 import { feedbackFromText, hintFromText } from 'components/activities/common/authoring/utils';
 import { EvaluationResponse, RequestHintResponse } from 'components/activities/DeliveryElement';
 import { Action, ActivityState, PartState } from 'components/activities/types';
+import { createFalse } from 'typescript';
 
 const partState: PartState = {
   attemptGuid: 'guid',
@@ -65,6 +66,6 @@ export const defaultDeliveryElementProps = {
   onResetPart,
   onSubmitEvaluations,
   state: attemptState,
-  progressState: '',
+  review: false,
   userId: 1,
 };

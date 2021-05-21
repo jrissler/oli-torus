@@ -216,13 +216,12 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
         />,
       ];
 
-  const gradedDetails =
-    props.graded && props.progressState === 'in_review' ? [evaluationSummary] : null;
+  const gradedDetails = props.graded && props.review ? [evaluationSummary] : null;
 
   const correctnessIcon = attemptState.score === 0 ? <IconIncorrect /> : <IconCorrect />;
 
   const gradedPoints =
-    props.graded && props.progressState === 'in_review'
+    props.graded && props.review
       ? [
           <div key="reviewed" className=" text-info font-italic">
             {correctnessIcon}
