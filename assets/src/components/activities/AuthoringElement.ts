@@ -50,7 +50,8 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     const editorMap: ActivityEditorMap = getProp('editorMap');
     const onEdit = (model: any) =>
       this.dispatchEvent(new CustomEvent('modelUpdated', { bubbles: true, detail: { model } }));
-    const dispatch = (action: (model: T) => void) => onEdit(produce(model, action));
+    // const dispatch = (action: (model: T) => void) => onEdit(produce(model, action));
+    const dispatch = (action: any) => onEdit(produce(model, action));
 
     return {
       onEdit,

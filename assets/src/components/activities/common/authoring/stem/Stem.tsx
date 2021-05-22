@@ -5,7 +5,6 @@ import { useAuthoringElementContext } from 'components/activities/AuthoringEleme
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
 import produce from 'immer';
-import { makeStem } from 'components/activities/common/authoring/utils';
 
 type StemActions = { type: 'EDIT_STEM_CONTENT'; content: RichText };
 
@@ -20,10 +19,8 @@ export function stemReducer(draft: HasStem, action: StemActions) {
 
 export function useStem({ reducer = stemReducer } = {}) {
   const { model } = useAuthoringElementContext<HasStem>();
-  const [{ stem }, dispatch] = useReducer(
-    produce(reducer),
-    model || { stem: makeStem('Question') },
-  );
+
+  const [{ stem }, dispatch] = useReducer(produce(reducer), model);
 
   const setStem = (content: RichText) => dispatch({ type: 'EDIT_STEM_CONTENT', content });
 
@@ -31,18 +28,21 @@ export function useStem({ reducer = stemReducer } = {}) {
 }
 
 interface AuthoringProps {
-  // Managed by AuthoringElementContext
-  onEdit?: (content: RichText) => void;
+  onStemChange: (text: RichText) => void;
 }
 
-export const Authoring = (props: AuthoringProps) => {
+export const Authoring = ({ onStemChange }: AuthoringProps) => {
   const { stem, setStem } = useStem();
+
   return (
     <div className="mb-2 flex-grow-1">
       <RichTextEditor
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}
-        onEdit={setStem}
+        onEdit={(text) => {
+          setStem(text);
+          onStemChange && onStemChange(text);
+        }}
         placeholder="Question"
       />
     </div>

@@ -8,7 +8,6 @@ import {
 } from '../AuthoringElement';
 import { CheckAllThatApplyModelSchema } from './schema_old';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/authoring/Stem';
 import { Feedback } from '../common/authoring/feedback/Feedback';
 import { Hints } from '../common/authoring/Hints';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
@@ -21,27 +20,33 @@ import { Panels } from 'components/activities/common/authoring/Panels';
 import { Settings } from 'components/activities/common/authoring/settings/Settings';
 import { Checkbox } from 'components/activities/common/authoring/icons/Checkbox';
 import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
-import { addChoice } from 'components/activities/common/authoring/actions/choices';
 import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
 import { toggleTargetedFeedback } from 'components/activities/common/authoring/actions/feedback';
+import {
+  previewTextReducer,
+  usePreviewText,
+} from 'components/activities/common/authoring/preview_text/usePreviewText';
+import { Stem, stemReducer, useStem } from 'components/activities/common/authoring/stem/Stem';
 import { Choices } from 'components/activities/common/authoring/choices/Choices';
 
 const store = configureStore();
 
 const CheckAllThatApply = () => {
   const { model, dispatch } = useAuthoringElementContext<CheckAllThatApplyModelSchemaV2>();
+  const { setPreviewText } = usePreviewText();
 
   return (
     <>
       <Panels.Tabs>
         <Panels.Tab label="Question">
-          <Stem.Authoring />
+          <Stem.Authoring onStemChange={setPreviewText} />
+
           <Choices
             icon={<Checkbox.Unchecked />}
-            addChoice={() => {
-              dispatch(addChoice());
-              (document.activeElement as any)?.blur();
-            }}
+            // addChoice={() => {
+            //   dispatch(addChoice());
+            //   (document.activeElement as any)?.blur();
+            // }}
           />
         </Panels.Tab>
 
