@@ -6,11 +6,11 @@ import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
 import produce, { Draft } from 'immer';
 
-type StemActions = { type: 'EDIT_STEM_CONTENT'; content: RichText };
+type StemActions = { type: 'SET_STEM_CONTENT'; content: RichText };
 
 export function stemReducer(draft: Draft<HasStem>, action: StemActions) {
   switch (action.type) {
-    case 'EDIT_STEM_CONTENT': {
+    case 'SET_STEM_CONTENT': {
       draft.stem.content = action.content;
       break;
     }
@@ -18,9 +18,12 @@ export function stemReducer(draft: Draft<HasStem>, action: StemActions) {
 }
 
 export function useStem({ reducer = stemReducer } = {}) {
-  const { model } = useAuthoringElementContext<HasStem>();
-  const [{ stem }, dispatch] = useReducer(produce(reducer), model);
-  const setStem = (content: RichText) => dispatch({ type: 'EDIT_STEM_CONTENT', content });
+  const { model: { stem }, dispatch } = useAuthoringElementContext<HasStem>(reducer);
+  // console.log('model in useStem', model)
+  // const [{ stem }, dispatch] = useReducer(produce(reducer), model);
+  // console.log('stem in useStem', stem)
+  const setStem = (content: RichText) => dispatch({ type: 'SET_STEM_CONTENT', content });
+
 
   return { stem, setStem };
 }

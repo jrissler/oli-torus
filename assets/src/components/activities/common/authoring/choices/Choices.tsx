@@ -35,7 +35,7 @@ export function choicesReducer(draft: HasChoices, action: ChoiceActions) {
 }
 
 export function useChoices({ reducer = choicesReducer } = {}) {
-  const { model } = useAuthoringElementContext<HasChoices>();
+  const { model } = useAuthoringElementContext<HasChoices>(choicesReducer);
 
   const [{ choices }, dispatch] = useReducer(produce(reducer), model);
 
@@ -93,7 +93,7 @@ export const Choices = (props: Props) => {
                   key={index + 'choice'}
                   index={index}
                   choice={choice}
-                  editChoiceContent={props.onEditChoiceContent}
+                  editChoiceContent={editChoiceContent}
                   removeChoice={props.onRemoveChoice}
                   canRemove={choices.length > 1}
                 />

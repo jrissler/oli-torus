@@ -29,8 +29,8 @@ const Menu: React.FC<MenuProps> = ({ children }) => {
     <AuthoringButton
       className={classNames([editMode ? '' : 'disabled'])}
       onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-    >
-      <Popover
+    >Text
+      {/* <Popover
         containerClassName="add-resource-popover"
         onClickOutside={() => setIsPopoverOpen(false)}
         isOpen={isPopoverOpen}
@@ -44,7 +44,7 @@ const Menu: React.FC<MenuProps> = ({ children }) => {
             <i className="material-icons-outlined">more_vert</i>
           </div>
         )}
-      </Popover>
+      </Popover> */}
     </AuthoringButton>
   );
 };

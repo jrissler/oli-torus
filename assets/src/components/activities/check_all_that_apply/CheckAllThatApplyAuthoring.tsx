@@ -28,11 +28,13 @@ import {
 } from 'components/activities/common/authoring/preview_text/usePreviewText';
 import { Stem, stemReducer, useStem } from 'components/activities/common/authoring/stem/Stem';
 import { Choices } from 'components/activities/common/authoring/choices/Choices';
+import produce from 'immer'
 
 const store = configureStore();
 
 const CheckAllThatApply = () => {
-  const { model, dispatch } = useAuthoringElementContext<CheckAllThatApplyModelSchemaV2>();
+  // const { model, onEdit } = useAuthoringElementContext<CheckAllThatApplyModelSchemaV2>();
+
   const { setPreviewText } = usePreviewText();
 
   return (
@@ -50,7 +52,7 @@ const CheckAllThatApply = () => {
           />
         </Panels.Tab>
 
-        <Panels.Tab label="Answer Key">
+        {/* <Panels.Tab label="Answer Key">
           <Stem.Delivery stem={model.stem} context={defaultWriterContext()} />
           <Feedback
             isCorrect={isCorrectChoice}
@@ -59,7 +61,7 @@ const CheckAllThatApply = () => {
               dispatch(editResponseFeedback(responseId, feedbackContent))
             }
           >
-            {/* {ActivityTypes.isTargetedFeedbackEnabled(model) && (
+            {ActivityTypes.isTargetedFeedbackEnabled(model) && (
               <TargetedFeedback
                 model={model}
                 onEditFeedback={(responseId, feedbackContent) =>
@@ -74,7 +76,7 @@ const CheckAllThatApply = () => {
                   choiceIds: ActivityTypes.ChoiceId[],
                 ) => dispatch(editTargetedFeedbackChoices(responseId, choiceIds))}
               />
-            )} */}
+            )}
           </Feedback>
         </Panels.Tab>
         <Panels.Tab label="Hints">
@@ -84,9 +86,9 @@ const CheckAllThatApply = () => {
             onEdit={(id, content) => dispatch(editHint(id, content))}
             onRemove={(id) => dispatch(removeHint(id))}
           />
-        </Panels.Tab>
+        </Panels.Tab> */}
 
-        <Settings.Menu>
+        {/* <Settings.Menu>
           <Settings.Setting
             isEnabled={isShuffled(model.authoring.transformations)}
             onToggle={() => dispatch(toggleAnswerChoiceShuffling())}
@@ -99,7 +101,7 @@ const CheckAllThatApply = () => {
           >
             Targeted Feedback
           </Settings.Setting>
-        </Settings.Menu>
+        </Settings.Menu> */}
       </Panels.Tabs>
     </>
   );

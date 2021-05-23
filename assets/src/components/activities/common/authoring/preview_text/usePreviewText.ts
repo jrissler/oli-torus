@@ -9,7 +9,6 @@ type PreviewTextActions = { type: 'EDIT_PREVIEW_TEXT'; content: RichText | strin
 export function previewTextReducer(draft: HasPreviewText, action: PreviewTextActions) {
   switch (action.type) {
     case 'EDIT_PREVIEW_TEXT': {
-      console.log('setting preview text');
       draft.authoring.previewText =
         typeof action.content === 'string'
           ? action.content
