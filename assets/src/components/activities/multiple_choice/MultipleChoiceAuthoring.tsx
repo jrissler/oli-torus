@@ -12,11 +12,8 @@ import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
 import produce from 'immer';
-<<<<<<< HEAD
 import { areAnswerChoicesShuffled } from 'components/activities/common/authoring/utils';
-=======
 import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
->>>>>>> 7a3c8771a70ea05211cabad4ff92582849b55004
 
 const store = configureStore();
 

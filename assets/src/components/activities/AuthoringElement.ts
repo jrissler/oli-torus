@@ -42,6 +42,12 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     this.mountPoint = document.createElement('div');
   }
 
+  componentDidUpdate(prevProps: AuthoringElementProps<T>) {
+    if (prevProps.model !== this.props().model) {
+      this.props().onEdit(this.props().model);
+    }
+  }
+
   props(): AuthoringElementProps<T> {
     const getProp = (key: string) => JSON.parse(this.getAttribute(key) as any);
     const model = getProp('model');

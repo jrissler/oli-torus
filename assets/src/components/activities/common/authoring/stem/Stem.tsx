@@ -4,11 +4,11 @@ import { HasStem, RichText, Stem as StemType } from '../../../types';
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
-import produce from 'immer';
+import produce, { Draft } from 'immer';
 
 type StemActions = { type: 'EDIT_STEM_CONTENT'; content: RichText };
 
-export function stemReducer(draft: HasStem, action: StemActions) {
+export function stemReducer(draft: Draft<HasStem>, action: StemActions) {
   switch (action.type) {
     case 'EDIT_STEM_CONTENT': {
       draft.stem.content = action.content;
@@ -19,9 +19,7 @@ export function stemReducer(draft: HasStem, action: StemActions) {
 
 export function useStem({ reducer = stemReducer } = {}) {
   const { model } = useAuthoringElementContext<HasStem>();
-
   const [{ stem }, dispatch] = useReducer(produce(reducer), model);
-
   const setStem = (content: RichText) => dispatch({ type: 'EDIT_STEM_CONTENT', content });
 
   return { stem, setStem };
