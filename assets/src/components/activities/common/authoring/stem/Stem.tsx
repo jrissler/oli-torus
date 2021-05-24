@@ -5,6 +5,7 @@ import { useAuthoringElementContext } from 'components/activities/AuthoringEleme
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
 import produce, { Draft } from 'immer';
+import { toSimpleText } from 'components/editing/utils';
 
 type StemActions = { type: 'SET_STEM_CONTENT'; content: RichText };
 
@@ -48,9 +49,9 @@ export const Authoring = ({ onStemChange }: AuthoringProps) => {
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}
         onEdit={(text) => {
-          console.log('text', text)
+          console.log('text', toSimpleText({ children: text.model }));
           setStem(text);
-          onStemChange && onStemChange(text);
+          onStemChange && onStemChange(text)
         }}
         placeholder="Question"
       />

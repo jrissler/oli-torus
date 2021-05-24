@@ -7,10 +7,9 @@ import { HasPreviewText, RichText } from 'components/activities/types';
 export function usePreviewText() {
   const { model, dispatch } = useAuthoringElementContext<HasPreviewText>();
 
-  const setPreviewText = (content: string | RichText) =>
+  const setPreviewText = (content: RichText) =>
     dispatch((draft: HasPreviewText) => {
-      draft.authoring.previewText =
-        typeof content === 'string' ? content : toSimpleText({ children: content.model });
+      draft.authoring.previewText = toSimpleText({ children: content.model });
     });
 
   return { previewText: model.authoring.previewText, setPreviewText };

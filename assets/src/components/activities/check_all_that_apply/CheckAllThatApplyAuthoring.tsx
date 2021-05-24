@@ -37,10 +37,10 @@ const CheckAllThatApply = () => {
   // const dispatch = (action: (state: MultipleChoiceModelSchema) => void) =>
   //   props.onEdit(produce(props.model, action));
 
-  const { setPreviewText } = usePreviewText();
+  const { previewText, setPreviewText } = usePreviewText();
 
   return (
-    <>
+    <><div>{previewText}</div>
       <Panels.Tabs>
         <Panels.Tab label="Question">
           <Stem.Authoring onStemChange={setPreviewText} />
