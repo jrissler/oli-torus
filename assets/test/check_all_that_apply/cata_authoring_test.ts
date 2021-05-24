@@ -1,4 +1,4 @@
-import { Actions } from 'components/activities/check_all_that_apply/actions';
+import { Actions } from 'components/activities/check_all_that_apply/actions_old';
 import * as ContentModel from 'data/content/model';
 import produce from 'immer';
 import { CheckAllThatApplyModelSchema } from 'components/activities/check_all_that_apply/schema';

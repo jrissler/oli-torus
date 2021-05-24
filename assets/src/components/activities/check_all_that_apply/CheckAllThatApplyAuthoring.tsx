@@ -23,17 +23,19 @@ import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils'
 import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
 import { toggleTargetedFeedback } from 'components/activities/common/authoring/actions/feedback';
 import {
-  previewTextReducer,
   usePreviewText,
 } from 'components/activities/common/authoring/preview_text/usePreviewText';
-import { Stem, stemReducer, useStem } from 'components/activities/common/authoring/stem/Stem';
-import { Choices } from 'components/activities/common/authoring/choices/Choices';
-import produce from 'immer'
+// import { Stem, stemReducer, useStem } from 'components/activities/common/authoring/stem/Stem';
+import { Choices } from '../common/authoring/choices/Choices';
+import produce from 'immer';
+import { Stem } from '../common/authoring/stem/Stem';
 
 const store = configureStore();
 
 const CheckAllThatApply = () => {
-  // const { model, onEdit } = useAuthoringElementContext<CheckAllThatApplyModelSchemaV2>();
+  // const { onEdit } = useAuthoringElementContext<CheckAllThatApplyModelSchemaV2>();
+  // const dispatch = (action: (state: MultipleChoiceModelSchema) => void) =>
+  //   props.onEdit(produce(props.model, action));
 
   const { setPreviewText } = usePreviewText();
 

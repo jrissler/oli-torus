@@ -5,6 +5,7 @@ import { RemoveButton } from 'components/misc/RemoveButton';
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import { editChoice, removeChoice } from 'components/activities/common/authoring/actions/choices';
+import { useChoices } from 'components/activities/common/authoring/choices/Choices';
 
 interface Props {
   choice: ChoiceType;
@@ -18,7 +19,8 @@ interface Props {
 }
 export const Choice = (props: Props) => {
   const { choice, canRemove, icon, index } = props;
-  const { dispatch } = useAuthoringElementContext<HasChoices>();
+  // const { dispatch } = useAuthoringElementContext<HasChoices>();
+  const { choices, removeChoice } = useChoices();
 
   const getStyle = (style: DraggingStyle | NotDraggingStyle | undefined) => {
     if (style?.transform) {
@@ -59,10 +61,10 @@ export const Choice = (props: Props) => {
           {canRemove && (
             <div className="d-flex justify-content-center" style={{ width: 48 }}>
               <RemoveButton
-                onClick={() =>
-                  (props.removeChoice && props.removeChoice(choice.id)) ||
-                  dispatch(removeChoice((response, id2) => choice.id === id2)(choice.id))
-                }
+                onClick={() => {
+                  removeChoice(choice.id);
+                  props.removeChoice && props.removeChoice(choice.id);
+                }}
               />
             </div>
           )}

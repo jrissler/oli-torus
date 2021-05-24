@@ -154,21 +154,12 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
         />,
       ];
 
-<<<<<<< HEAD
-  const gradedDetails =
-    props.graded && props.progressState === 'in_review' ? [evaluationSummary] : null;
-=======
   const gradedDetails = props.graded && props.review ? [evaluationSummary] : null;
->>>>>>> efeb85bf6a6b74dd75baed89a0c785badab62b03
 
   const correctnessIcon = attemptState.score === 0 ? <IconIncorrect /> : <IconCorrect />;
 
   const gradedPoints =
-<<<<<<< HEAD
-    props.graded && props.progressState === 'in_review'
-=======
     props.graded && props.review
->>>>>>> efeb85bf6a6b74dd75baed89a0c785badab62b03
       ? [
           <div key="correct" className="text-info font-italic">
             {correctnessIcon}

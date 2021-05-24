@@ -8,28 +8,35 @@ import produce, { Draft } from 'immer';
 
 type StemActions = { type: 'SET_STEM_CONTENT'; content: RichText };
 
-export function stemReducer(draft: Draft<HasStem>, action: StemActions) {
-  switch (action.type) {
-    case 'SET_STEM_CONTENT': {
-      draft.stem.content = action.content;
-      break;
-    }
-  }
-}
+// export const stemReducer = (draft: Draft<HasStem>, action: StemActions) => {
+//   switch (action.type) {
+//     case 'SET_STEM_CONTENT': {
+//       draft.stem.content = action.content;
+//       break;
+//     }
+//   }
+// }
+// onEditContent={(content) => dispatch(MCActions.editStem(content))}
 
-export function useStem({ reducer = stemReducer } = {}) {
-  const { model: { stem }, dispatch } = useAuthoringElementContext<HasStem>(reducer);
-  // console.log('model in useStem', model)
-  // const [{ stem }, dispatch] = useReducer(produce(reducer), model);
-  // console.log('stem in useStem', stem)
-  const setStem = (content: RichText) => dispatch({ type: 'SET_STEM_CONTENT', content });
+// dispatch(  (content: RichText) => {
+//   return (model: HasStem & HasPreviewText) => {
+//     model.stem.content = content;
+//     model.authoring.previewText = toSimpleText({ children: content.model });
+//   };
 
+export function useStem() {
+  const { model, dispatch } = useAuthoringElementContext<HasStem>();
 
-  return { stem, setStem };
+  const setStem = (content: RichText) =>
+    dispatch((draft: Draft<HasStem>) => {
+      draft.stem.content = content;
+    });
+
+  return { stem: model.stem, setStem };
 }
 
 interface AuthoringProps {
-  onStemChange: (text: RichText) => void;
+  onStemChange?: (text: RichText) => void;
 }
 
 export const Authoring = ({ onStemChange }: AuthoringProps) => {
@@ -41,6 +48,7 @@ export const Authoring = ({ onStemChange }: AuthoringProps) => {
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}
         onEdit={(text) => {
+          console.log('text', text)
           setStem(text);
           onStemChange && onStemChange(text);
         }}

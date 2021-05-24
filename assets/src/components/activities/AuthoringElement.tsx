@@ -1,8 +1,19 @@
 import { ActivityModelSchema } from './types';
 import { ProjectSlug } from 'data/types';
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Reducer, useContext, useEffect, useReducer } from 'react';
 import { ActivityEditorMap } from 'data/content/editors';
 import produce from 'immer';
+
+export const combineReducers = (reducers) => {
+  return (state, action) => {
+    return Object.keys(reducers).reduce((acc, prop) => {
+      return {
+        ...acc,
+        ...reducers[prop]({ [prop]: acc[prop] }, action),
+      };
+    }, state);
+  };
+};
 
 export interface AuthoringElementProps<T extends ActivityModelSchema> {
   model: T;
@@ -10,33 +21,27 @@ export interface AuthoringElementProps<T extends ActivityModelSchema> {
   editMode: boolean;
   projectSlug: ProjectSlug;
   editorMap: ActivityEditorMap;
-  dispatch: any;
+  dispatch: (action: (model: T) => void) => boolean
 }
 
-export const AuthoringElementContext = React.createContext<AuthoringElementProps<any> | undefined>(
-  undefined,
-);
+export const AuthoringElementContext =
+  React.createContext<AuthoringElementProps<any> | undefined>(undefined);
 
-export function useAuthoringElementContext<T>(reducer: any) {
+export function useAuthoringElementContext<T>() {
   const context = useContext<AuthoringElementProps<T> | undefined>(AuthoringElementContext);
-  console.log('context', context)
   if (context === undefined) {
     throw new Error('useAuthoringElementContext must be used within an AuthoringElementProvider');
   }
-  const [model, dispatch] = useReducer(produce(reducer), context.model)
-
-  return Object.assign(context, model, dispatch);
+  return context;
 }
 
-// export function AuthoringElementProvider(props: any) {
-//   console.log('props', props)
-//   const [model, dispatch] = React.useReducer(props.reducer, {});
-//   console.log('cache', model)
-//     useEffect(() => {
-//     // console.log('new model in authoringelement', cache.model)
-//     // cache.onEdit(cache.model);
-//   }, [props.model])
-//   return <AuthoringElementContext.Provider value={Object.assign(props.value, dispatch, model)} {...props.children} />;
+// export const AuthoringElementProvider: React.FC<AuthoringElementProps> = ({ reducer, initialState = {}, children }) => {
+//   const value = React.useReducer(reducer, initialState);
+//   return (
+//     <AuthoringElementContext.Provider value={value}>
+//       {props.children}
+//     </AuthoringElementContext.Provider>
+//   );
 // }
 
 // An abstract authoring web component, designed to delegate to
@@ -62,9 +67,9 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     const editMode: boolean = getProp('editMode');
     const projectSlug: ProjectSlug = this.getAttribute('projectSlug') as string;
     const editorMap: ActivityEditorMap = getProp('editorMap');
-    const onEdit = (model: any) =>
+    const onEdit = (model: unknown) =>
       this.dispatchEvent(new CustomEvent('modelUpdated', { bubbles: true, detail: { model } }));
-    // const dispatch = (action: (model: T) => void) => onEdit(produce(model, action));
+    const dispatch = (action: (model: T) => void) => onEdit(produce(model, action));
     // onEdit = (action: any) => onEdit(produce(model, action));
 
     return {
@@ -73,7 +78,7 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
       editMode,
       projectSlug,
       editorMap,
-      dispatch: () => undefined,
+      dispatch,
     };
   }
 
@@ -85,7 +90,7 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     this.connected = true;
   }
 
-  attributeChangedCallback(name: any, oldValue: any, newValue: any) {
+  attributeChangedCallback(name: unknown, oldValue: unknown, newValue: unknown) {
     if (this.connected) {
       this.render(this.mountPoint, this.props());
     }

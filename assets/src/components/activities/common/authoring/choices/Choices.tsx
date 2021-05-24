@@ -5,7 +5,6 @@ import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { getChoice, makeChoice } from 'components/activities/common/authoring/utils';
-import produce from 'immer';
 
 type ChoiceActions =
   | { type: 'ADD_CHOICE' }
@@ -16,7 +15,7 @@ type ChoiceActions =
 export function choicesReducer(draft: HasChoices, action: ChoiceActions) {
   switch (action.type) {
     case 'ADD_CHOICE':
-      console.log('adding choice');
+      console.log('adding choice')
       draft.choices.push(makeChoice(''));
       break;
 
@@ -35,10 +34,7 @@ export function choicesReducer(draft: HasChoices, action: ChoiceActions) {
 }
 
 export function useChoices({ reducer = choicesReducer } = {}) {
-  const { model } = useAuthoringElementContext<HasChoices>(choicesReducer);
-
-  const [{ choices }, dispatch] = useReducer(produce(reducer), model);
-
+  const { model: { choices }, dispatch } = useAuthoringElementContext<HasChoices>();
   const addChoice = () => dispatch({ type: 'ADD_CHOICE' });
   const editChoiceContent = (id: ChoiceId, content: RichText) =>
     dispatch({ type: 'EDIT_CHOICE_CONTENT', id, content });
@@ -60,7 +56,7 @@ interface Props {
   onRemoveChoice?: (id: ChoiceId) => void;
 }
 export const Choices = (props: Props) => {
-  const { choices, addChoice, editChoiceContent, editChoices, removeChoice } = useChoices();
+  const { choices, addChoice, editChoiceContent, editChoices } = useChoices();
 
   return (
     <>
@@ -107,8 +103,8 @@ export const Choices = (props: Props) => {
         <AuthoringButton
           className="btn btn-link pl-2"
           onClick={() => {
-            console.log(addChoice(), 'Adding choice');
-            props.onAddChoice && props.onAddChoice();
+            addChoice();
+            // props.onAddChoice && props.onAddChoice();
           }}
         >
           Add choice

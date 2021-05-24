@@ -5,6 +5,7 @@ import { ModelEditorProps } from '../schema';
 import { ChoiceId, RichText } from '../../types';
 import { ProjectSlug } from 'data/types';
 import { ShuffleChoicesOption } from 'components/activities/common/utils';
+import { DeleteButton } from 'components/misc/DeleteButton';
 
 interface MoveButtonProps {
   choiceId: ChoiceId;
@@ -95,7 +96,7 @@ export const Choices = (props: Props) => {
               onEdit={(content) => onEditChoiceContent(choice.id, content)}
             />
             {index > 0 && (
-              <CloseButton
+              <DeleteButton
                 className="pl-3 pr-1"
                 onClick={() => onRemoveChoice(choice.id)}
                 editMode={editMode}

@@ -19,7 +19,7 @@ const store = configureStore();
 
 const MultipleChoice = (props: AuthoringElementProps<MultipleChoiceModelSchema>) => {
   const dispatch = (action: (state: MultipleChoiceModelSchema) => void) =>
-    props.onEdit(produce(props.model, (draftState) => action(draftState)));
+    props.onEdit(produce(props.model, action));
 
   const { projectSlug } = props;
 
