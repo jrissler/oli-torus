@@ -5,7 +5,7 @@ import { RemoveButton } from 'components/misc/RemoveButton';
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import { editChoice, removeChoice } from 'components/activities/common/authoring/actions/choices';
-import { useChoices } from 'components/activities/common/authoring/choices/Choices';
+import { useChoices } from 'components/activities/common/choices/Authoring';
 
 interface Props {
   choice: ChoiceType;
@@ -17,7 +17,7 @@ interface Props {
   editChoiceContent?: (id: string, content: RichText) => void;
   removeChoice?: (id: string) => void;
 }
-export const Choice = (props: Props) => {
+export const Authoring = (props: Props) => {
   const { choice, canRemove, icon, index } = props;
   // const { dispatch } = useAuthoringElementContext<HasChoices>();
   const { choices, removeChoice } = useChoices();

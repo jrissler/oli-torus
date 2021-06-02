@@ -4,16 +4,13 @@ import React, { Reducer, useContext, useEffect, useReducer } from 'react';
 import { ActivityEditorMap } from 'data/content/editors';
 import produce from 'immer';
 
-export const combineReducers = (reducers) => {
-  return (state, action) => {
-    return Object.keys(reducers).reduce((acc, prop) => {
-      return {
-        ...acc,
-        ...reducers[prop]({ [prop]: acc[prop] }, action),
-      };
-    }, state);
-  };
-};
+
+export function orIdentity(f: unknown)  {
+  if (typeof f === 'function') {
+    return f
+  }
+  return (..._args: unknown[]) => (model: unknown) => model
+}
 
 export interface AuthoringElementProps<T extends ActivityModelSchema> {
   model: T;
@@ -21,7 +18,7 @@ export interface AuthoringElementProps<T extends ActivityModelSchema> {
   editMode: boolean;
   projectSlug: ProjectSlug;
   editorMap: ActivityEditorMap;
-  dispatch: (action: (model: T) => void) => boolean
+  dispatch: (...actions: ((model: T) => void)[]) => boolean;
 }
 
 export const AuthoringElementContext =
@@ -69,7 +66,11 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     const editorMap: ActivityEditorMap = getProp('editorMap');
     const onEdit = (model: unknown) =>
       this.dispatchEvent(new CustomEvent('modelUpdated', { bubbles: true, detail: { model } }));
-    const dispatch = (action: (model: T) => void) => onEdit(produce(model, action));
+    const dispatch = (...actions: ((model: T) => void)[]) =>
+      onEdit(actions.reduce((acc, curr) => curr(acc), model));
+    // const dispatch = (action: ((model: T) => void)) =>
+    //   onEdit(produce(model, action));
+    // onEdit(produce(model, action));
     // onEdit = (action: any) => onEdit(produce(model, action));
 
     return {

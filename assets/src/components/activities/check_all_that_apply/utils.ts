@@ -20,18 +20,18 @@ import { makeTransformation } from 'components/activities/common/utils';
 
 // Choices
 export const getChoiceIds = ([choiceIds]: ChoiceIdsToResponseId) => choiceIds;
-export const getCorrectChoiceIds = (model: CATA) => getChoiceIds(model.authoring.correct);
-export const getIncorrectChoiceIds = (model: CATA) => getChoiceIds(model.authoring.incorrect);
+export const getCorrectChoiceIds = (model: CheckAllThatApplyModelSchemaV2) => getChoiceIds(model.authoring.correct);
+export const getIncorrectChoiceIds = (model: CheckAllThatApplyModelSchemaV2) => getChoiceIds(model.authoring.incorrect);
 export const getTargetedChoiceIds = (model: TargetedFeedbackEnabled) =>
   model.authoring.targeted.map(getChoiceIds);
-export const isCorrectChoice = (model: CATA, choiceId: ChoiceId) =>
+export const isCorrectChoice = (model: CheckAllThatApplyModelSchemaV2, choiceId: ChoiceId) =>
   getCorrectChoiceIds(model).includes(choiceId);
 
 // Responses
 export const getResponseId = ([, responseId]: ChoiceIdsToResponseId) => responseId;
-export const getCorrectResponse = (model: CATA) =>
+export const getCorrectResponse = (model: CheckAllThatApplyModelSchemaV2) =>
   getResponse(model, getResponseId(model.authoring.correct));
-export const getIncorrectResponse = (model: CATA) =>
+export const getIncorrectResponse = (model: CheckAllThatApplyModelSchemaV2) =>
   getResponse(model, getResponseId(model.authoring.incorrect));
 export const getTargetedResponses = (model: TargetedFeedbackEnabled & HasParts) =>
   model.authoring.targeted.map((assoc) => getResponse(model, getResponseId(assoc)));

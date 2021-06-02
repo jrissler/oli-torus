@@ -28,28 +28,28 @@
 //     };
 //   },
 
-//   editStem,
+//   // editStem,
 
 //   addChoice: () => {
 //     return (model: CATA) => {
-//       const newChoice: Choice = fromText('');
+//       // const newChoice: Choice = fromText('');
 
-//       model.choices.push(newChoice);
+//       // model.choices.push(newChoice);
 //       getChoiceIds(model.authoring.incorrect).push(newChoice.id);
 //       updateResponseRules(model);
 //     };
 //   },
 
-//   editChoiceContent: (id: string, content: RichText) => {
-//     return (model: CATA) => {
-//       getChoice(model, id).content = content;
-//     };
-//   },
+//   // editChoiceContent: (id: string, content: RichText) => {
+//   //   return (model: CATA) => {
+//   //     getChoice(model, id).content = content;
+//   //   };
+//   // },
 
 //   removeChoice: (id: string) => {
 //     return (model: CATA) => {
-//       const removeIdFrom = (list: string[]) => removeFromList(id, list);
-//       model.choices = model.choices.filter((choice) => choice.id !== id);
+//       // const removeIdFrom = (list: string[]) => removeFromList(id, list);
+//       // model.choices = model.choices.filter((choice) => choice.id !== id);
 //       removeIdFrom(getChoiceIds(model.authoring.correct));
 //       removeIdFrom(getChoiceIds(model.authoring.incorrect));
 
@@ -137,27 +137,27 @@
 //     };
 //   },
 
-//   addHint: () => {
-//     return (model: CATA) => {
-//       const newHint: HintType = fromText('');
-//       // new hints are always cognitive hints. they should be inserted
-//       // right before the bottomOut hint at the end of the list
-//       const bottomOutIndex = getHints(model).length - 1;
-//       getHints(model).splice(bottomOutIndex, 0, newHint);
-//     };
-//   },
+//   // addHint: () => {
+//   //   return (model: CATA) => {
+//   //     const newHint: HintType = fromText('');
+//   //     // new hints are always cognitive hints. they should be inserted
+//   //     // right before the bottomOut hint at the end of the list
+//   //     const bottomOutIndex = getHints(model).length - 1;
+//   //     getHints(model).splice(bottomOutIndex, 0, newHint);
+//   //   };
+//   // },
 
-//   editHint: (id: string, content: RichText) => {
-//     return (model: CATA) => {
-//       getHint(model, id).content = content;
-//     };
-//   },
+//   // editHint: (id: string, content: RichText) => {
+//   //   return (model: CATA) => {
+//   //     getHint(model, id).content = content;
+//   //   };
+//   // },
 
-//   removeHint: (id: string) => {
-//     return (model: CATA) => {
-//       model.authoring.parts[0].hints = getHints(model).filter((h) => h.id !== id);
-//     };
-//   },
+//   // removeHint: (id: string) => {
+//   //   return (model: CATA) => {
+//   //     model.authoring.parts[0].hints = getHints(model).filter((h) => h.id !== id);
+//   //   };
+//   // },
 // };
 
 // // mutable

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { ImageCodingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/authoring/stem/Stem';
+import { Stem } from '../common/stem/Stem';
 import { Hints } from '../common/authoring/Hints';
 import { ICActions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
@@ -175,7 +175,7 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
 
   return (
     <React.Fragment>
-      <Stem stem={model.stem} onEditContent={(content) => dispatch(ICActions.editStem(content))} />
+      <Stem.Authoring />
 
       <Heading title="Resources" id="images" />
       <div>
@@ -224,7 +224,6 @@ const ImageCoding = (props: AuthoringElementProps<ImageCodingModelSchema>) => {
           {solutionParameters()}
 
           <Hints
-            projectSlug={props.projectSlug}
             hints={model.authoring.parts[0].hints}
             editMode={props.editMode}
             onAddHint={() => dispatch(ICActions.addHint())}

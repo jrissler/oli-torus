@@ -1,79 +1,47 @@
-import React, { PropsWithChildren, useReducer } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { CheckAllThatApplyModelSchema } from '../../../check_all_that_apply/schema_old';
-import { ChoiceId, Feedback, HasChoices, HasParts, ResponseId, RichText } from '../../../types';
-import { defaultWriterContext } from 'data/content/writers/context';
-import { DisplayedChoices } from 'components/activities/common/delivery/choices/DisplayedChoices';
 import { Card } from 'components/activities/common/authoring/Card';
 import {
-  getCorrectChoiceIds,
   getCorrectResponse,
   getIncorrectResponse,
 } from 'components/activities/check_all_that_apply/utils';
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import produce, { Draft } from 'immer';
 import { getResponse } from '../utils';
+import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
+import { ResponseId, RichText } from 'components/activities/types';
 
-type FeedbackActions =
-  | { type: 'SET_CORRECT_ANSWER_FEEDBACK'; id: ResponseId; content: RichText }
-  | { type: 'SET_INCORRECT_ANSWER_FEEDBACK'; id: ResponseId; content: RichText }
-  | { type: 'TOGGLE_CHOICE_CORRECTNESS'; id: ChoiceId };
+export function useFeedback() {
+  const { model, dispatch } = useAuthoringElementContext<CheckAllThatApplyModelSchemaV2>();
 
-const feedbackReducer = (draft: Draft<HasParts>, action: FeedbackActions) => {
-  switch (action.type) {
-    case 'SET_CORRECT_ANSWER_FEEDBACK':
-    case 'SET_INCORRECT_ANSWER_FEEDBACK':
-      getResponse(draft, action.id).feedback.content = action.content;
-      break;
-    case 'TOGGLE_CHOICE_CORRECTNESS':
-      getChoiceIds(model.authoring.correct);
-  }
-};
+  const setResponseFeedback = (id: ResponseId, content: RichText) =>
+    produce(
+      (draft: Draft<CheckAllThatApplyModelSchemaV2>) =>
+        void (getResponse(draft, id).feedback.content = content),
+    );
 
-export function useFeedback({ reducer = feedbackReducer } = {}) {
-  const { model } = useAuthoringElementContext<HasParts>();
-  const [state, dispatch] = useReducer(produce(reducer), model);
-  const setCorrectAnswerFeedback = (id: ResponseId, content: RichText) =>
-    dispatch({ type: 'SET_CORRECT_ANSWER_FEEDBACK', id, content });
-  const setIncorrectAnswerFeedback = (id: ResponseId, content: RichText) =>
-    dispatch({ type: 'SET_INCORRECT_ANSWER_FEEDBACK', id, content });
-  const toggleChoiceCorrectness = (id: ChoiceId) =>
-    dispatch({ type: 'TOGGLE_CHOICE_CORRECTNESS', id });
+  const correctResponse = getCorrectResponse(model);
+  const incorrectResponse = getIncorrectResponse(model);
 
-  return { state, setCorrectAnswerFeedback, setIncorrectAnswerFeedback };
+  return { setResponseFeedback, correctResponse, incorrectResponse, dispatch };
 }
 
-interface FeedbackProps {
-  onEditFeedback: (responseId: ResponseId, content: RichText) => void;
-  toggleCorrect: any;
-  isCorrect: any;
+interface AuthoringProps {
+  onSetResponseFeedback?: (id: ResponseId, content: RichText) => void;
 }
-export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
-  const { state, setCorrectAnswerFeedback, setIncorrectAnswerFeedback } = useFeedback();
-
-  const { onEditFeedback } = props;
-  const writerContext = defaultWriterContext();
+const Authoring: React.FC<AuthoringProps> = (props) => {
+  const { setResponseFeedback, correctResponse, incorrectResponse, dispatch } = useFeedback();
 
   return (
     <>
-      <DisplayedChoices
-        unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}
-        selectedIcon={<i className="material-icons-outlined">check_box</i>}
-        choices={model.choices}
-        selected={getCorrectChoiceIds(model)}
-        onSelect={(id) => props.toggleCorrect(id)}
-        isEvaluated={false}
-        context={writerContext}
-      />
-
       <Card
         title="Feedback for correct answer"
         content={
           <RichTextEditor
             style={{ backgroundColor: 'white' }}
             placeholder="Enter feedback"
-            text={getCorrectResponse(model).feedback.content}
-            onEdit={(content) => onEditFeedback(getCorrectResponse(model).id, content)}
+            text={correctResponse.feedback.content}
+            onEdit={(content) => dispatch(setResponseFeedback(correctResponse.id, content))}
           />
         }
       />
@@ -84,11 +52,15 @@ export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
           <RichTextEditor
             style={{ backgroundColor: 'white' }}
             placeholder="Enter feedback"
-            text={getIncorrectResponse(model).feedback.content}
-            onEdit={(content) => onEditFeedback(getIncorrectResponse(model).id, content)}
+            text={incorrectResponse.feedback.content}
+            onEdit={(content) => dispatch(setResponseFeedback(incorrectResponse.id, content))}
           />
         }
       />
     </>
   );
+};
+
+export const Feedback = {
+  Authoring,
 };

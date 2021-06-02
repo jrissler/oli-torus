@@ -5,7 +5,6 @@ import { Objective, ResourceId } from 'data/content/objective';
 import { ProjectSlug } from 'data/types';
 import { create } from 'data/persistence/objective';
 import guid from 'utils/guid';
-import { valueOr } from 'utils/common';
 
 export type ObjectivesProps = {
   objectives: Immutable.List<Objective>;

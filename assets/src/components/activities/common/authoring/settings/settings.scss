@@ -1,8 +1,17 @@
+@import 'bootstrap';
+
+
 .settings__open-button {
+  padding: 6px;
+}
+
+.settings__setting-button {
   @extend .d-flex;
   @extend .align-items-center;
   height: 46px;
   line-height: 46px;
+  border: 0;
+  background-color: white;
 }
 
 .settings__is-enabled {
@@ -26,4 +35,11 @@
   padding: 8px 0;
   width: 320px;
   background-color: white;
+
+  .insert-button {
+    @extend .float-right;
+    @extend .d-flex;
+    @extend .align-self-center;
+    padding: 2px;
+  }
 }

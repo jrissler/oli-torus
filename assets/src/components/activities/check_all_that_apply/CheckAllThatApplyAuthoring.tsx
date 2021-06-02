@@ -13,8 +13,15 @@ import { Hints } from '../common/authoring/Hints';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
-import { isCorrectChoice } from 'components/activities/check_all_that_apply/utils';
-import { getHints, isShuffled } from 'components/activities/common/authoring/utils';
+import {
+  getCorrectChoiceIds,
+  isCorrectChoice,
+} from 'components/activities/check_all_that_apply/utils';
+import {
+  getHints,
+  getTransformations,
+  isShuffled,
+} from 'components/activities/common/authoring/utils';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { Panels } from 'components/activities/common/authoring/Panels';
 import { Settings } from 'components/activities/common/authoring/settings/Settings';
@@ -22,13 +29,13 @@ import { Checkbox } from 'components/activities/common/authoring/icons/Checkbox'
 import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
 import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
 import { toggleTargetedFeedback } from 'components/activities/common/authoring/actions/feedback';
-import {
-  usePreviewText,
-} from 'components/activities/common/authoring/preview_text/usePreviewText';
+import { usePreviewText } from 'components/activities/common/authoring/preview_text/usePreviewText';
 // import { Stem, stemReducer, useStem } from 'components/activities/common/authoring/stem/Stem';
-import { Choices } from '../common/authoring/choices/Choices';
 import produce from 'immer';
-import { Stem } from '../common/authoring/stem/Stem';
+import { Stem, useStem } from '../common/stem/Stem';
+import { AnswerKey } from '../common/authoring/AnswerKey';
+import { Choices } from '../common/choices';
+import { useChoices } from 'components/activities/common/choices/Authoring';
 
 const store = configureStore();
 
@@ -38,61 +45,51 @@ const CheckAllThatApply = () => {
   //   props.onEdit(produce(props.model, action));
 
   const { previewText, setPreviewText } = usePreviewText();
+  const { setStem } = useStem();
+  const { model, dispatch } = useAuthoringElementContext<CheckAllThatApplyModelSchemaV2>();
+  const { addChoice } = useChoices();
 
   return (
-    <><div>{previewText}</div>
+    <>
+      {/* <div>{previewText}</div> */}
       <Panels.Tabs>
         <Panels.Tab label="Question">
-          <Stem.Authoring onStemChange={setPreviewText} />
+          <div className="d-flex">
+            <Stem.Authoring
+              onStemChange={(text) => dispatch(setStem(text), setPreviewText(text))}
+            />
+            <select style={{ width: 160, height: 61, marginLeft: 10 }} className="custom-select">
+              <option selected>Checkboxes</option>
+              <option value="1">Multiple Choice</option>
+              <option value="2">Ordering</option>
+              <option value="3">Short Answer</option>
+            </select>
+          </div>
 
-          <Choices
+          <Choices.Authoring
             icon={<Checkbox.Unchecked />}
-            // addChoice={() => {
-            //   dispatch(addChoice());
-            //   (document.activeElement as any)?.blur();
-            // }}
+            onAddChoice={() => {
+              dispatch(addChoice());
+              // TODO: Focus last choice here
+              (document.activeElement as any)?.blur();
+
+              // Support targeted feedback here
+            }}
           />
         </Panels.Tab>
 
-        {/* <Panels.Tab label="Answer Key">
-          <Stem.Delivery stem={model.stem} context={defaultWriterContext()} />
-          <Feedback
-            isCorrect={isCorrectChoice}
-            toggleCorrect={(choiceId: string) => dispatch(toggleChoiceCorrectness(choiceId))}
-            onEditFeedback={(responseId, feedbackContent) =>
-              dispatch(editResponseFeedback(responseId, feedbackContent))
-            }
-          >
-            {ActivityTypes.isTargetedFeedbackEnabled(model) && (
-              <TargetedFeedback
-                model={model}
-                onEditFeedback={(responseId, feedbackContent) =>
-                  dispatch(editResponseFeedback(responseId, feedbackContent))
-                }
-                onAddTargetedFeedback={() => dispatch(addTargetedFeedback())}
-                onRemoveTargetedFeedback={(responseId: ActivityTypes.ResponseId) =>
-                  dispatch(removeTargetedFeedback(responseId))
-                }
-                onEditTargetedFeedbackChoices={(
-                  responseId: ActivityTypes.ResponseId,
-                  choiceIds: ActivityTypes.ChoiceId[],
-                ) => dispatch(editTargetedFeedbackChoices(responseId, choiceIds))}
-              />
-            )}
-          </Feedback>
+        <Panels.Tab label="Answer Key">
+          <AnswerKey correctChoiceIds={getCorrectChoiceIds(model)} />
+          <Feedback.Authoring />
         </Panels.Tab>
+
         <Panels.Tab label="Hints">
-          <Hints
-            hints={getHints(model)}
-            onAdd={() => dispatch(addHint())}
-            onEdit={(id, content) => dispatch(editHint(id, content))}
-            onRemove={(id) => dispatch(removeHint(id))}
-          />
-        </Panels.Tab> */}
+          <Hints />
+        </Panels.Tab>
 
-        {/* <Settings.Menu>
+        <Settings.Menu>
           <Settings.Setting
-            isEnabled={isShuffled(model.authoring.transformations)}
+            isEnabled={isShuffled(getTransformations(model))}
             onToggle={() => dispatch(toggleAnswerChoiceShuffling())}
           >
             Shuffle answer choice order
@@ -103,7 +100,7 @@ const CheckAllThatApply = () => {
           >
             Targeted Feedback
           </Settings.Setting>
-        </Settings.Menu> */}
+        </Settings.Menu>
       </Panels.Tabs>
     </>
   );
@@ -125,3 +122,22 @@ export class CheckAllThatApplyAuthoring extends AuthoringElement<CheckAllThatApp
 // eslint-disable-next-line
 const manifest = require('./manifest.json') as ActivityTypes.Manifest;
 window.customElements.define(manifest.authoring.element, CheckAllThatApplyAuthoring);
+
+{
+  /* {ActivityTypes.isTargetedFeedbackEnabled(model) && (
+              <TargetedFeedback
+                model={model}
+                onEditFeedback={(responseId, feedbackContent) =>
+                  dispatch(editResponseFeedback(responseId, feedbackContent))
+                }
+                onAddTargetedFeedback={() => dispatch(addTargetedFeedback())}
+                onRemoveTargetedFeedback={(responseId: ActivityTypes.ResponseId) =>
+                  dispatch(removeTargetedFeedback(responseId))
+                }
+                onEditTargetedFeedbackChoices={(
+                  responseId: ActivityTypes.ResponseId,
+                  choiceIds: ActivityTypes.ChoiceId[],
+                ) => dispatch(editTargetedFeedbackChoices(responseId, choiceIds))}
+              />
+            )} */
+}

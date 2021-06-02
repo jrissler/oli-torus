@@ -14,8 +14,8 @@ import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
-import { DisplayedChoices } from 'components/activities/common/delivery/choices/DisplayedChoices';
-import { Stem } from 'components/activities/common/authoring/stem/Stem';
+import { Stem } from 'components/activities/common/stem/Stem';
+import { Choices } from '../common/choices';
 
 type Evaluation = {
   score: number;
@@ -177,7 +177,7 @@ export const CheckAllThatApplyComponent = (
         <div>
           <Stem.Delivery stem={stem} context={writerContext} />
           {gradedPoints}
-          <DisplayedChoices
+          <Choices.Delivery
             unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}
             selectedIcon={<i className="material-icons-outlined">check_box</i>}
             choices={choices}

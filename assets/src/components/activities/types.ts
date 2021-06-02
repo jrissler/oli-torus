@@ -93,9 +93,7 @@ export interface HasStem {
 }
 
 export type Hint = ContentItem;
-export interface HasHints {
-  hints: Hint[];
-}
+export type HasHints = HasParts
 
 export type ChoiceIdsToResponseId = [ChoiceId[], ResponseId];
 

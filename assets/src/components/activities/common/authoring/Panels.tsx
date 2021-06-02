@@ -29,7 +29,6 @@ const TabsComponent: React.FunctionComponent<TabsProps> = ({ children }) => {
                 key={child.props.label + '-' + index}
                 className="nav-item"
                 role="presentation"
-                style={{ marginBottom: '-2px' }}
               >
                 <a
                   className={'nav-link' + (index === 0 ? ' active' : '')}

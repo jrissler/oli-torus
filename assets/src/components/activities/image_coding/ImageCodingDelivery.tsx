@@ -9,7 +9,6 @@ import {
 } from '../DeliveryElement';
 import { ImageCodingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/delivery/DisplayedStem';
 import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
@@ -18,6 +17,7 @@ import { Evaluator, EvalContext } from './Evaluator';
 import { lastPart } from './utils';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { ImageCodeEditor } from './sections/ImageCodeEditor';
+import { Stem } from '../common/stem/Stem';
 
 type Evaluation = {
   score: number;
@@ -318,7 +318,7 @@ const ImageCoding = (props: ImageCodingDeliveryProps) => {
   return (
     <div className="activity short-answer-activity">
       <div className="activity-content">
-        <Stem stem={stem} context={writerContext} />
+        <Stem.Delivery stem={stem} context={writerContext} />
 
         <div>
           <ImageCodeEditor value={input} disabled={isEvaluated} onChange={onInputChange} />

@@ -9,13 +9,13 @@ import {
 } from '../DeliveryElement';
 import { InputType, ShortAnswerModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/delivery/DisplayedStem';
-import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { valueOr } from 'utils/common';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext } from 'data/content/writers/context';
+import { Hint } from 'react-bootstrap-typeahead';
+import { Stem } from '../common/stem/Stem';
 
 type Evaluation = {
   score: number;
@@ -144,7 +144,7 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
     ? null
     : [
         evaluationSummary,
-        <Hints
+        <Hint
           key="hints"
           onClick={onRequestHint}
           hints={hints}
@@ -183,7 +183,7 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
   return (
     <div className="activity short-answer-activity">
       <div className="activity-content">
-        <Stem stem={stem} context={writerContext} />
+        <Stem.Delivery stem={stem} context={writerContext} />
         {gradedPoints}
         <div className="">
           <Input
