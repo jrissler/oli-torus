@@ -4,17 +4,19 @@ import {
   HasTargetedFeedback,
   isTargetedFeedbackEnabled,
   RichText,
+  TargetedFeedbackDisabled,
+  TargetedFeedbackEnabled,
 } from 'components/activities/types';
+import produce, { Draft } from 'immer';
 
-export const toggleTargetedFeedback = () => {
-  return (model: HasTargetedFeedback) => {
-    if (isTargetedFeedbackEnabled(model)) {
-      (model as HasTargetedFeedback).authoring.targeted = undefined;
-      return;
+export const toggleTargetedFeedback = () =>
+  produce((draft: Draft<HasTargetedFeedback>) => {
+    if (draft.authoring.feedback.type === 'TargetedFeedbackEnabled') {
+      (draft as TargetedFeedbackDisabled).authoring.feedback.type = 'TargetedFeedbackDisabled';
+    } else {
+      (draft as TargetedFeedbackEnabled).authoring.feedback.type = 'TargetedFeedbackEnabled';
     }
-    model.authoring.targeted = [];
-  };
-};
+  });
 
 export const editFeedback = (id: string, content: RichText) => {
   return (model: HasParts) => {

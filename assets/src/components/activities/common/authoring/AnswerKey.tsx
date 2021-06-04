@@ -4,11 +4,12 @@ import { defaultWriterContext } from 'data/content/writers/context';
 import { Stem } from '../stem/Stem';
 import { ChoiceId, HasChoices, HasStem, HasTargetedFeedback } from 'components/activities/types';
 import { Choices } from '../choices';
-import produce from 'immer';
-import { getChoiceIds } from 'components/activities/check_all_that_apply/utils';
+import produce, { Draft } from 'immer';
+import { getChoiceIds } from './feedback/TargetedFeedback';
 
 export const useAnswerKey = () => {
-  const { model, dispatch } = useAuthoringElementContext<HasStem & HasChoices & HasTargetedFeedback>();
+  const { model, dispatch } =
+    useAuthoringElementContext<HasStem & HasChoices & HasTargetedFeedback>();
 
   function removeFromList<T>(item: T, list: T[]) {
     const index = list.findIndex((x) => x === item);
@@ -24,14 +25,13 @@ export const useAnswerKey = () => {
   }
 
   const toggleCorrectness = (id: ChoiceId) =>
-    produce((draft) => {
-      addOrRemoveFromList(id, getChoiceIds(model.authoring.correct));
-      addOrRemoveFromList(id, getChoiceIds(model.authoring.incorrect));
+    produce((draft: Draft<HasChoices>) => {
+      addOrRemoveFromList(id, getChoiceIds(model.authoring.feedback.correct));
+      addOrRemoveFromList(id, getChoiceIds(model.authoring.feedback.incorrect));
     });
 
   return { model, dispatch, toggleCorrectness };
 };
-
 interface Props {
   correctChoiceIds: ChoiceId[];
   onToggleCorrectness?: (id: ChoiceId) => void;

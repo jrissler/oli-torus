@@ -12,8 +12,6 @@ let store = configureStore();
 (window as any).oliMountApplication = (mountPoint: any, paramString: any) => {
   const params = JSON.parse(b64DecodeUnicode(paramString));
 
-  console.log('params in ActivityEditorApp.tsx', params);
-
   ReactDOM.render(
     <Provider store={store}>
       <ActivityEditor {...params} />

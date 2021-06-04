@@ -28,7 +28,6 @@
 //     };
 //   },
 
-//   // editStem,
 
 //   addChoice: () => {
 //     return (model: CATA) => {
@@ -40,11 +39,6 @@
 //     };
 //   },
 
-//   // editChoiceContent: (id: string, content: RichText) => {
-//   //   return (model: CATA) => {
-//   //     getChoice(model, id).content = content;
-//   //   };
-//   // },
 
 //   removeChoice: (id: string) => {
 //     return (model: CATA) => {
@@ -75,11 +69,6 @@
 //     };
 //   },
 
-//   editResponseFeedback: (responseId: ResponseId, content: RichText) => {
-//     return (model: CATA) => {
-//       getResponse(model, responseId).feedback.content = content;
-//     };
-//   },
 
 //   addTargetedFeedback: () => {
 //     return (model: CATA) => {
@@ -137,29 +126,6 @@
 //     };
 //   },
 
-//   // addHint: () => {
-//   //   return (model: CATA) => {
-//   //     const newHint: HintType = fromText('');
-//   //     // new hints are always cognitive hints. they should be inserted
-//   //     // right before the bottomOut hint at the end of the list
-//   //     const bottomOutIndex = getHints(model).length - 1;
-//   //     getHints(model).splice(bottomOutIndex, 0, newHint);
-//   //   };
-//   // },
-
-//   // editHint: (id: string, content: RichText) => {
-//   //   return (model: CATA) => {
-//   //     getHint(model, id).content = content;
-//   //   };
-//   // },
-
-//   // removeHint: (id: string) => {
-//   //   return (model: CATA) => {
-//   //     model.authoring.parts[0].hints = getHints(model).filter((h) => h.id !== id);
-//   //   };
-//   // },
-// };
-
 // // mutable
 // function addOrRemoveFromList<T>(item: T, list: T[]) {
 //   if (list.find((x) => x === item)) {
@@ -175,34 +141,4 @@
 //   }
 // }
 
-// // Update all response rules based on a model with new choices that
-// // are not yet reflected by the rules.
-// const updateResponseRules = (model: CATA) => {
-//   getCorrectResponse(model).rule = createRuleForIds(
-//     getCorrectChoiceIds(model),
-//     getIncorrectChoiceIds(model),
-//   );
 
-//   switch (model.type) {
-//     case 'SimpleCATA':
-//       getIncorrectResponse(model).rule = invertRule(getCorrectResponse(model).rule);
-//       break;
-//     case 'TargetedCATA':
-//       // eslint-disable-next-line
-//       const targetedRules: string[] = [];
-//       // eslint-disable-next-line
-//       const allChoiceIds = model.choices.map((choice) => choice.id);
-//       model.authoring.targeted.forEach((assoc) => {
-//         const targetedRule = createRuleForIds(
-//           getChoiceIds(assoc),
-//           setDifference(allChoiceIds, getChoiceIds(assoc)),
-//         );
-//         targetedRules.push(targetedRule);
-//         getResponse(model, getResponseId(assoc)).rule = targetedRule;
-//       });
-//       getIncorrectResponse(model).rule = unionRules(
-//         targetedRules.map(invertRule).concat([invertRule(getCorrectResponse(model).rule)]),
-//       );
-//       break;
-//   }
-// };

@@ -4,7 +4,7 @@ import { Editor } from 'components/editing/editor/Editor';
 import { getToolbarForResourceType } from 'components/editing/toolbars/insertion/items';
 import { ErrorBoundary } from 'components/common/ErrorBoundary';
 import { classNames } from 'utils/classNames';
-import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
+import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 
 type RichTextEditorProps = {
   text: RichText;
@@ -20,7 +20,7 @@ export const RichTextEditor = ({
   placeholder,
   style,
 }: React.PropsWithChildren<RichTextEditorProps>) => {
-  const { editMode, projectSlug } = useAuthoringElementContext();
+  const { editMode, projectSlug } = useActivityContext();
 
   return (
     <div className={classNames(['rich-text-editor', className])}>

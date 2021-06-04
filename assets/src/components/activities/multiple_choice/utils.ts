@@ -34,7 +34,7 @@ export const defaultMCModel: () => MultipleChoiceModelSchema = () => {
 
 const isCorrect = (response: Response) => response.score === 1;
 
-export const correctChoice = (model: HasChoices & { authoring: HasParts }) =>
+export const correctChoice = (model: HasChoices & HasParts) =>
   model.choices.reduce((correct, choice) => {
     const responseMatchesChoice = (response: Response, choice: Choice) =>
       response.rule === `input like {${choice.id}}`;
@@ -51,5 +51,5 @@ export const correctChoice = (model: HasChoices & { authoring: HasParts }) =>
     throw new Error('Correct choice could not be found:' + JSON.stringify(model.choices));
   });
 
-export const incorrectChoices = (model: HasChoices & { authoring: HasParts }) =>
+export const incorrectChoices = (model: HasChoices & HasParts) =>
   model.choices.filter((choice) => choice.id !== correctChoice(model).id);

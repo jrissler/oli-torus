@@ -6,13 +6,12 @@ export type TitleBarProps = {
   title: string; // The title of the resource
   editMode: boolean; // Whether or not the user is editing
   onTitleEdit: (title: string) => void;
-  children: any;
   className?: string;
 };
 
 // Title bar component that allows title bar editing and displays
 // any collection of child components
-export const TitleBar = (props: TitleBarProps) => {
+export const TitleBar: React.FC<TitleBarProps> = (props) => {
   const { editMode, className, title, onTitleEdit, children } = props;
 
   return (
@@ -23,19 +22,11 @@ export const TitleBar = (props: TitleBarProps) => {
         <TextEditor
           onEdit={onTitleEdit}
           model={title}
-          showAffordances={false}
-          size="large"
-          allowEmptyContents={false}
-          editMode={editMode}
-        />
-        {/* <TextEditor
-          onEdit={onTitleEdit}
-          model={title}
           showAffordances={true}
           size="large"
           allowEmptyContents={false}
           editMode={editMode}
-        /> */}
+        />
       </div>
       {children}
     </div>

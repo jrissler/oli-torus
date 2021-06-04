@@ -1,15 +1,18 @@
 import { ActivityModelSchema } from './types';
 import { ProjectSlug } from 'data/types';
-import React, { Reducer, useContext, useEffect, useReducer } from 'react';
+import React, { Reducer, useContext, useEffect, useMemo, useReducer } from 'react';
 import { ActivityEditorMap } from 'data/content/editors';
 import produce from 'immer';
+import { useDispatch } from 'react-redux';
+import { useCallback } from 'react';
 
-
-export function orIdentity(f: unknown)  {
+export function orIdentity(f: unknown) {
   if (typeof f === 'function') {
-    return f
+    return f;
   }
-  return (..._args: unknown[]) => (model: unknown) => model
+  return (..._args: unknown[]) =>
+    (model: unknown) =>
+      model;
 }
 
 export interface AuthoringElementProps<T extends ActivityModelSchema> {
@@ -18,34 +21,14 @@ export interface AuthoringElementProps<T extends ActivityModelSchema> {
   editMode: boolean;
   projectSlug: ProjectSlug;
   editorMap: ActivityEditorMap;
-  dispatch: (...actions: ((model: T) => void)[]) => boolean;
+  // dispatch: (...actions: ((model: T) => void)[]) => boolean;
 }
-
-export const AuthoringElementContext =
-  React.createContext<AuthoringElementProps<any> | undefined>(undefined);
-
-export function useAuthoringElementContext<T>() {
-  const context = useContext<AuthoringElementProps<T> | undefined>(AuthoringElementContext);
-  if (context === undefined) {
-    throw new Error('useAuthoringElementContext must be used within an AuthoringElementProvider');
-  }
-  return context;
-}
-
-// export const AuthoringElementProvider: React.FC<AuthoringElementProps> = ({ reducer, initialState = {}, children }) => {
-//   const value = React.useReducer(reducer, initialState);
-//   return (
-//     <AuthoringElementContext.Provider value={value}>
-//       {props.children}
-//     </AuthoringElementContext.Provider>
-//   );
-// }
 
 // An abstract authoring web component, designed to delegate to
 // a React authoring component.  This authoring web component will re-render
 // the underlying React component when the 'model' attribute of the
 // the web component changes.  It also traps onEdit callbacks from the
-// React component and translated these calls into dispatches of the
+// React component and translates these calls into dispatches of the
 // 'modelUpdated' CustomEvent.  It is this CustomEvent that is handled by
 // Torus to process updates from the authoring web component.
 export abstract class AuthoringElement<T extends ActivityModelSchema> extends HTMLElement {
@@ -64,10 +47,13 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     const editMode: boolean = getProp('editMode');
     const projectSlug: ProjectSlug = this.getAttribute('projectSlug') as string;
     const editorMap: ActivityEditorMap = getProp('editorMap');
-    const onEdit = (model: unknown) =>
+    const onEdit = (model: T) =>
       this.dispatchEvent(new CustomEvent('modelUpdated', { bubbles: true, detail: { model } }));
-    const dispatch = (...actions: ((model: T) => void)[]) =>
-      onEdit(actions.reduce((acc, curr) => curr(acc), model));
+    // const dispatch = (...actions: ((model: T) => void)[]) =>
+    //   onEdit(actions.reduce((acc, curr) => curr(acc), model));
+    // const dispatch = useCallback((action) => onEdit(useDispatch()(action)), []);
+
+    // const dispatch = useDispatch();
     // const dispatch = (action: ((model: T) => void)) =>
     //   onEdit(produce(model, action));
     // onEdit(produce(model, action));
@@ -79,7 +65,6 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
       editMode,
       projectSlug,
       editorMap,
-      dispatch,
     };
   }
 

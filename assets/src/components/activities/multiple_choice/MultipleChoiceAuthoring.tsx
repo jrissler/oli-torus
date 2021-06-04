@@ -14,6 +14,7 @@ import { configureStore } from 'state/store';
 import produce from 'immer';
 import { areAnswerChoicesShuffled } from 'components/activities/common/authoring/utils';
 import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
+import { TargetedFeedback } from '../common/authoring/feedback/TargetedFeedback';
 
 const store = configureStore();
 
@@ -46,10 +47,12 @@ const MultipleChoice = (props: AuthoringElementProps<MultipleChoiceModelSchema>)
         onToggleAnswerChoiceShuffling={() => dispatch(MCActions.toggleAnswerChoiceShuffling())}
         isShuffled={areAnswerChoicesShuffled(props.model)}
       />
-      <Feedback
-        {...sharedProps}
-        onEditResponse={(id, content) => dispatch(MCActions.editFeedback(id, content))}
-      />
+      <TargetedFeedback>
+        <Feedback
+          {...sharedProps}
+          onEditResponse={(id, content) => dispatch(MCActions.editFeedback(id, content))}
+        />
+      </TargetedFeedback>
       <Hints
         projectSlug={props.projectSlug}
         hints={props.model.authoring.parts[0].hints}

@@ -1,35 +1,53 @@
 import React from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { HasStem, RichText, Stem as StemType } from '../../types';
-import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
 import produce, { Draft } from 'immer';
+import { useDispatch, useSelector } from 'react-redux';
 
-export function useStem() {
-  const { model: { stem }, dispatch } = useAuthoringElementContext<HasStem>();
+import { makeStem } from '../authoring/utils';
+import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
+import { stemSlice } from './redux';
 
-  const setStem = (content: RichText) =>
-    produce((draft: Draft<HasStem>) => {
-      draft.stem.content = content;
-    });
+// const toggleReducer = (state: HasStem, action:) => {
+//   switch (action.type)
+// }
+// export function useStem({ reducer = stemSlice.reducer } = {}) {
+//   const {
+//     model: { stem },
+//     // dispatch,
+//   } = useActivityContext<HasStem>();
+//   const [state, dispatch] = React.useReducer(reducer, stem);
 
-  return { stem, setStem, dispatch };
-}
+//   const setStem = (content: RichText) =>
+//     produce((draft: Draft<HasStem>) => {
+//       draft.stem.content = content;
+//     });
+
+//   return { stem, setStem, dispatch };
+// }
 
 interface AuthoringProps {
   onStemChange?: (text: RichText) => void;
 }
 
 export const Authoring = ({ onStemChange }: AuthoringProps) => {
-  const { stem, setStem, dispatch } = useStem();
+  // const { stem, setStem, dispatch } = useStem();
+  // const stem = useSelector((state: HasStem) => console.log('state', state) || state.stem);
+  // console.log('state', stem);
+  // const dispatch = useDispatch();
+  const { dispatch, model } = useActivityContext<HasStem>();
+  const stem = model.stem;
 
   return (
     <div className="mb-2 flex-grow-1">
       <RichTextEditor
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}
-        onEdit={(text) => (onStemChange ? onStemChange(text) : dispatch(setStem(text)))}
+        // onEdit={(text) => (onStemChange ? onStemChange(text) : dispatch(setStem(text)))}
+        onEdit={(text) => (onStemChange ? onStemChange(text) : stemSlice.actions.set(text))}
+        // onEdit={(text) => dispatch(stemSlice.actions.set(text))}
         placeholder="Question"
       />
     </div>

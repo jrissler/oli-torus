@@ -99,3 +99,5 @@ export const isShuffled = (transformations: Transformation[]) =>
   !!transformations.find((xform) => xform.operation === Operation.shuffle);
 
 export const getTransformations = (model: HasTransformations) => model.authoring.transformations;
+
+// Targeted Feedback

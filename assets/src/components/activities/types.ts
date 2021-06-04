@@ -1,5 +1,6 @@
-import { ResourceContext } from 'data/content/resource';
 import { ID, Identifiable, ModelElement, Selection } from 'data/content/model';
+import { ResourceContext } from 'data/content/resource';
+import { ResourceId } from 'data/types';
 
 export type ChoiceId = ID;
 export type ResponseId = ID;
@@ -19,7 +20,7 @@ export interface HasContent {
 }
 
 export interface StudentResponse {
-  input: any;
+  input: unknown;
 }
 
 export type ModeSpecification = {
@@ -36,8 +37,8 @@ export type ClientEvaluation = {
   attemptGuid: string;
   score: number | null;
   outOf: number | null;
-  response: any;
-  feedback: any;
+  response: unknown;
+  feedback: unknown;
 };
 
 export type Manifest = {
@@ -50,8 +51,10 @@ export type Manifest = {
 
 export interface ActivityModelSchema {
   resourceId?: number;
-  authoring?: any;
-  content?: any;
+  authoring?: unknown;
+  content?: unknown;
+  activityType?: unknown;
+  id?: string; // maybe slug
 }
 
 export interface PartState {
@@ -60,16 +63,17 @@ export interface PartState {
   dateEvaluated: Date | null;
   score: number | null;
   outOf: number | null;
-  response: any;
-  feedback: any;
+  response: unknown;
+  feedback: unknown;
   hints: [];
-  partId: number;
+  partId: string | number;
   hasMoreAttempts: boolean;
   hasMoreHints: boolean;
   error?: string;
 }
 
 export interface ActivityState {
+  activityId?: ResourceId;
   attemptGuid: string;
   attemptNumber: number;
   dateEvaluated: Date | null;
@@ -78,6 +82,7 @@ export interface ActivityState {
   parts: PartState[];
   hasMoreAttempts: boolean;
   hasMoreHints: boolean;
+  snapshot?: unknown;
 }
 
 export interface ContentItem extends Identifiable, HasContent {}
@@ -93,26 +98,45 @@ export interface HasStem {
 }
 
 export type Hint = ContentItem;
-export type HasHints = HasParts
+export type HasHints = HasParts;
 
 export type ChoiceIdsToResponseId = [ChoiceId[], ResponseId];
 
-export interface HasTargetedFeedback {
-  authoring: {
-    targeted: ChoiceIdsToResponseId[] | undefined; // [[...choiceIds], targetedResponseId][] | undefined when no targeted feedback
-    correct: ChoiceIdsToResponseId; // [[...correctChoiceIds], correctResponseId]
-    incorrect: ChoiceIdsToResponseId; // [[...incorrectChoiceIds], catchAllIncorrectResponseId]
+// Targeted feedback works like this:
+// `correct` holds the correct choice ids that map to the single correct response id.
+// `incorrect` holds the incorrect choice ids that map to the single catch-all incorrect response id.
+// `targeted` holds the choice ids that correspond to a specific targeted feedback response id (there may be multiple). An empty array means there is no targeted feedback, but the targeted feedback mode is "on." `targeted` being undefined means targeted feedback mode is off.
+// `CorrectAndIncorrectResponseMappings` has dependencies on `Parts` and `Choices` that the ids correspond to.
+type TargetedFeedbackBase = HasChoices &
+  HasParts & {
+    authoring: {
+      feedback: {
+        type: 'TargetedFeedbackEnabled' | 'TargetedFeedbackDisabled';
+        correct: ChoiceIdsToResponseId;
+        incorrect: ChoiceIdsToResponseId;
+        targeted: ChoiceIdsToResponseId[];
+      };
+    };
   };
-}
-export type TargetedFeedbackEnabled = HasTargetedFeedback & {
+export type TargetedFeedbackEnabled = TargetedFeedbackBase & {
   authoring: {
-    targeted: ChoiceIdsToResponseId[];
+    feedback: {
+      type: 'TargetedFeedbackEnabled';
+    };
   };
 };
+export type TargetedFeedbackDisabled = TargetedFeedbackBase & {
+  authoring: {
+    feedback: {
+      type: 'TargetedFeedbackDisabled';
+    };
+  };
+};
+export type HasTargetedFeedback = TargetedFeedbackEnabled | TargetedFeedbackDisabled;
 
 export const isTargetedFeedbackEnabled = (
   model: HasTargetedFeedback,
-): model is TargetedFeedbackEnabled => model.authoring.targeted !== undefined;
+): model is TargetedFeedbackEnabled => model.authoring.feedback.type === 'TargetedFeedbackEnabled';
 
 export type Feedback = ContentItem;
 export interface Transformation extends Identifiable {
@@ -131,9 +155,10 @@ export interface HasPreviewText {
   };
 }
 
+export type Rule = string;
 export interface Response extends Identifiable {
   // see `parser.ex` and `rule.ex`
-  rule: string;
+  rule: Rule;
   // `score >= 0` indicates the feedback corresponds to a correct choice
   score: number;
   feedback: Feedback;
@@ -221,3 +246,9 @@ export enum Operation {
 }
 // eslint-disable-next-line
 export interface CreationContext extends ResourceContext {}
+
+export interface PartComponentDefinition {
+  id: string;
+  type: string;
+  custom: Record<string, unknown>;
+}
