@@ -2,6 +2,9 @@
 
 RELEASE_SHA=$1
 
+cp oli.example.env oli.env
+set -a; source oli.env;
+
 mix local.hex --force
 mix local.rebar --force
 mix archive.install hex phx_new 1.5.9
