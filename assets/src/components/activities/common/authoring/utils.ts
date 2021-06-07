@@ -16,6 +16,7 @@ import {
   HasParts,
   HasTargetedFeedback,
   ActivityModelSchema,
+  HasHints,
 } from '../../types';
 import guid from 'utils/guid';
 
@@ -92,8 +93,8 @@ export const getResponse = (model: HasParts, id: ResponseId) =>
 
 // Hints
 // Only for activity types with one part
-export const getHints = (model: HasParts) => model.authoring.parts[0].hints;
-export const getHint = (model: HasParts, id: HintId) => unsafeGetById<Hint>(getHints(model), id);
+export const getHints = (model: HasHints) => model.authoring.parts[0].hints;
+export const getHint = (model: HasHints, id: HintId) => unsafeGetById<Hint>(getHints(model), id);
 
 export const isShuffled = (transformations: Transformation[]) =>
   !!transformations.find((xform) => xform.operation === Operation.shuffle);

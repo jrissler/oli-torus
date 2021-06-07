@@ -1,3 +1,4 @@
+import { EntityState } from '@reduxjs/toolkit';
 import { ID, Identifiable, ModelElement, Selection } from 'data/content/model';
 import { ResourceContext } from 'data/content/resource';
 import { ResourceId } from 'data/types';

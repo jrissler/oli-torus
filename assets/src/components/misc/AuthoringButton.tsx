@@ -1,4 +1,4 @@
-import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
+import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 import React, { MouseEventHandler } from 'react';
 import { classNames } from 'utils/classNames';
 
@@ -11,7 +11,7 @@ export type Props = {
 };
 
 export const AuthoringButton: React.FC<Props> = (props: Props) => {
-  const { editMode } = useAuthoringElementContext();
+  const { editMode } = useActivityContext();
 
   return (
     <button

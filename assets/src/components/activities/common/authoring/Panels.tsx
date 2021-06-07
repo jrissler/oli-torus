@@ -60,7 +60,7 @@ const TabsComponent: React.FunctionComponent<TabsProps> = ({ children }) => {
   );
 };
 
-function isValidChild(child: any, component: any) {
+export function isValidChild(child: any, component: any) {
   return Object.keys(component).reduce(
     (acc, key) => acc || child.type === (component as any)[key],
     false,

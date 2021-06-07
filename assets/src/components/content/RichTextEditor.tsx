@@ -4,6 +4,7 @@ import { Editor } from 'components/editing/editor/Editor';
 import { getToolbarForResourceType } from 'components/editing/toolbars/insertion/items';
 import { ErrorBoundary } from 'components/common/ErrorBoundary';
 import { classNames } from 'utils/classNames';
+import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 
 type RichTextEditorProps = {

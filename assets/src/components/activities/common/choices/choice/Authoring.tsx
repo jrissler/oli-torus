@@ -1,27 +1,28 @@
 import React from 'react';
-import { Choice as ChoiceType, HasChoices, RichText } from 'components/activities/types';
+import { Choice as ChoiceType, ChoiceId, RichText } from 'components/activities/types';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { RemoveButton } from 'components/misc/RemoveButton';
-import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
-import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
-import { editChoice, removeChoice } from 'components/activities/common/authoring/actions/choices';
-import { useChoices } from 'components/activities/common/choices/Authoring';
+import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import { choicesSlice } from 'components/activities/common/choices/Authoring';
+import { connect } from 'react-redux';
 
 interface Props {
-  choice: ChoiceType;
   canRemove: boolean;
   icon: JSX.Element;
   index: number;
 
-  // Managed by AuthoringElement context
-  editChoiceContent?: (id: string, content: RichText) => void;
-  removeChoice?: (id: string) => void;
+  choice: ChoiceType;
+  onEditChoiceContent: (id: ChoiceId, content: RichText) => void;
+  onRemoveChoice: (id: ChoiceId) => void;
 }
-export const Authoring = (props: Props) => {
-  const { choice, canRemove, icon, index } = props;
-  // const { dispatch } = useAuthoringElementContext<HasChoices>();
-  const { choices, removeChoice } = useChoices();
-
+export const Component = ({
+  canRemove,
+  icon,
+  index,
+  choice,
+  onEditChoiceContent,
+  onRemoveChoice,
+}: Props) => {
   const getStyle = (style: DraggingStyle | NotDraggingStyle | undefined) => {
     if (style?.transform) {
       const axisLockY = `translate(0px, ${style.transform.split(',').pop()}`;
@@ -53,19 +54,11 @@ export const Authoring = (props: Props) => {
           <RichTextEditor
             placeholder="Answer choice"
             text={choice.content}
-            onEdit={(content) =>
-              (props.editChoiceContent && props.editChoiceContent(choice.id, content)) ||
-              dispatch(editChoice(choice.id, content))
-            }
+            onEdit={(content) => onEditChoiceContent(choice.id, content)}
           />
           {canRemove && (
             <div className="d-flex justify-content-center" style={{ width: 48 }}>
-              <RemoveButton
-                onClick={() => {
-                  removeChoice(choice.id);
-                  props.removeChoice && props.removeChoice(choice.id);
-                }}
-              />
+              <RemoveButton onClick={() => onRemoveChoice(choice.id)} />
             </div>
           )}
         </div>
@@ -73,3 +66,9 @@ export const Authoring = (props: Props) => {
     </Draggable>
   );
 };
+
+export const Authoring = connect(null, (dispatch) => ({
+  onEditChoiceContent: (id: ChoiceId, content: RichText) =>
+    dispatch(choicesSlice.actions.editChoiceContent({ id, content })),
+  onRemoveChoice: (id: ChoiceId) => dispatch(choicesSlice.actions.removeChoice(id)),
+}))(Component);

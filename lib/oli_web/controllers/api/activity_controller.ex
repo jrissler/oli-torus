@@ -147,6 +147,8 @@ defmodule OliWeb.Api.ActivityController do
       }) do
     author = conn.assigns[:current_author]
 
+    IO.inspect(model, label: "Model")
+
     case ActivityEditor.create(project_slug, activity_type_slug, author, model, objectives) do
       {:ok, {%{slug: slug}, transformed}} ->
         json(conn, %{"type" => "success", "revisionSlug" => slug, "transformed" => transformed})

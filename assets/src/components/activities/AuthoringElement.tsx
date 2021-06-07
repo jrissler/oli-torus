@@ -15,13 +15,23 @@ export function orIdentity(f: unknown) {
       model;
 }
 
+export const AuthoringElementContext: React.Context<AuthoringElementProps<IModel> | undefined> =
+  React.createContext<AuthoringElementProps<IModel> | undefined>(undefined);
+
+export function useAuthoringElementContext<IModel>() {
+  const context = useContext<AuthoringElementProps<IModel> | undefined>(AuthoringElementContext);
+  if (context === undefined) {
+    throw new Error('useAuthoringElementContext must be used within an ActivityProvider');
+  }
+  return context;
+}
+
 export interface AuthoringElementProps<T extends ActivityModelSchema> {
   model: T;
   onEdit: (model: T) => void;
   editMode: boolean;
   projectSlug: ProjectSlug;
   editorMap: ActivityEditorMap;
-  // dispatch: (...actions: ((model: T) => void)[]) => boolean;
 }
 
 // An abstract authoring web component, designed to delegate to
@@ -49,15 +59,6 @@ export abstract class AuthoringElement<T extends ActivityModelSchema> extends HT
     const editorMap: ActivityEditorMap = getProp('editorMap');
     const onEdit = (model: T) =>
       this.dispatchEvent(new CustomEvent('modelUpdated', { bubbles: true, detail: { model } }));
-    // const dispatch = (...actions: ((model: T) => void)[]) =>
-    //   onEdit(actions.reduce((acc, curr) => curr(acc), model));
-    // const dispatch = useCallback((action) => onEdit(useDispatch()(action)), []);
-
-    // const dispatch = useDispatch();
-    // const dispatch = (action: ((model: T) => void)) =>
-    //   onEdit(produce(model, action));
-    // onEdit(produce(model, action));
-    // onEdit = (action: any) => onEdit(produce(model, action));
 
     return {
       onEdit,

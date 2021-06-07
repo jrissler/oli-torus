@@ -3,51 +3,34 @@ import { RichTextEditor } from 'components/content/RichTextEditor';
 import { HasStem, RichText, Stem as StemType } from '../../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
-import produce, { Draft } from 'immer';
-import { useDispatch, useSelector } from 'react-redux';
-
+import { connect } from 'react-redux';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { makeStem } from '../authoring/utils';
-import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
-import { stemSlice } from './redux';
 
-// const toggleReducer = (state: HasStem, action:) => {
-//   switch (action.type)
-// }
-// export function useStem({ reducer = stemSlice.reducer } = {}) {
-//   const {
-//     model: { stem },
-//     // dispatch,
-//   } = useActivityContext<HasStem>();
-//   const [state, dispatch] = React.useReducer(reducer, stem);
-
-//   const setStem = (content: RichText) =>
-//     produce((draft: Draft<HasStem>) => {
-//       draft.stem.content = content;
-//     });
-
-//   return { stem, setStem, dispatch };
-// }
+export const selectStem = (state: HasStem) => state.stem;
+const initialState: StemType = makeStem('');
+export const stemSlice = createSlice({
+  name: 'stem',
+  initialState,
+  reducers: {
+    set(state, action: PayloadAction<RichText>) {
+      state.content = action.payload;
+    },
+  },
+});
 
 interface AuthoringProps {
-  onStemChange?: (text: RichText) => void;
+  stem: StemType;
+  onStemChange: (text: RichText) => void;
 }
 
-export const Authoring = ({ onStemChange }: AuthoringProps) => {
-  // const { stem, setStem, dispatch } = useStem();
-  // const stem = useSelector((state: HasStem) => console.log('state', state) || state.stem);
-  // console.log('state', stem);
-  // const dispatch = useDispatch();
-  const { dispatch, model } = useActivityContext<HasStem>();
-  const stem = model.stem;
-
+export const Authoring: React.FC<AuthoringProps> = ({ stem, onStemChange }) => {
   return (
     <div className="mb-2 flex-grow-1">
       <RichTextEditor
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}
-        // onEdit={(text) => (onStemChange ? onStemChange(text) : dispatch(setStem(text)))}
-        onEdit={(text) => (onStemChange ? onStemChange(text) : stemSlice.actions.set(text))}
-        // onEdit={(text) => dispatch(stemSlice.actions.set(text))}
+        onEdit={onStemChange}
         placeholder="Question"
       />
     </div>
@@ -64,6 +47,14 @@ export const Delivery = ({ stem, context }: DeliveryProps) => {
 };
 
 export const Stem = {
-  Authoring,
+  Authoring: {
+    Unconnected: Authoring,
+    Connected: connect(
+      (state: HasStem) => ({ stem: state.stem }),
+      (dispatch) => ({
+        onStemChange: (text: RichText) => dispatch(stemSlice.actions.set(text)),
+      }),
+    )(Authoring),
+  },
   Delivery,
 };

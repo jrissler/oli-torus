@@ -1,115 +1,204 @@
-import React, { useContext } from 'react';
+import React, { Reducer, useContext, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
-import { CheckAllThatApplyModelSchema } from './schema_old';
+import { connect, Provider, useSelector } from 'react-redux';
+import { Panels } from 'components/activities/common/authoring/Panels';
+import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
+import { Stem, stemSlice } from '../common/stem/Stem';
+import {
+  HasTargetedFeedback,
+  HasTransformations,
+  isTargetedFeedbackEnabled,
+  Manifest,
+  Operation,
+  Part,
+  TargetedFeedbackDisabled,
+  TargetedFeedbackEnabled,
+} from '../types';
+import { combineReducers, createAction, createSlice } from '@reduxjs/toolkit';
+import { configureStore as configureStore2 } from '@reduxjs/toolkit';
+import { Choices } from '../common/choices';
+import { Checkbox } from '../common/authoring/icons/Checkbox';
+import { choicesSlice } from '../common/choices/Authoring';
+import { AnswerKey, answerKeySlice } from '../common/authoring/AnswerKey';
+import {
+  getChoiceIds,
+  TargetedFeedback,
+  targetedFeedbackSlice,
+} from '../common/authoring/feedback/TargetedFeedback';
 import { Feedback } from '../common/authoring/feedback/Feedback';
 import { Hints } from '../common/authoring/Hints';
-import { ModalDisplay } from 'components/modal/ModalDisplay';
-import { Provider, useDispatch, useStore } from 'react-redux';
-import { configureStore } from 'state/store';
-import { getTransformations, isShuffled } from 'components/activities/common/authoring/utils';
-import { Panels } from 'components/activities/common/authoring/Panels';
-import { Settings } from 'components/activities/common/authoring/settings/Settings';
-import { Checkbox } from 'components/activities/common/authoring/icons/Checkbox';
-import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
-import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
-import { toggleTargetedFeedback } from 'components/activities/common/authoring/actions/feedback';
-import { usePreviewText } from 'components/activities/common/authoring/preview_text/usePreviewText';
-import { Stem } from '../common/stem/Stem';
-import { AnswerKey } from '../common/authoring/AnswerKey';
-import { Choices } from '../common/choices';
-import { useChoices } from 'components/activities/common/choices/Authoring';
-import { isTargetedFeedbackEnabled, Manifest, RichText } from '../types';
-import {
-  getCorrectChoiceIds,
-  TargetedFeedback,
-} from '../common/authoring/feedback/TargetedFeedback';
-
-import { combineReducers, createStore, PayloadAction } from '@reduxjs/toolkit';
-import { stemSlice } from 'components/activities/common/stem/redux';
-import { ActivityEditorProps } from 'components/activity/ActivityEditor';
-import { Reducer } from 'react';
-
-// export const { select: selectStemActionCreator } = stemSlice.actions;
-
-// const activityStore = configureStore({ reducer: activityReducer });
-// export { activityReducer, activityStore };
-
-const store = configureStore();
-
-// const useCheckAllThatApply = () => {
-//   // const { model, onEdit } = useActivityContext<CheckAllThatApplyModelSchemaV2>();
-//   // const store = useStore();
-//   // console.log('store', store.getState());
-//   // store.subscribe(() => {
-//   //   console.log('state', store.getState());
-//   //   onEdit(store.getState());
-//   // });
-//   const { setPreviewText } = usePreviewText();
-//   // const { setStem } = useStem();
-//   const { addChoice } = useChoices();
-//   const dispatch = useDispatch();
-
-//   return {
-//     // setStem(text),
-//     // stemChange: (text: RichText) => dispatch(setPreviewText(text)),
-//     stemChange: (text: RichText) => dispatch(stemSlice.actions.set(text)),
-//     // focus last choice and support targeted feedback in add choice
-//     addChoice: () => dispatch(addChoice()),
-//     toggleAnswerChoiceShuffling: () => dispatch(toggleAnswerChoiceShuffling()),
-//     toggleTargetedFeedback: () => dispatch(toggleTargetedFeedback()),
-//     // model,
-//   };
-// };
+import { Settings } from '../common/authoring/settings/Settings';
+import { getTransformations, isShuffled, makeTransformation } from '../common/authoring/utils';
+import { transformationsSlice } from '../common/authoring/transformations/transformationsRedux';
+import { previewTextSlice } from '../common/authoring/preview_text/previewTextRedux';
 
 export const ActivityContext: React.Context<
-  IActivityContext<CheckAllThatApplyModelSchemaV2> | undefined
-> = React.createContext<IActivityContext<CheckAllThatApplyModelSchemaV2> | undefined>(undefined);
+  AuthoringElementProps<CheckAllThatApplyModelSchemaV2> | undefined
+> =
+  React.createContext<AuthoringElementProps<CheckAllThatApplyModelSchemaV2> | undefined>(undefined);
 
 export function useActivityContext() {
   const context =
-    useContext<IActivityContext<CheckAllThatApplyModelSchemaV2> | undefined>(ActivityContext);
+    useContext<AuthoringElementProps<CheckAllThatApplyModelSchemaV2> | undefined>(ActivityContext);
   if (context === undefined) {
     throw new Error('useActivityContext must be used within an ActivityProvider');
   }
   return context;
 }
 
-interface IActivityContext<ModelT> extends IActivityProviderProps<ModelT> {
-  dispatch: React.Dispatch<PayloadAction>;
+function removeFromList<T>(item: T, list: T[]) {
+  const index = list.findIndex((x) => x === item);
+  if (index > -1) {
+    list.splice(index, 1);
+  }
+  return list;
 }
-interface IActivityProviderProps<ModelT> extends AuthoringElementProps<ModelT> {
-  reducer: React.Reducer<ModelT, PayloadAction>;
+function addOrRemoveFromList<T>(item: T, list: T[]) {
+  if (list.find((x) => x === item)) {
+    return removeFromList(item, list);
+  }
+  list.push(item);
+  return list;
 }
 
-// const cataReducer = combineReducers({});
+const toggleAnswerChoiceShuffling = createAction<void>('settings/toggleAnswerChoiceShuffling');
+const toggleTargetedFeedback = createAction<void>('settings/toggleTargetedFeedback');
+type Setting = { isEnabled: boolean; onToggle: () => void; label: string };
+const CheckAllThatApplySettingsComponent: React.FC<{
+  settings: Setting[];
+}> = ({ settings }) => {
+  return (
+    <Settings.Menu>
+      {settings.map(({ isEnabled, onToggle, label }, i) => (
+        <Settings.Setting key={i} isEnabled={isEnabled} onToggle={onToggle}>
+          {label}
+        </Settings.Setting>
+      ))}
+    </Settings.Menu>
+  );
+};
+const CheckAllThatApplySettings = connect(
+  (state: HasTransformations & HasTargetedFeedback) => ({
+    settingsState: [
+      {
+        isEnabled: isShuffled(getTransformations(state)),
+        label: 'Shuffle answer choice order',
+      },
+      {
+        isEnabled: isTargetedFeedbackEnabled(state),
+        label: 'Targeted Feedback',
+      },
+    ],
+  }),
+  (dispatch) => ({
+    settingsDispatch: [
+      { onToggle: () => dispatch(toggleAnswerChoiceShuffling()) },
+      { onToggle: () => dispatch(toggleTargetedFeedback()) },
+    ],
+  }),
+  (stateProps, dispatchProps) => ({
+    // zip both lists together into a single list of Setting objects
+    settings: stateProps.settingsState.reduce(
+      (acc, settingsState, i) =>
+        acc.concat({ ...settingsState, ...dispatchProps.settingsDispatch[i] }),
+      [] as Setting[],
+    ),
+  }),
+)(CheckAllThatApplySettingsComponent);
 
-const activityReducer = combineReducers(stemSlice.reducer);
-
-// export const ActivityProvider<ModelT>(props: IActivityProviderProps<ModelT>) {
-export const ActivityProvider: React.FC<IActivityProviderProps<CheckAllThatApplyModelSchemaV2>> = (
+export const ActivityProvider: React.FC<AuthoringElementProps<CheckAllThatApplyModelSchemaV2>> = (
   props,
 ) => {
-  const [model, dispatch] = React.useReducer(props.reducer, props.model);
+  const activitySlice = createSlice({
+    name: 'model',
+    initialState: props.model,
+    reducers: {},
+    extraReducers: (builder) => {
+      builder
+        .addCase(answerKeySlice.actions.toggleCorrectness, (state, action) => {
+          const correct = addOrRemoveFromList(
+            action.payload,
+            getChoiceIds(state.authoring.feedback.correct),
+          );
+          const incorrect = addOrRemoveFromList(
+            action.payload,
+            getChoiceIds(state.authoring.feedback.incorrect),
+          );
+          targetedFeedbackSlice.reducer(
+            state,
+            targetedFeedbackSlice.actions.syncResponseRules({
+              correctChoiceIds: correct,
+              incorrectChoiceIds: incorrect,
+            }),
+          );
+        })
+        .addCase(toggleTargetedFeedback, (state) => {
+          if (state.authoring.feedback.type === 'TargetedFeedbackEnabled') {
+            (state as TargetedFeedbackDisabled).authoring.feedback.type =
+              'TargetedFeedbackDisabled';
+          } else {
+            (state as TargetedFeedbackEnabled).authoring.feedback.type = 'TargetedFeedbackEnabled';
+          }
+        });
+    },
+  });
+
+  const partsSlice = createSlice({
+    name: 'parts',
+    reducers: {},
+    initialState: {} as CheckAllThatApplyModelSchemaV2['authoring']['parts'],
+  });
+  const feedbackSlice = createSlice({
+    name: 'feedback',
+    reducers: {},
+    initialState: {} as HasTargetedFeedback['authoring']['feedback'],
+  });
+
+  const store = configureStore2<CheckAllThatApplyModelSchemaV2>({
+    reducer: combineReducers<CheckAllThatApplyModelSchemaV2>({
+      choices: choicesSlice.reducer,
+      // activity: activitySlice.reducer,
+      stem: stemSlice.reducer,
+      authoring: (state = props.model.authoring, action) => ({
+        ...state,
+        previewText: previewTextSlice.reducer(state.previewText, action),
+      }),
+
+      // combineReducers<CheckAllThatApplyModelSchemaV2['authoring']>({
+      //   feedback: feedbackSlice.reducer as any,
+      //   parts: partsSlice.reducer,
+      //   transformations: transformationsSlice.reducer,
+      //   previewText: previewTextReducer.reducer,
+      // }),
+    }),
+    // (state = props.model, action) => {
+    // return activitySlice.reducer(
+    //   {
+    //     ...state,
+    //     stem: stemSlice.reducer(state?.stem, action),
+    //     choices: choicesSlice.reducer(state?.choices, action),
+    //   },
+    //   action,
+    // );
+    preloadedState: props.model,
+  });
+  store.subscribe(() => props.onEdit(store.getState()));
+
   return (
-    <ActivityContext.Provider value={{ ...props, dispatch, model }}>
-      {props.children}
-    </ActivityContext.Provider>
+    <Provider store={store}>
+      <ActivityContext.Provider value={{ ...props }}>{props.children}</ActivityContext.Provider>
+    </Provider>
   );
 };
 
 const CheckAllThatApply: React.FC = () => {
-  // const { model, stemChange, addChoice, toggleAnswerChoiceShuffling, toggleTargetedFeedback } =
-  // useCheckAllThatApply();
-  const { model, dispatch } = useActivityContext();
-
   return (
     <>
       <Panels.Tabs>
         <Panels.Tab label="Question">
           <div className="d-flex">
-            {/* <Stem.Authoring onStemChange={stemChange} /> */}
-            <Stem.Authoring />
+            <Stem.Authoring.Connected />
             <select style={{ width: 160, height: 61, marginLeft: 10 }} className="custom-select">
               <option selected>Checkboxes</option>
               <option value="1">Multiple Choice</option>
@@ -118,34 +207,20 @@ const CheckAllThatApply: React.FC = () => {
             </select>
           </div>
 
-          {/* <Choices.Authoring icon={<Checkbox.Unchecked />} onAddChoice={addChoice} /> */}
+          <Choices.Authoring icon={<Checkbox.Unchecked />} />
         </Panels.Tab>
 
-        {/* <Panels.Tab label="Answer Key">
-          <AnswerKey correctChoiceIds={getCorrectChoiceIds(model)} />
-          <TargetedFeedback>
-            <Feedback.Authoring />
-          </TargetedFeedback>
+        <Panels.Tab label="Answer Key">
+          <AnswerKey.Connected />
+          {/* <TargetedFeedback> */}
+          <Feedback.Authoring.Connected />
+          {/* </TargetedFeedback> */}
         </Panels.Tab>
 
         <Panels.Tab label="Hints">
-          <Hints />
-        </Panels.Tab> */}
-
-        {/* <Settings.Menu>
-          <Settings.Setting
-            isEnabled={isShuffled(getTransformations(model))}
-            onToggle={toggleAnswerChoiceShuffling}
-          >
-            Shuffle answer choice order
-          </Settings.Setting>
-          <Settings.Setting
-            isEnabled={isTargetedFeedbackEnabled(model)}
-            onToggle={toggleTargetedFeedback}
-          >
-            Targeted Feedback
-          </Settings.Setting>
-        </Settings.Menu> */}
+          <Hints.Connected />
+        </Panels.Tab>
+        <CheckAllThatApplySettings />
       </Panels.Tabs>
     </>
   );
@@ -154,16 +229,14 @@ const CheckAllThatApply: React.FC = () => {
 export class CheckAllThatApplyAuthoring extends AuthoringElement<CheckAllThatApplyModelSchemaV2> {
   render(mountPoint: HTMLDivElement, props: AuthoringElementProps<CheckAllThatApplyModelSchemaV2>) {
     ReactDOM.render(
-      <Provider store={store}>
-        {/* <ActivityProvider reducer={cataReducer} value={props}> */}
-        {/* <Provider store={activityStore}> */}
-        <ActivityProvider {...props} reducer={activityReducer}>
+      <>
+        {/* <AuthoringElementContext.Provider value={props}> */}
+        <ActivityProvider {...props}>
           <CheckAllThatApply />
+          {/* </Provider> */}
         </ActivityProvider>
-        {/* </Provider> */}
-        {/* </ActivityProvider> */}
-        <ModalDisplay />
-      </Provider>,
+        {/* </AuthoringElementContext.Provider> */}
+      </>,
       mountPoint,
     );
   }

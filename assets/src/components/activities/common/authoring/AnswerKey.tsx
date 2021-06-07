@@ -1,58 +1,69 @@
 import React from 'react';
-import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { defaultWriterContext } from 'data/content/writers/context';
-import { Stem } from '../stem/Stem';
-import { ChoiceId, HasChoices, HasStem, HasTargetedFeedback } from 'components/activities/types';
+
+import {
+  Choice,
+  ChoiceId,
+  HasChoices,
+  HasStem,
+  HasTargetedFeedback,
+  Stem as StemType,
+} from 'components/activities/types';
 import { Choices } from '../choices';
-import produce, { Draft } from 'immer';
-import { getChoiceIds } from './feedback/TargetedFeedback';
+import { getCorrectChoiceIds } from './feedback/TargetedFeedback';
+import { connect } from 'react-redux';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Stem } from '../stem/Stem';
+import { makeStem } from './utils';
 
-export const useAnswerKey = () => {
-  const { model, dispatch } =
-    useAuthoringElementContext<HasStem & HasChoices & HasTargetedFeedback>();
+export const answerKeySlice = createSlice({
+  name: 'answerKey',
+  initialState: { stem: makeStem(''), choices: [] as Choice[] },
+  reducers: {
+    toggleCorrectness(state, action: PayloadAction<ChoiceId>) {
+      return state;
+    },
+  },
+});
 
-  function removeFromList<T>(item: T, list: T[]) {
-    const index = list.findIndex((x) => x === item);
-    if (index > -1) {
-      list.splice(index, 1);
-    }
-  }
-  function addOrRemoveFromList<T>(item: T, list: T[]) {
-    if (list.find((x) => x === item)) {
-      return removeFromList(item, list);
-    }
-    return list.push(item);
-  }
-
-  const toggleCorrectness = (id: ChoiceId) =>
-    produce((draft: Draft<HasChoices>) => {
-      addOrRemoveFromList(id, getChoiceIds(model.authoring.feedback.correct));
-      addOrRemoveFromList(id, getChoiceIds(model.authoring.feedback.incorrect));
-    });
-
-  return { model, dispatch, toggleCorrectness };
-};
 interface Props {
+  stem: StemType;
+  choices: Choice[];
   correctChoiceIds: ChoiceId[];
-  onToggleCorrectness?: (id: ChoiceId) => void;
+  onToggleCorrectness: (id: ChoiceId) => void;
 }
-export const AnswerKey: React.FC<Props> = ({ correctChoiceIds, onToggleCorrectness }) => {
-  const { model, dispatch, toggleCorrectness } = useAnswerKey();
+export const AuthoringAnswerKey: React.FC<Props> = ({
+  stem,
+  choices,
+  correctChoiceIds,
+  onToggleCorrectness,
+}) => {
   return (
     <>
-      <Stem.Delivery stem={model.stem} context={defaultWriterContext()} />
+      <Stem.Delivery stem={stem} context={defaultWriterContext()} />
 
       <Choices.Delivery
         unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}
         selectedIcon={<i className="material-icons-outlined">check_box</i>}
-        choices={model.choices}
+        choices={choices}
         selected={correctChoiceIds}
-        onSelect={(id) =>
-          onToggleCorrectness ? onToggleCorrectness(id) : dispatch(toggleCorrectness(id))
-        }
+        onSelect={onToggleCorrectness}
         isEvaluated={false}
         context={defaultWriterContext()}
       />
     </>
   );
+};
+
+export const AnswerKey = {
+  Connected: connect(
+    (state: HasChoices & HasStem & HasTargetedFeedback) => ({
+      stem: state.stem,
+      choices: state.choices,
+      correctChoiceIds: getCorrectChoiceIds(state),
+    }),
+    (dispatch) => ({
+      onToggleCorrectness: (id: ChoiceId) => dispatch(answerKeySlice.actions.toggleCorrectness(id)),
+    }),
+  )(AuthoringAnswerKey),
 };

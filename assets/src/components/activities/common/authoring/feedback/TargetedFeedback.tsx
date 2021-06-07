@@ -23,7 +23,7 @@ import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { ID } from 'data/content/model';
 import produce, { Draft } from 'immer';
-import { useFeedback } from './Feedback';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface Option {
   id: string;
@@ -51,11 +51,13 @@ export const getIncorrectResponse = (model: HasTargetedFeedback) =>
 export const getTargetedResponses = (model: TargetedFeedbackEnabled & HasParts) =>
   model.authoring.feedback.targeted.map((assoc) => getResponse(model, getResponseId(assoc)));
 
-const updateCorrectResponseRule = (model: HasTargetedFeedback) =>
-  (getCorrectResponse(model).rule = createRuleForIds(
-    getCorrectChoiceIds(model),
-    getIncorrectChoiceIds(model),
-  ));
+const updateCorrectResponseRule = (
+  model: HasTargetedFeedback,
+  {
+    correctChoiceIds,
+    incorrectChoiceIds,
+  }: { correctChoiceIds: ChoiceId[]; incorrectChoiceIds: ChoiceId[] },
+) => (getCorrectResponse(model).rule = createRuleForIds(correctChoiceIds, incorrectChoiceIds));
 
 // Rules
 export const createRuleForIds = (toMatch: ID[], notToMatch: ID[]) =>
@@ -150,6 +152,37 @@ const syncResponseRules = (model: HasTargetedFeedback) => {
     targetedFeedbackRules.map(invertRule).concat([invertRule(getCorrectResponse(model).rule)]),
   );
 };
+
+export const targetedFeedbackSlice = createSlice({
+  name: 'targetedFeedback',
+  initialState: {} as any,
+  reducers: {
+    syncResponseRules(
+      state: HasTargetedFeedback,
+      action: PayloadAction<{ correctChoiceIds: ChoiceId[]; incorrectChoiceIds: ChoiceId[] }>,
+    ) {
+      // Always update the rule to match the correct response with the correct answer choices.
+      updateCorrectResponseRule(state, action.payload);
+
+      // The targeted rules list might be empty, or it might not.
+      const targetedFeedbackRules: Rule[] = [];
+      const allChoiceIds = state.choices.map((choice) => choice.id);
+      state.authoring.feedback.targeted.forEach((assoc) => {
+        const targetedRule = createRuleForIds(
+          getChoiceIds(assoc),
+          setDifference(allChoiceIds, getChoiceIds(assoc)),
+        );
+        targetedFeedbackRules.push(targetedRule);
+        getResponse(state, getResponseId(assoc)).rule = targetedRule;
+      });
+
+      // Now for the catch-all incorrect response rule, which matches any choice combination that doesn't match either the correct response rule or any of the targeted feedback rules.
+      getIncorrectResponse(state).rule = unionRules(
+        targetedFeedbackRules.map(invertRule).concat([invertRule(getCorrectResponse(state).rule)]),
+      );
+    },
+  },
+});
 
 function addOrRemoveFromList<T>(item: T, list: T[]) {
   if (list.find((x) => x === item)) {

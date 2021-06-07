@@ -86,9 +86,9 @@ const populateEntries = () => {
   if (
     Object.keys(merged).length !=
     Object.keys(initialEntries).length +
-      2 * foundActivities.length +
-      2 * foundParts.length +
-      foundThemes.length
+    2 * foundActivities.length +
+    2 * foundParts.length +
+    foundThemes.length
   ) {
     throw new Error(
       'Encountered a possible naming collision in activity or part manifests. Aborting.',
@@ -101,7 +101,7 @@ const populateEntries = () => {
 module.exports = (env, options) => ({
   devtool: 'source-map',
   optimization: {
-    minimize: true,
+    minimize: process.env.NODE_ENV == 'production',
     minimizer: [new TerserPlugin()],
   },
   entry: populateEntries(),

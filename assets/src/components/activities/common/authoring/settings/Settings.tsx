@@ -2,9 +2,9 @@ import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { Popover } from 'react-tiny-popover';
 import React, { useState } from 'react';
 import { classNames } from 'utils/classNames';
-import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
 import { IconCorrect } from 'components/misc/Icons';
 import './Settings.scss';
+import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 
 interface SettingProps {
   isEnabled: boolean;
@@ -24,7 +24,7 @@ interface MenuProps {
 }
 const Menu: React.FC<MenuProps> = ({ children }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { editMode } = useAuthoringElementContext();
+  const { editMode } = useActivityContext();
 
   return (
     <AuthoringButton
