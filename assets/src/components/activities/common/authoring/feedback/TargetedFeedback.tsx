@@ -133,7 +133,7 @@ export function setDifference<T>(subtractedFrom: T[], toSubtract: T[]): T[] {
 // Update all response rules from new choices that are not yet reflected by the rules.
 const syncResponseRules = (model: HasTargetedFeedback) => {
   // Always update the rule to match the correct response with the correct answer choices.
-  updateCorrectResponseRule(model);
+  // updateCorrectResponseRule(model);
 
   // The targeted rules list might be empty, or it might not.
   const targetedFeedbackRules: Rule[] = [];
@@ -199,8 +199,8 @@ function removeFromList<T>(item: T, list: T[]) {
 }
 
 const useTargetedFeedback = () => {
-  const { editMode, model, dispatch } = useAuthoringElementContext<HasTargetedFeedback>();
-  const { setResponseFeedback } = useFeedback();
+  // const { editMode, model, dispatch } = useAuthoringElementContext<HasTargetedFeedback>();
+  // const { setResponseFeedback } = useFeedback();
 
   const addTargetedFeedback = () =>
     produce((model: Draft<HasTargetedFeedback>) => {
@@ -238,13 +238,13 @@ const useTargetedFeedback = () => {
     });
 
   return {
-    model,
-    editMode,
-    setResponseFeedback,
-    addTargetedFeedback,
-    removeTargetedFeedback,
-    editTargetedFeedbackChoices,
-    dispatch,
+    // model,
+    // editMode,
+    // // setResponseFeedback,
+    // addTargetedFeedback,
+    // removeTargetedFeedback,
+    // editTargetedFeedbackChoices,
+    // dispatch,
   };
 };
 
@@ -261,34 +261,34 @@ export const TargetedFeedback: React.FC<Props> = ({
   onEditTargetedFeedbackChoices,
   children,
 }) => {
-  const {
-    model,
-    editMode,
-    setResponseFeedback,
-    addTargetedFeedback,
-    removeTargetedFeedback,
-    editTargetedFeedbackChoices,
-    dispatch,
-  } = useTargetedFeedback();
+  // const {
+    // model,
+    // editMode,
+    // // setResponseFeedback,
+    // addTargetedFeedback,
+    // removeTargetedFeedback,
+    // editTargetedFeedbackChoices,
+    // dispatch,
+  // } = useTargetedFeedback();
 
-  const createSelection = (assocs: ChoiceIdsToResponseId[]) =>
-    assocs.reduce((acc, assoc) => {
-      acc[getResponseId(assoc)] = toOptions(getChoiceIds(assoc));
-      return acc;
-    }, {} as OptionMap);
+  // const createSelection = (assocs: ChoiceIdsToResponseId[]) =>
+  //   assocs.reduce((acc, assoc) => {
+  //     acc[getResponseId(assoc)] = toOptions(getChoiceIds(assoc));
+  //     return acc;
+  //   }, {} as OptionMap);
 
-  const toOptions = (choiceIds: ChoiceId[]) =>
-    choiceIds.map((id) => ({
-      id,
-      label: (model.choices.findIndex((choice) => choice.id === id) + 1).toString(),
-    }));
+  // const toOptions = (choiceIds: ChoiceId[]) =>
+  //   choiceIds.map((id) => ({
+  //     id,
+  //     label: (model.choices.findIndex((choice) => choice.id === id) + 1).toString(),
+  //   }));
 
-  const allChoiceOptions = toOptions(model.choices.map((choice) => choice.id));
-  const selected = createSelection(model.authoring.feedback.targeted);
+  // const allChoiceOptions = toOptions(model.choices.map((choice) => choice.id));
+  // const selected = createSelection(model.authoring.feedback.targeted);
 
   return (
     <>
-      {children}
+      {/* {children}
 
       {model.authoring.feedback.targeted.map((assoc) => {
         const response = getResponse(model, getResponseId(assoc));
@@ -345,7 +345,7 @@ export const TargetedFeedback: React.FC<Props> = ({
         onClick={onAddTargetedFeedback ? onAddTargetedFeedback : addTargetedFeedback}
       >
         Add targeted feedback
-      </AuthoringButton>
+      </AuthoringButton> */}
     </>
   );
 };

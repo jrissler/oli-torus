@@ -3,9 +3,7 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { ShortAnswerModelSchema, InputType } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/stem/Stem';
 import { Feedback } from './sections/Feedback';
-import { Hints } from '../common/authoring/Hints';
 import { ShortAnswerActions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
@@ -68,28 +66,27 @@ const ShortAnswer = (props: AuthoringElementProps<ShortAnswerModelSchema>) => {
         inputType={props.model.inputType}
         onChange={(inputType) => dispatch(ShortAnswerActions.setInputType(inputType))}
       />
-      <Stem
+      {/* <Stem
         projectSlug={props.projectSlug}
         editMode={props.editMode}
         stem={props.model.stem}
         onEditStem={(content) => dispatch(ShortAnswerActions.editStem(content))}
-      />
+      /> */}
       <Feedback
         {...sharedProps}
-        projectSlug={props.projectSlug}
         onAddResponse={() => dispatch(ShortAnswerActions.addResponse())}
         onRemoveResponse={(id) => dispatch(ShortAnswerActions.removeReponse(id))}
         onEditResponseRule={(id, rule) => dispatch(ShortAnswerActions.editRule(id, rule))}
         onEditResponse={(id, content) => dispatch(ShortAnswerActions.editFeedback(id, content))}
       />
-      <Hints
+      {/* <Hints
         projectSlug={props.projectSlug}
         hints={props.model.authoring.parts[0].hints}
         editMode={props.editMode}
         onAddHint={() => dispatch(ShortAnswerActions.addHint())}
         onEditHint={(id, content) => dispatch(ShortAnswerActions.editHint(id, content))}
         onRemoveHint={(id) => dispatch(ShortAnswerActions.removeHint(id))}
-      />
+      /> */}
     </div>
   );
 };

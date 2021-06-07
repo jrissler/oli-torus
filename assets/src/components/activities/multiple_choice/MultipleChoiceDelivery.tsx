@@ -11,12 +11,12 @@ import { MultipleChoiceModelSchema } from './schema';
 import * as ActivityTypes from '../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { Maybe } from 'tsmonad';
-import { Stem } from '../common/delivery/DisplayedStem';
 import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
+import {StemDelivery} from '../common/stem/Stem'
 
 type Evaluation = {
   score: number;
@@ -81,7 +81,7 @@ export const MultipleChoiceComponent = (props: DeliveryElementProps<MultipleChoi
   const [selected, setSelected] = useState(
     props.state.parts[0].response === null
       ? Maybe.nothing<string>()
-      : Maybe.just<string>(props.state.parts[0].response.input),
+      : Maybe.just<string>((props.state.parts[0].response as any).input),
   );
 
   const { stem, choices } = model;
@@ -184,7 +184,7 @@ export const MultipleChoiceComponent = (props: DeliveryElementProps<MultipleChoi
   return (
     <div className={`activity multiple-choice-activity ${isEvaluated ? 'evaluated' : ''}`}>
       <div className="activity-content">
-        <Stem stem={stem} context={writerContext} />
+        <StemDelivery stem={stem} context={writerContext} />
         {gradedPoints}
         <Choices
           choices={choices}

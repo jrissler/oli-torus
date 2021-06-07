@@ -15,7 +15,6 @@ import { valueOr } from 'utils/common';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { Hint } from 'react-bootstrap-typeahead';
-import { Stem } from '../common/stem/Stem';
 
 type Evaluation = {
   score: number;
@@ -75,7 +74,7 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
   const [attemptState, setAttemptState] = useState<ActivityTypes.ActivityState>(props.state);
   const [hints, setHints] = useState<ActivityTypes.Hint[]>(props.state.parts[0].hints);
   const [hasMoreHints, setHasMoreHints] = useState<boolean>(props.state.parts[0].hasMoreHints);
-  const [input, setInput] = useState<string>(valueOr(attemptState.parts[0].response, ''));
+  const [input, setInput] = useState<string>(valueOr((attemptState.parts[0] as any).response, ''));
   const { stem } = model;
 
   const isEvaluated = attemptState.score !== null;
@@ -144,14 +143,14 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
     ? null
     : [
         evaluationSummary,
-        <Hint
-          key="hints"
-          onClick={onRequestHint}
-          hints={hints}
-          context={writerContext}
-          hasMoreHints={hasMoreHints}
-          isEvaluated={isEvaluated}
-        />,
+        // <Hint
+        //   key="hints"
+        //   onClick={onRequestHint}
+        //   hints={hints}
+        //   context={writerContext}
+        //   hasMoreHints={hasMoreHints}
+        //   isEvaluated={isEvaluated}
+        // />,
       ];
 
   const gradedDetails = props.graded && props.review ? [evaluationSummary] : null;
@@ -183,7 +182,7 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
   return (
     <div className="activity short-answer-activity">
       <div className="activity-content">
-        <Stem.Delivery stem={stem} context={writerContext} />
+        {/* <Stem.Delivery stem={stem} context={writerContext} /> */}
         {gradedPoints}
         <div className="">
           <Input

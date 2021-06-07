@@ -1,15 +1,11 @@
-import {
-  addHint,
-  editChoice,
-  editFeedback,
-  editHint,
-  editStem,
-  removeChoice,
-  removeHint,
-  toggleAnswerChoiceShuffling,
-} from 'components/activities/common/authoring/immerActions';
+
 import { makeChoice, makeResponse } from 'components/activities/common/authoring/utils';
 import { HasChoices, HasParts } from 'components/activities/types';
+import {editChoice, removeChoice} from '../common/authoring/actions/choices'
+import {editFeedback} from '../common/authoring/actions/feedback'
+import {addHint, editHint, removeHint} from '../common/authoring/actions/hints'
+import {editStem} from '../common/authoring/actions/stem'
+import {toggleAnswerChoiceShuffling} from '../common/utils'
 
 export class MCActions {
   static editStem = editStem;

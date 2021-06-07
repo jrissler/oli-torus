@@ -20,26 +20,28 @@ export const defaultCATAModel = (): CheckAllThatApplyModelSchemaV2 => {
   );
   const incorrectResponse = makeResponse(invertRule(correctResponse.rule), 0, '');
 
-  return {
-    stem: makeStem(''),
-    choices: [correctChoice, incorrectChoice],
-    authoring: {
-      parts: [
-        {
-          id: '1', // only has one part, so it is safe to hardcode the id
-          scoringStrategy: ScoringStrategy.average,
-          responses: [correctResponse, incorrectResponse],
-          hints: [makeHint(''), makeHint(''), makeHint('')],
-        },
-      ],
-      feedback: {
-        type: 'TargetedFeedbackDisabled',
-        correct: [[correctChoice.id], correctResponse.id] as ChoiceIdsToResponseId,
-        incorrect: [[incorrectChoice.id], incorrectResponse.id] as ChoiceIdsToResponseId,
-        targeted: [],
-      },
-      transformations: [makeTransformation('choices', Operation.shuffle)],
-      previewText: '',
-    },
-  };
+  return {} as any;
+
+  // return {
+  //   stem: makeStem(''),
+  //   choices: [correctChoice, incorrectChoice],
+  //   authoring: {
+  //     parts: [
+  //       {
+  //         id: '1', // only has one part, so it is safe to hardcode the id
+  //         scoringStrategy: ScoringStrategy.average,
+  //         responses: [correctResponse, incorrectResponse],
+  //         hints: [makeHint(''), makeHint(''), makeHint('')],
+  //       },
+  //     ],
+  //     feedback: {
+  //       type: 'TargetedFeedbackDisabled',
+  //       correct: [[correctChoice.id], correctResponse.id] as ChoiceIdsToResponseId,
+  //       incorrect: [[incorrectChoice.id], incorrectResponse.id] as ChoiceIdsToResponseId,
+  //       targeted: [],
+  //     },
+  //     transformations: [makeTransformation('choices', Operation.shuffle)],
+  //     previewText: '',
+  //   },
+  // };
 };

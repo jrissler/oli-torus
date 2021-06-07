@@ -27,8 +27,6 @@ export const Item = (props: ItemProps) => {
         Feedback for {score === 1 ? 'Correct' : 'Incorrect'} Answer:
       </Description>
       <RichTextEditor
-        projectSlug={props.projectSlug}
-        editMode={editMode}
         text={feedback.content}
         onEdit={(content) => onEditResponse(score, content)}
       />

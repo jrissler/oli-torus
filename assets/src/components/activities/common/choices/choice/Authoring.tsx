@@ -3,7 +3,6 @@ import { Choice as ChoiceType, ChoiceId, RichText } from 'components/activities/
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { RemoveButton } from 'components/misc/RemoveButton';
 import { Draggable, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
-import { choicesSlice } from 'components/activities/common/choices/Authoring';
 import { connect } from 'react-redux';
 
 interface Props {
@@ -67,8 +66,8 @@ export const Component = ({
   );
 };
 
-export const Authoring = connect(null, (dispatch) => ({
-  onEditChoiceContent: (id: ChoiceId, content: RichText) =>
-    dispatch(choicesSlice.actions.editChoiceContent({ id, content })),
-  onRemoveChoice: (id: ChoiceId) => dispatch(choicesSlice.actions.removeChoice(id)),
-}))(Component);
+// export const Authoring = connect(null, (dispatch) => ({
+//   onEditChoiceContent: (id: ChoiceId, content: RichText) =>
+//     dispatch(choicesSlice.actions.editChoiceContent({ id, content })),
+//   onRemoveChoice: (id: ChoiceId) => dispatch(choicesSlice.actions.removeChoice(id)),
+// }))(Component);

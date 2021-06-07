@@ -3,11 +3,6 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { MultipleChoiceModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/stem/Stem';
-import { Choices } from './sections/Choices';
-import { Feedback } from './sections/Feedback';
-import { Hints } from '../common/authoring/Hints';
-import { MCActions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
@@ -32,7 +27,7 @@ const MultipleChoice = (props: AuthoringElementProps<MultipleChoiceModelSchema>)
 
   return (
     <React.Fragment>
-      <Stem
+      {/* <Stem
         projectSlug={props.projectSlug}
         editMode={props.editMode}
         stem={props.model.stem}
@@ -60,7 +55,7 @@ const MultipleChoice = (props: AuthoringElementProps<MultipleChoiceModelSchema>)
         onAddHint={() => dispatch(MCActions.addHint())}
         onEditHint={(id, content) => dispatch(MCActions.editHint(id, content))}
         onRemoveHint={(id) => dispatch(MCActions.removeHint(id))}
-      />
+      /> */}
     </React.Fragment>
   );
 };

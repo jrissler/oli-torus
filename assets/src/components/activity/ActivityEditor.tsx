@@ -214,7 +214,7 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
   syncObjectivesWithParts(update: Partial<Undoable>) {
     if (update.content !== undefined) {
       let objectives = this.state.undoable.current.objectives;
-      const parts = valueOr(update.content.authoring.parts, []);
+      const parts = valueOr((update.content.authoring as any).parts, []);
       const partIds = parts
         .map((p: any) => valueOr(p.id, ''))
         .reduce((m: any, id: string) => {
@@ -267,7 +267,7 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
       editorMap: JSON.stringify(this.props.editorMap),
     };
 
-    const parts = valueOr(this.state.undoable.current.content.authoring.parts, []);
+    const parts = valueOr((this.state.undoable.current.content.authoring as any).parts, []);
     const partIds = parts.map((p: any) => p.id);
 
     return (

@@ -16,29 +16,6 @@ interface HintsProps {
   onRemoveHint: (id: HintId) => void;
 }
 
-export const hintsSlice = createSlice({
-  name: 'hints',
-  initialState: [makeHint('')],
-  reducers: {
-    addHint(state) {
-      const newHint = makeHint('');
-      // new hints are always cognitive hints. they should be inserted
-      // right before the bottomOut hint at the end of the list
-      const bottomOutIndex = state.length - 1;
-      state.splice(bottomOutIndex, 0, newHint);
-    },
-    editHintContent(state, action: PayloadAction<{ id: HintId; content: RichText }>) {
-      const hint = state.find(({ id }) => id === action.payload.id);
-      if (hint) {
-        hint.content = action.payload.content;
-      }
-    },
-    removeHint(state, action: PayloadAction<HintId>) {
-      return state.filter((h) => h.id !== action.payload);
-    },
-  },
-});
-
 export const AuthoringHints: React.FC<HintsProps> = ({
   hints,
   onAddHint,
@@ -135,18 +112,4 @@ export const AuthoringHints: React.FC<HintsProps> = ({
       <BottomOutHint />
     </>
   );
-};
-
-export const Hints = {
-  Connected: connect(
-    (state: HasHints) => ({
-      hints: state.authoring.parts[0].hints,
-    }),
-    (dispatch) => ({
-      onEditHintContent: (id: HintId, content: RichText) =>
-        dispatch(hintsSlice.actions.editHintContent({ id, content })),
-      onAddHint: () => dispatch(hintsSlice.actions.addHint()),
-      onRemoveHint: (id: HintId) => dispatch(hintsSlice.actions.removeHint(id)),
-    }),
-  )(AuthoringHints),
 };

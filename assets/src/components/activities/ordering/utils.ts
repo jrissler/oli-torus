@@ -6,13 +6,13 @@ import {
 } from './schema';
 import { Operation, ScoringStrategy } from '../types';
 import {
-  transformation,
   getResponse,
   getResponses,
   makeChoice,
   makeResponse,
   makeStem,
   makeHint,
+  makeTransformation,
 } from 'components/activities/common/authoring/utils';
 import { ID } from 'data/content/model';
 
@@ -45,7 +45,7 @@ export const getIncorrectResponse = (model: Ordering) => {
     case 'TargetedOrdering':
       return responsesWithoutCorrect.filter(
         (r1) => !getTargetedResponses(model).find((r2) => r1.id === r2.id),
-        (r1) => !getTargetedResponses(model).find((r2) => r1.id === r2.id),
+        (r1: any) => !getTargetedResponses(model).find((r2) => r1.id === r2.id),
       )[0];
   }
 };
@@ -86,7 +86,7 @@ export const defaultOrderingModel = (): Ordering => {
         },
       ],
       correct: [[choice1.id, choice2.id], correctResponse.id],
-      transformations: [transformation('choices', Operation.shuffle)],
+      transformations: [makeTransformation('choices', Operation.shuffle)],
       previewText: '',
     },
   };

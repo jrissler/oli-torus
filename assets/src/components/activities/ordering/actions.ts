@@ -17,15 +17,10 @@ import {
   makeChoice,
   makeResponse,
 } from 'components/activities/common/authoring/utils';
-import {
-  addHint,
-  editChoice,
-  editFeedback,
-  editHint,
-  editStem,
-  moveChoice,
-  removeHint,
-} from 'components/activities/common/authoring/immerActions';
+import {editStem} from '../common/authoring/actions/stem'
+import {editChoice, moveChoice} from '../common/authoring/actions/choices'
+import {editFeedback} from '../common/authoring/actions/feedback'
+import {addHint, editHint, removeHint} from '../common/authoring/actions/hints'
 
 export class Actions {
   static toggleType() {

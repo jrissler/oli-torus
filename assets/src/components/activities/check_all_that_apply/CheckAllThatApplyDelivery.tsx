@@ -14,7 +14,6 @@ import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
-import { Stem } from 'components/activities/common/stem/Stem';
 import { Choices } from '../common/choices';
 
 type Evaluation = {
@@ -175,7 +174,7 @@ export const CheckAllThatApplyComponent = (
     <div className={`activity cata-activity ${isEvaluated ? 'evaluated' : ''}`}>
       <div className="activity-content">
         <div>
-          <Stem.Delivery stem={stem} context={writerContext} />
+          {/* <Stem.Delivery stem={stem} context={writerContext} /> */}
           {gradedPoints}
           <Choices.Delivery
             unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}

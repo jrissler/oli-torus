@@ -44,8 +44,6 @@ export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
           <IconCorrect /> Feedback for Correct Answer
         </Description>
         <RichTextEditor
-          projectSlug={projectSlug}
-          editMode={editMode}
           text={getCorrectResponse(model).feedback.content}
           onEdit={(content) => onEditFeedback(getCorrectResponse(model).id, content)}
         />
@@ -56,8 +54,6 @@ export const Feedback = (props: PropsWithChildren<FeedbackProps>) => {
           <IconIncorrect /> Catch-all Feedback for Incorrect Answers
         </Description>
         <RichTextEditor
-          projectSlug={projectSlug}
-          editMode={editMode}
           text={getIncorrectResponse(model).feedback.content}
           onEdit={(content) => onEditFeedback(getIncorrectResponse(model).id, content)}
         />

@@ -90,14 +90,12 @@ export const Choices = (props: Props) => {
             </div>
             <RichTextEditor
               className="flex-fill"
-              projectSlug={projectSlug}
-              editMode={editMode}
               text={choice.content}
               onEdit={(content) => onEditChoiceContent(choice.id, content)}
             />
             {index > 0 && (
               <DeleteButton
-                className="pl-3 pr-1"
+                // className="pl-3 pr-1"
                 onClick={() => onRemoveChoice(choice.id)}
                 editMode={editMode}
               />

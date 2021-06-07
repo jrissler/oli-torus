@@ -59,7 +59,7 @@ export const createEditor = (
   if (activity !== undefined) {
     const editor = editorMap[activity.typeSlug] ? editorMap[activity.typeSlug] : unsupported;
 
-    const previewText = activity.model.authoring?.previewText;
+    const previewText = (activity.model.authoring as any).previewText;
 
     // Test mode is supported by giving the delivery component a transformed
     // instance of the activity model.  Recognizing that we are in an editing mode

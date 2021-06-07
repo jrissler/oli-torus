@@ -15,11 +15,11 @@ export function orIdentity(f: unknown) {
       model;
 }
 
-export const AuthoringElementContext: React.Context<AuthoringElementProps<IModel> | undefined> =
-  React.createContext<AuthoringElementProps<IModel> | undefined>(undefined);
+export const AuthoringElementContext: React.Context<AuthoringElementProps<any> | undefined> =
+  React.createContext<AuthoringElementProps<any> | undefined>(undefined);
 
-export function useAuthoringElementContext<IModel>() {
-  const context = useContext<AuthoringElementProps<IModel> | undefined>(AuthoringElementContext);
+export function useAuthoringElementContext<T>() {
+  const context = useContext<AuthoringElementProps<T> | undefined>(AuthoringElementContext);
   if (context === undefined) {
     throw new Error('useAuthoringElementContext must be used within an ActivityProvider');
   }

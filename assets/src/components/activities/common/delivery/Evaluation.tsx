@@ -2,7 +2,7 @@ import React from 'react';
 import * as ActivityTypes from '../../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
-import { makeContent } from 'components/activities/common/authoring/utils';
+import { makeContent, makeFeedback } from 'components/activities/common/authoring/utils';
 
 export const Evaluation = ({
   attemptState,
@@ -13,7 +13,7 @@ export const Evaluation = ({
 }) => {
   const { score, outOf, parts } = attemptState;
   const error = parts[0].error;
-  const feedback = parts[0].feedback.content;
+  const feedback = parts[0].feedback?.content;
 
   const errorText = makeContent('There was an error processing this response');
 
@@ -37,7 +37,10 @@ export const Evaluation = ({
           {outOf}
         </span>
       </div>
-      <HtmlContentModelRenderer text={error ? errorText : feedback} context={context} />
+      <HtmlContentModelRenderer
+        text={error ? errorText : feedback ? feedback : makeFeedback('')}
+        context={context}
+      />
     </div>
   );
 };

@@ -4,34 +4,195 @@ import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { connect, Provider, useSelector } from 'react-redux';
 import { Panels } from 'components/activities/common/authoring/Panels';
 import { CheckAllThatApplyModelSchemaV2 } from 'components/activities/check_all_that_apply/schema';
-import { Stem, stemSlice } from '../common/stem/Stem';
+import { StemAuthoring } from '../common/stem/Stem';
 import {
+  Choice,
+  ChoiceId,
+  HasChoices,
+  HasHints,
+  HasParts,
+  HasStem,
   HasTargetedFeedback,
   HasTransformations,
+  HintId,
   isTargetedFeedbackEnabled,
   Manifest,
   Operation,
   Part,
+  ResponseId,
+  RichText,
+  Stem,
   TargetedFeedbackDisabled,
   TargetedFeedbackEnabled,
 } from '../types';
-import { combineReducers, createAction, createSlice } from '@reduxjs/toolkit';
+import { combineReducers, createAction, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { configureStore as configureStore2 } from '@reduxjs/toolkit';
-import { Choices } from '../common/choices';
 import { Checkbox } from '../common/authoring/icons/Checkbox';
-import { choicesSlice } from '../common/choices/Authoring';
-import { AnswerKey, answerKeySlice } from '../common/authoring/AnswerKey';
 import {
   getChoiceIds,
+  getCorrectChoiceIds,
   TargetedFeedback,
   targetedFeedbackSlice,
 } from '../common/authoring/feedback/TargetedFeedback';
-import { Feedback } from '../common/authoring/feedback/Feedback';
-import { Hints } from '../common/authoring/Hints';
+import { AuthoringFeedback } from '../common/authoring/feedback/Feedback';
+import { AuthoringHints } from '../common/authoring/Hints';
 import { Settings } from '../common/authoring/settings/Settings';
-import { getTransformations, isShuffled, makeTransformation } from '../common/authoring/utils';
-import { transformationsSlice } from '../common/authoring/transformations/transformationsRedux';
-import { previewTextSlice } from '../common/authoring/preview_text/previewTextRedux';
+import {
+  getResponse,
+  getTransformations,
+  isShuffled,
+  makeChoice,
+  makeHint,
+  makeStem,
+  makeTransformation,
+} from '../common/authoring/utils';
+import { ChoicesAuthoring } from '../common/choices/Authoring';
+import { AuthoringAnswerKey } from '../common/authoring/AnswerKey';
+
+export const selectStem = (state: HasStem) => state.stem;
+const initialState: Stem = makeStem('');
+export const stemSlice = createSlice({
+  name: 'stem',
+  initialState,
+  reducers: {
+    set(state, action: PayloadAction<RichText>) {
+      state.content = action.payload;
+    },
+  },
+});
+
+const Stem = connect(
+  (state: HasStem) => ({ stem: state.stem }),
+  (dispatch) => ({
+    onStemChange: (text: RichText) => dispatch(stemSlice.actions.set(text)),
+  }),
+)(StemAuthoring);
+
+export const choicesSlice = createSlice({
+  name: 'choices',
+  initialState: [] as Choice[],
+  reducers: {
+    // addChoice: choicesAdapter.addOne,
+    // editChoices: choicesAdapter.setAll,
+    // removeChoice: choicesAdapter.removeOne,
+    // editChoiceContent: choicesAdapter.updateOne,
+    addChoice(state) {
+      state.push(makeChoice(''));
+    },
+    editChoiceContent(state, action: PayloadAction<{ id: ChoiceId; content: RichText }>) {
+      const choice = state.find(({ id }) => id === action.payload.id);
+      if (choice) {
+        choice.content = action.payload.content;
+      }
+    },
+    editChoices(state, action: PayloadAction<Choice[]>) {
+      return action.payload;
+    },
+    removeChoice(state, action: PayloadAction<ChoiceId>) {
+      return state.filter((c) => c.id !== action.payload);
+    },
+  },
+});
+
+const Choices = connect(
+  (state: HasChoices) => ({ choices: state.choices }),
+  (dispatch) => ({
+    onAddChoice: () => dispatch(choicesSlice.actions.addChoice()),
+    onEditChoiceContent: (id: ChoiceId, content: RichText) =>
+      dispatch(choicesSlice.actions.editChoiceContent({ id, content })),
+    onEditChoices: (choices: Choice[]) => dispatch(choicesSlice.actions.editChoices(choices)),
+    onRemoveChoice: (id: ChoiceId) => dispatch(choicesSlice.actions.removeChoice(id)),
+  }),
+)(ChoicesAuthoring);
+
+const answerKeySlice = createSlice({
+  name: 'answerKey',
+  initialState: { stem: makeStem(''), choices: [] as Choice[] },
+  reducers: {
+    toggleCorrectness(state, action: PayloadAction<ChoiceId>) {
+      return state;
+    },
+  },
+});
+
+const AnswerKey = connect(
+  (state: HasChoices & HasStem & HasTargetedFeedback) => ({
+    stem: state.stem,
+    choices: state.choices,
+    correctChoiceIds: getCorrectChoiceIds(state),
+  }),
+  (dispatch) => ({
+    onToggleCorrectness: (id: ChoiceId) => dispatch(answerKeySlice.actions.toggleCorrectness(id)),
+  }),
+)(AuthoringAnswerKey);
+
+// The default getCorrectResponse and getIncorrectResponse only work
+// for models with one part and one correct response + one catch-all incorrect
+// response. If an activity type has a different model, the response finding strategies
+// should be passed.
+
+const feedbackSlice = createSlice({
+  name: 'feedback',
+  initialState: {} as HasParts,
+  reducers: {
+    setResponseFeedback(state, action: PayloadAction<{ id: ResponseId; content: RichText }>) {
+      getResponse(state, action.payload.id).feedback.content = action.payload.content;
+    },
+  },
+});
+
+const Feedback = connect(
+  (state: HasParts) => {
+    const getCorrectResponse = (model: HasParts) =>
+      model.authoring.parts[0].responses.find((r) => r.score === 1);
+    const getIncorrectResponse = (model: HasParts) =>
+      model.authoring.parts[0].responses.find((r) => r.score === 0);
+
+    return {
+      correctResponse: getCorrectResponse(state),
+      incorrectResponse: getIncorrectResponse(state),
+    };
+  },
+  (dispatch) => ({
+    onSetResponseFeedback: (id: ResponseId, content: RichText) =>
+      dispatch(feedbackSlice.actions.setResponseFeedback({ id, content })),
+  }),
+)(AuthoringFeedback);
+
+export const hintsSlice = createSlice({
+  name: 'hints',
+  initialState: [makeHint('')],
+  reducers: {
+    addHint(state) {
+      const newHint = makeHint('');
+      // new hints are always cognitive hints. they should be inserted
+      // right before the bottomOut hint at the end of the list
+      const bottomOutIndex = state.length - 1;
+      state.splice(bottomOutIndex, 0, newHint);
+    },
+    editHintContent(state, action: PayloadAction<{ id: HintId; content: RichText }>) {
+      const hint = state.find(({ id }) => id === action.payload.id);
+      if (hint) {
+        hint.content = action.payload.content;
+      }
+    },
+    removeHint(state, action: PayloadAction<HintId>) {
+      return state.filter((h) => h.id !== action.payload);
+    },
+  },
+});
+
+const Hints = connect(
+  (state: HasHints) => ({
+    hints: state.authoring.parts[0].hints,
+  }),
+  (dispatch) => ({
+    onEditHintContent: (id: HintId, content: RichText) =>
+      dispatch(hintsSlice.actions.editHintContent({ id, content })),
+    onAddHint: () => dispatch(hintsSlice.actions.addHint()),
+    onRemoveHint: (id: HintId) => dispatch(hintsSlice.actions.removeHint(id)),
+  }),
+)(AuthoringHints);
 
 export const ActivityContext: React.Context<
   AuthoringElementProps<CheckAllThatApplyModelSchemaV2> | undefined
@@ -155,23 +316,35 @@ export const ActivityProvider: React.FC<AuthoringElementProps<CheckAllThatApplyM
     initialState: {} as HasTargetedFeedback['authoring']['feedback'],
   });
 
-  const store = configureStore2<CheckAllThatApplyModelSchemaV2>({
-    reducer: combineReducers<CheckAllThatApplyModelSchemaV2>({
-      choices: choicesSlice.reducer,
-      // activity: activitySlice.reducer,
-      stem: stemSlice.reducer,
-      authoring: (state = props.model.authoring, action) => ({
-        ...state,
-        previewText: previewTextSlice.reducer(state.previewText, action),
-      }),
+  /*
+  {
+    stem: Stem,
+    choices: Choice[],
 
-      // combineReducers<CheckAllThatApplyModelSchemaV2['authoring']>({
-      //   feedback: feedbackSlice.reducer as any,
-      //   parts: partsSlice.reducer,
-      //   transformations: transformationsSlice.reducer,
-      //   previewText: previewTextReducer.reducer,
-      // }),
-    }),
+  }
+  */
+
+  const store = configureStore2<CheckAllThatApplyModelSchemaV2>({
+    reducer: (state = props.model, action) => {
+      return state;
+    },
+
+    // combineReducers<CheckAllThatApplyModelSchemaV2>({
+    //   choices: choicesSlice.reducer,
+    //   // activity: activitySlice.reducer,
+    //   stem: stemSlice.reducer,
+    //   authoring: (state = props.model.authoring, action) => ({
+    //     ...state,
+    //     previewText: previewTextSlice.reducer(state.previewText, action),
+    //   }),
+
+    // combineReducers<CheckAllThatApplyModelSchemaV2['authoring']>({
+    //   feedback: feedbackSlice.reducer as any,
+    //   parts: partsSlice.reducer,
+    //   transformations: transformationsSlice.reducer,
+    //   previewText: previewTextReducer.reducer,
+    // }),
+    // }),
     // (state = props.model, action) => {
     // return activitySlice.reducer(
     //   {
@@ -198,7 +371,8 @@ const CheckAllThatApply: React.FC = () => {
       <Panels.Tabs>
         <Panels.Tab label="Question">
           <div className="d-flex">
-            <Stem.Authoring.Connected />
+            {/* <Stem.Authoring.Connected /> */}
+            <Stem />
             <select style={{ width: 160, height: 61, marginLeft: 10 }} className="custom-select">
               <option selected>Checkboxes</option>
               <option value="1">Multiple Choice</option>
@@ -207,18 +381,18 @@ const CheckAllThatApply: React.FC = () => {
             </select>
           </div>
 
-          <Choices.Authoring icon={<Checkbox.Unchecked />} />
+          <Choices icon={<Checkbox.Unchecked />} />
         </Panels.Tab>
 
         <Panels.Tab label="Answer Key">
-          <AnswerKey.Connected />
+          <AnswerKey />
           {/* <TargetedFeedback> */}
-          <Feedback.Authoring.Connected />
+          <Feedback />
           {/* </TargetedFeedback> */}
         </Panels.Tab>
 
         <Panels.Tab label="Hints">
-          <Hints.Connected />
+          <Hints />
         </Panels.Tab>
         <CheckAllThatApplySettings />
       </Panels.Tabs>

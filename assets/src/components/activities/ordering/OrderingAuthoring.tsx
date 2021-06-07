@@ -3,17 +3,13 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { OrderingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Stem } from '../common/stem/Stem';
-import { MovableChoices } from '../common/choices/Authoring';
 import { Feedback } from './sections/Feedback';
-import { Hints } from '../common/authoring/Hints';
 import { Actions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
 import produce from 'immer';
 import { TargetedFeedback } from 'components/activities/ordering/sections/TargetedFeedback';
-import { canMoveChoice, getHints, isTargetedOrdering } from 'components/activities/ordering/utils';
 import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
 
 const store = configureStore();
@@ -30,7 +26,7 @@ const Ordering = (props: AuthoringElementProps<OrderingModelSchema>) => {
 
   return (
     <React.Fragment>
-      <Stem
+      {/* <Stem
         {...sharedProps}
         stem={props.model.stem}
         onEditContent={(content) => dispatch(Actions.editStem(content))}
@@ -81,7 +77,7 @@ const Ordering = (props: AuthoringElementProps<OrderingModelSchema>) => {
         onAddHint={() => dispatch(Actions.addHint())}
         onEditHint={(id, content) => dispatch(Actions.editHint(id, content))}
         onRemoveHint={(id) => dispatch(Actions.removeHint(id))}
-      />
+      /> */}
     </React.Fragment>
   );
 };

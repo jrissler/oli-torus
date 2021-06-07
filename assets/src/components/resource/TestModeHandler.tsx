@@ -6,7 +6,7 @@ import { removeEmpty } from 'utils/common';
 import produce from 'immer';
 
 export const defaultState = (model: ActivityModelSchema) => {
-  const parts = model.authoring.parts.map((p: any) => ({
+  const parts = (model.authoring as any).parts.map((p: any) => ({
     attemptNumber: 1,
     attemptGuid: p.id,
     dateEvaluated: null,
@@ -45,7 +45,7 @@ export interface TestModelHandlerState {
 type Continuation = (success: any, error: any) => void;
 
 function initHints(model: ActivityModelSchema) {
-  return model.authoring.parts.reduce((m: any, p: any) => {
+  return (model.authoring as any).parts.reduce((m: any, p: any) => {
     m[p.id] = 0;
     return m;
   }, {});
@@ -66,7 +66,7 @@ export class TestModeHandler extends React.Component<TestModelHandlerProps, Test
   }
 
   getPart(id: string): any {
-    return this.state.model.authoring.parts.find((p: any) => p.id === id);
+    return (this.state.model.authoring as any).parts.find((p: any) => p.id === id);
   }
 
   componentDidMount() {

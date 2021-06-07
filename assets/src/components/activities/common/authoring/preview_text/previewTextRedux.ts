@@ -1,7 +1,7 @@
 import { toSimpleText } from 'components/editing/utils';
 import { HasPreviewText } from 'components/activities/types';
 import { createSlice } from '@reduxjs/toolkit';
-import { stemSlice } from '../../stem/Stem';
+import { stemSlice } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 
 console.log('action', stemSlice);
 export const selectPreviewText = (state: HasPreviewText) => state.authoring.previewText;

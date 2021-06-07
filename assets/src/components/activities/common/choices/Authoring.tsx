@@ -32,32 +32,6 @@ import { connect } from 'react-redux';
 
 // export const choicesAdapter = createEntityAdapter<ChoiceType>();
 
-export const choicesSlice = createSlice({
-  name: 'choices',
-  initialState: [] as ChoiceType[],
-  reducers: {
-    // addChoice: choicesAdapter.addOne,
-    // editChoices: choicesAdapter.setAll,
-    // removeChoice: choicesAdapter.removeOne,
-    // editChoiceContent: choicesAdapter.updateOne,
-    addChoice(state) {
-      state.push(makeChoice(''));
-    },
-    editChoiceContent(state, action: PayloadAction<{ id: ChoiceId; content: RichText }>) {
-      const choice = state.find(({ id }) => id === action.payload.id);
-      if (choice) {
-        choice.content = action.payload.content;
-      }
-    },
-    editChoices(state, action: PayloadAction<ChoiceType[]>) {
-      return action.payload;
-    },
-    removeChoice(state, action: PayloadAction<ChoiceId>) {
-      return state.filter((c) => c.id !== action.payload);
-    },
-  },
-});
-
 interface Props {
   icon: JSX.Element;
 
@@ -67,7 +41,7 @@ interface Props {
   onEditChoices: (choices: ChoiceType[]) => void;
   onRemoveChoice: (id: ChoiceId) => void;
 }
-const Component = ({
+export const ChoicesAuthoring = ({
   icon,
   choices,
   onAddChoice,
@@ -100,15 +74,15 @@ const Component = ({
         <Droppable droppableId={'choices'}>
           {(provided) => (
             <div {...provided.droppableProps} className="mt-3" ref={provided.innerRef}>
-              {choices.map((choice, index) => (
-                <Choice.Authoring
-                  icon={icon}
-                  key={index + 'choice'}
-                  index={index}
-                  choice={choice}
-                  canRemove={choices.length > 1}
-                />
-              ))}
+              {/* {choices.map((choice, index) => ( }
+                // <Choice.Authoring
+                //   icon={icon}
+                //   key={index + 'choice'}
+                //   index={index}
+                //   choice={choice}
+                //   canRemove={choices.length > 1}
+                // />
+              // ))}*/}
               {provided.placeholder}
             </div>
           )}
@@ -122,14 +96,3 @@ const Component = ({
     </>
   );
 };
-
-export const Authoring = connect(
-  (state: HasChoices) => ({ choices: state.choices }),
-  (dispatch) => ({
-    onAddChoice: () => dispatch(choicesSlice.actions.addChoice()),
-    onEditChoiceContent: (id: ChoiceId, content: RichText) =>
-      dispatch(choicesSlice.actions.editChoiceContent({ id, content })),
-    onEditChoices: (choices: ChoiceType[]) => dispatch(choicesSlice.actions.editChoices(choices)),
-    onRemoveChoice: (id: ChoiceId) => dispatch(choicesSlice.actions.removeChoice(id)),
-  }),
-)(Component);

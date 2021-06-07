@@ -158,6 +158,7 @@ module.exports = (env, options) => ({
               sassOptions: {
                 includePaths: [path.join(__dirname, 'src'), path.join(__dirname, 'styles')],
                 importer: globImporter(),
+                quiet: true,
               },
               sourceMap: true,
             },

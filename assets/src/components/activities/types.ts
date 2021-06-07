@@ -21,7 +21,7 @@ export interface HasContent {
 }
 
 export interface StudentResponse {
-  input: unknown;
+  input: any;
 }
 
 export type ModeSpecification = {
@@ -38,8 +38,8 @@ export type ClientEvaluation = {
   attemptGuid: string;
   score: number | null;
   outOf: number | null;
-  response: unknown;
-  feedback: unknown;
+  response: any;
+  feedback: any;
 };
 
 export type Manifest = {
@@ -52,9 +52,9 @@ export type Manifest = {
 
 export interface ActivityModelSchema {
   resourceId?: number;
-  authoring?: unknown;
-  content?: unknown;
-  activityType?: unknown;
+  authoring?: any;
+  content?: any;
+  activityType?: any;
   id?: string; // maybe slug
 }
 
@@ -64,8 +64,8 @@ export interface PartState {
   dateEvaluated: Date | null;
   score: number | null;
   outOf: number | null;
-  response: unknown;
-  feedback: unknown;
+  response: any;
+  feedback: any;
   hints: [];
   partId: string | number;
   hasMoreAttempts: boolean;
@@ -83,7 +83,7 @@ export interface ActivityState {
   parts: PartState[];
   hasMoreAttempts: boolean;
   hasMoreHints: boolean;
-  snapshot?: unknown;
+  snapshot?: any;
 }
 
 export interface ContentItem extends Identifiable, HasContent {}
@@ -251,5 +251,5 @@ export interface CreationContext extends ResourceContext {}
 export interface PartComponentDefinition {
   id: string;
   type: string;
-  custom: Record<string, unknown>;
+  custom: Record<string, any>;
 }

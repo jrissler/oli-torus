@@ -1,7 +1,6 @@
 import React from 'react';
 import { Heading } from 'components/misc/Heading';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { ModelEditorProps } from '../schema';
 import { RichText } from '../../types';
 import { Description } from 'components/misc/Description';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
@@ -25,7 +24,7 @@ export const Choices = ({
 }: ChoicesProps) => {
   return (
     <div className="my-5">
-      <Heading
+      {/* <Heading
         title={Lang.dgettext('mcq', 'Answer Choices')}
         subtitle={Lang.dgettext(
           'mcq',
@@ -44,7 +43,10 @@ export const Choices = ({
         key="correct"
         text={correctChoice(model).content}
         onEdit={(content) => onEditChoice(correctChoice(model).id, content)}
-      />
+      /> */}
+
+
+
       {/* {incorrectChoices(model).map((choice, index) => (
         <React.Fragment key={choice.id}>
           <Description>

@@ -10,12 +10,12 @@ import {
 import { OrderingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
-import { Stem } from '../common/delivery/DisplayedStem';
 import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
+import {StemDelivery} from '../common/stem/Stem'
 
 type Evaluation = {
   score: number;
@@ -109,7 +109,7 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
   const [selected, setSelected] = useState<ActivityTypes.ChoiceId[]>(
     props.state.parts[0].response === null
       ? []
-      : props.state.parts[0].response.input
+      : (props.state.parts[0].response as any).input
           .split(' ')
           .reduce(
             (acc: ActivityTypes.ChoiceId[], curr: ActivityTypes.ChoiceId) => acc.concat([curr]),
@@ -246,7 +246,7 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
     <div className={`activity ordering-activity ${isEvaluated ? 'evaluated' : ''}`}>
       <div className="activity-content">
         <div>
-          <Stem stem={stem} context={writerContext} />
+          <StemDelivery stem={stem} context={writerContext} />
           {gradedPoints}
           <Selection
             onDeselect={(id: ActivityTypes.ChoiceId) => updateSelection(id)}

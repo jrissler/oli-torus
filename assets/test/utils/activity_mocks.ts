@@ -1,4 +1,4 @@
-import { feedbackFromText, hintFromText } from 'components/activities/common/authoring/utils';
+import {makeFeedback, makeHint} from 'components/activities/common/authoring/utils'
 import { EvaluationResponse, RequestHintResponse } from 'components/activities/DeliveryElement';
 import { Action, ActivityState, PartState } from 'components/activities/types';
 import { createFalse } from 'typescript';
@@ -33,7 +33,7 @@ const feedbackAction: Action = {
   attempt_guid: '1',
   out_of: 1,
   score: 1,
-  feedback: feedbackFromText('correct feedback'),
+  feedback: makeFeedback('correct feedback'),
 };
 
 const evaluationResponse: EvaluationResponse = {
@@ -43,7 +43,7 @@ const evaluationResponse: EvaluationResponse = {
 
 const requestHintResponse: RequestHintResponse = {
   type: 'success',
-  hint: hintFromText('hint'),
+  hint: makeHint('hint'),
   hasMoreHints: false,
 };
 

@@ -17,7 +17,6 @@ import { Evaluator, EvalContext } from './Evaluator';
 import { lastPart } from './utils';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { ImageCodeEditor } from './sections/ImageCodeEditor';
-import { Stem } from '../common/stem/Stem';
 
 type Evaluation = {
   score: number;
@@ -322,7 +321,7 @@ const ImageCoding = (props: ImageCodingDeliveryProps) => {
   return (
     <div className="activity short-answer-activity">
       <div className="activity-content">
-        <Stem.Delivery stem={stem} context={writerContext} />
+        {/* <Stem.Delivery stem={stem} context={writerContext} /> */}
 
         <div>
           <ImageCodeEditor value={input} disabled={isEvaluated} onChange={onInputChange} />
