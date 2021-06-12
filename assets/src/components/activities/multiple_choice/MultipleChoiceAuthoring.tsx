@@ -9,7 +9,6 @@ import { configureStore } from 'state/store';
 import produce from 'immer';
 import { areAnswerChoicesShuffled } from 'components/activities/common/authoring/utils';
 import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
-import { TargetedFeedback } from '../common/authoring/feedback/TargetedFeedback';
 
 const store = configureStore();
 

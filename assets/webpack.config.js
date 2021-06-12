@@ -2,8 +2,9 @@
 const webpack = require('webpack');
 const path = require('path');
 const glob = require('glob');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const globImporter = require('node-sass-glob-importer');
-const TerserPlugin = require('terser-webpack-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
@@ -17,7 +18,7 @@ const populateEntries = () => {
     resourceeditor: ['./src/components/resource/ResourceEditorApp.tsx'],
     activityeditor: ['./src/components/activity/ActivityEditorApp.tsx'],
     authoring: ['./src/apps/AuthoringApp.tsx'],
-    delivery: ['./src/apps/DeliveryApp.tsx'],
+    delivery: ['./src/apps/DeliveryApp.tsx']
   };
 
   const manifests = glob.sync('./src/components/activities/*/manifest.json', {});
@@ -120,7 +121,7 @@ module.exports = (env, options) => ({
       utils: path.resolve(__dirname, 'src/utils'),
       styles: path.resolve(__dirname, 'styles'),
     },
-    fallback: { vm: require.resolve('vm-browserify') },
+    fallback: { "vm": require.resolve("vm-browserify") }
   },
   module: {
     rules: [
@@ -150,15 +151,19 @@ module.exports = (env, options) => ({
       {
         test: /\.[s]?css$/,
         use: [
-          'style-loader',
-          'css-loader',
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
           {
             loader: 'sass-loader',
             options: {
               sassOptions: {
                 includePaths: [path.join(__dirname, 'src'), path.join(__dirname, 'styles')],
                 importer: globImporter(),
-                quiet: true,
               },
               sourceMap: true,
             },
@@ -175,6 +180,7 @@ module.exports = (env, options) => ({
     new webpack.ProvidePlugin({
       React: 'react',
     }),
-    new CopyWebpackPlugin({ patterns: [{ from: 'static/', to: '../' }] }),
+    new MiniCssExtractPlugin({ filename: '../css/[name].css' }),
+    new CopyWebpackPlugin({ patterns: [{ from: 'static/', to: '../' }] })
   ],
 });

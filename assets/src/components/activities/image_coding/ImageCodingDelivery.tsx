@@ -9,7 +9,6 @@ import {
 } from '../DeliveryElement';
 import { ImageCodingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { valueOr } from 'utils/common';
@@ -17,6 +16,7 @@ import { Evaluator, EvalContext } from './Evaluator';
 import { lastPart } from './utils';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { ImageCodeEditor } from './sections/ImageCodeEditor';
+import { Hints } from '../common/hints';
 
 type Evaluation = {
   score: number;
@@ -252,7 +252,7 @@ const ImageCoding = (props: ImageCodingDeliveryProps) => {
     ? null
     : [
         evaluationSummary,
-        <Hints
+        <Hints.Delivery
           key="hints"
           onClick={onRequestHint}
           hints={hints}

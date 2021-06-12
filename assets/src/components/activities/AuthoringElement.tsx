@@ -1,19 +1,7 @@
 import { ActivityModelSchema } from './types';
 import { ProjectSlug } from 'data/types';
-import React, { Reducer, useContext, useEffect, useMemo, useReducer } from 'react';
+import React, { useContext } from 'react';
 import { ActivityEditorMap } from 'data/content/editors';
-import produce from 'immer';
-import { useDispatch } from 'react-redux';
-import { useCallback } from 'react';
-
-export function orIdentity(f: unknown) {
-  if (typeof f === 'function') {
-    return f;
-  }
-  return (..._args: unknown[]) =>
-    (model: unknown) =>
-      model;
-}
 
 export const AuthoringElementContext: React.Context<AuthoringElementProps<any> | undefined> =
   React.createContext<AuthoringElementProps<any> | undefined>(undefined);

@@ -5,19 +5,13 @@ import {
   getChoice,
   getChoiceIndex,
   isShuffled,
-  makeChoice,
 } from 'components/activities/common/authoring/utils';
 import { makeTransformation } from 'components/activities/common/utils';
-import {
-  Choice,
-  ChoiceId,
-  HasChoices,
-  HasParts,
-  HasTransformations,
-  Operation,
-  Response,
-  RichText,
-} from 'components/activities/types';
+import { ChoiceId, RichText } from 'components/activities/types';
+import { HasChoices, IChoice, makeChoice } from '../../choices/types';
+import { HasParts } from '../parts/types';
+import { IResponse } from '../responses/types';
+import { HasTransformations, IOperation } from '../transformations/types';
 
 // Only for activities with one part
 export const addChoice = () => {
@@ -29,7 +23,7 @@ export const addChoice = () => {
 export const editChoice = (id: ChoiceId, content: RichText) => (model: HasChoices) =>
   (getChoice(model, id).content = content);
 
-export const editChoices = (choices: Choice[]) => (model: HasChoices) => (model.choices = choices);
+export const editChoices = (choices: IChoice[]) => (model: HasChoices) => (model.choices = choices);
 
 export const moveChoice = (direction: ChoiceMoveDirection, id: ChoiceId) => {
   return (model: HasChoices) => {
@@ -53,16 +47,15 @@ export const moveChoice = (direction: ChoiceMoveDirection, id: ChoiceId) => {
 };
 
 // Only for activities with one part
-export const removeChoice = (responsePredicate: (response: Response, id: ChoiceId) => boolean) => (
-  id: ChoiceId,
-) => {
-  return (model: HasChoices & HasParts) => {
-    model.choices = model.choices.filter((c) => c.id !== id);
-    model.authoring.parts[0].responses = model.authoring.parts[0].responses.filter((response) =>
-      responsePredicate(response, id),
-    );
+export const removeChoice =
+  (responsePredicate: (response: IResponse, id: ChoiceId) => boolean) => (id: ChoiceId) => {
+    return (model: HasChoices & HasParts) => {
+      model.choices = model.choices.filter((c) => c.id !== id);
+      model.authoring.parts[0].responses = model.authoring.parts[0].responses.filter((response) =>
+        responsePredicate(response, id),
+      );
+    };
   };
-};
 
 export const toggleAnswerChoiceShuffling = () => {
   return (model: HasTransformations) => {
@@ -70,8 +63,8 @@ export const toggleAnswerChoiceShuffling = () => {
 
     isShuffled(transformations)
       ? (model.authoring.transformations = transformations.filter(
-          (xform) => xform.operation !== Operation.shuffle,
+          (xform) => xform.operation !== IOperation.shuffle,
         ))
-      : model.authoring.transformations.push(makeTransformation('choices', Operation.shuffle));
+      : model.authoring.transformations.push(makeTransformation('choices', IOperation.shuffle));
   };
 };

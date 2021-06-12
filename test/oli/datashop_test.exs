@@ -703,7 +703,6 @@ defmodule Oli.DatashopTest do
     end
 
     test "tool message should be well formed for attempts", %{datashop_file: datashop_file} do
-      IO.inspect(datashop_file)
       regex =
         ~r/<tool_message context_message_id=".*">\s*<meta>\s*<user_id>.*<\/user_id>\s*<session_id>.*<\/session_id>\s*<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}<\/time>\s*<time_zone>GMT<\/time_zone>\s*<\/meta>\s*<problem_name>(.*)<\/problem_name>\s*<semantic_event name="ATTEMPT" transaction_id=".*"\/>\s*<event_descriptor>\s*<selection>\1<\/selection>\s*<action>.*<\/action>\s*<input>.*<\/input>\s*<\/event_descriptor>\s*<\/tool_message>/
 

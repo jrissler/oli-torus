@@ -1,18 +1,17 @@
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { defaultState } from 'components/resource/TestModeHandler';
-import { defaultCATAModel } from 'components/activities/check_all_that_apply/utils';
 import { CheckAllThatApplyComponent } from 'components/activities/check_all_that_apply/CheckAllThatApplyDelivery';
 import { defaultDeliveryElementProps } from '../utils/activity_mocks';
 import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
+import { defaultCATAModel } from 'components/activities/check_all_that_apply/schema';
 
 describe('check all that apply delivery', () => {
   it('pass', () => {
     expect(true).toBe(true);
-  })
+  });
   xit('renders ungraded correctly', async () => {
-
     const model = defaultCATAModel();
     const props = {
       model,
@@ -22,7 +21,8 @@ describe('check all that apply delivery', () => {
     };
     const { onSaveActivity, onSubmitActivity } = defaultDeliveryElementProps;
 
-    render(<></>
+    render(
+      <></>,
       // <CheckAllThatApplyComponent
       //   {...props}
       //   {...defaultDeliveryElementProps}
@@ -39,11 +39,12 @@ describe('check all that apply delivery', () => {
       fireEvent.click(choices[0]);
     });
     expect(onSaveActivity).toHaveBeenCalledTimes(1);
-    expect(onSaveActivity).toHaveBeenCalledWith('guid',
-      [{
+    expect(onSaveActivity).toHaveBeenCalledWith('guid', [
+      {
         attemptGuid: 'guid',
-        response: { input: model.choices.map(choice => choice.id)[0] },
-      }]);
+        response: { input: model.choices.map((choice) => choice.id)[0] },
+      },
+    ]);
 
     // expect no hints displayed
     expect(screen.queryAllByLabelText(/hint [0-9]/)).toHaveLength(0);
@@ -67,11 +68,12 @@ describe('check all that apply delivery', () => {
       fireEvent.click(submitButton);
     });
     expect(onSubmitActivity).toHaveBeenCalledTimes(1);
-    expect(onSubmitActivity).toHaveBeenCalledWith('guid',
-      [{
+    expect(onSubmitActivity).toHaveBeenCalledWith('guid', [
+      {
         attemptGuid: 'guid',
-        response: { input: model.choices.map(choice => choice.id)[0] },
-      }]);
+        response: { input: model.choices.map((choice) => choice.id)[0] },
+      },
+    ]);
 
     // expect results to be displayed after submission
     expect(await screen.findAllByLabelText('result')).toHaveLength(1);

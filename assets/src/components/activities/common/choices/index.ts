@@ -1,7 +1,11 @@
-// import { Authoring } from 'components/activities/common/choices/Authoring'
-import { Delivery } from 'components/activities/common/choices/Delivery'
+import { Unconnected } from 'components/activities/common/choices/authoring/Unconnected';
+import { Connected } from 'components/activities/common/choices/authoring/Connected';
+import { Delivery } from 'components/activities/common/choices/delivery/Delivery';
 
 export const Choices = {
-  // Authoring,
-  Delivery
-}
+  Authoring: {
+    Connected,
+    Unconnected,
+  },
+  Delivery,
+};

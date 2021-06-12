@@ -10,12 +10,12 @@ import {
 import { OrderingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
-import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
-import {StemDelivery} from '../common/stem/Stem'
+import { Hints } from '../common/hints';
+import { Stem } from '../common/stem';
 
 type Evaluation = {
   score: number;
@@ -206,7 +206,7 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
     ? null
     : [
         evaluationSummary,
-        <Hints
+        <Hints.Delivery
           key="hints"
           onClick={onRequestHint}
           hints={hints}
@@ -246,7 +246,7 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
     <div className={`activity ordering-activity ${isEvaluated ? 'evaluated' : ''}`}>
       <div className="activity-content">
         <div>
-          <StemDelivery stem={stem} context={writerContext} />
+          <Stem.Delivery stem={stem} context={writerContext} />
           {gradedPoints}
           <Selection
             onDeselect={(id: ActivityTypes.ChoiceId) => updateSelection(id)}

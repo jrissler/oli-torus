@@ -1,12 +1,8 @@
-import {
-  Part,
-  Transformation,
-  ActivityModelSchema,
-  ChoiceId,
-  ResponseId,
-  HasChoices,
-  HasStem,
-} from '../types';
+import { IPart } from '../common/authoring/parts/types';
+import { ITransformation } from '../common/authoring/transformations/types';
+import { HasChoices } from '../common/choices/types';
+import { HasStem } from '../common/stem/types';
+import { ActivityModelSchema, ChoiceId, ResponseId } from '../types';
 
 export type CheckAllThatApplyModelSchema = SimpleCATA | TargetedCATA;
 
@@ -16,8 +12,8 @@ interface BaseCATA extends ActivityModelSchema, HasStem, HasChoices {
     correct: ChoiceIdsToResponseId;
     // An association list of incorrect choice ids to the matching response id
     incorrect: ChoiceIdsToResponseId;
-    parts: Part[];
-    transformations: Transformation[];
+    parts: IPart[];
+    transformations: ITransformation[];
     previewText: string;
   };
 }

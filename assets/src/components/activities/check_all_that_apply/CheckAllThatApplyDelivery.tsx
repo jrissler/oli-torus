@@ -10,11 +10,11 @@ import {
 import { CheckAllThatApplyModelSchema } from './schema_old';
 import * as ActivityTypes from '../types';
 import { defaultWriterContext } from 'data/content/writers/context';
-import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { Choices } from '../common/choices';
+import { Hints } from '../common/hints';
 
 type Evaluation = {
   score: number;
@@ -134,7 +134,7 @@ export const CheckAllThatApplyComponent = (
     ? null
     : [
         evaluationSummary,
-        <Hints
+        <Hints.Delivery
           key="hints"
           onClick={onRequestHint}
           hints={hints}

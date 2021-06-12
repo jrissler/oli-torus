@@ -1,11 +1,20 @@
 import * as ContentModel from 'data/content/model';
 import produce from 'immer';
 import { getHints, getResponses } from 'components/activities/common/authoring/utils';
-import {CheckAllThatApplyModelSchemaV2} from 'components/activities/check_all_that_apply/schema'
-import {defaultCATAModel} from 'components/activities/check_all_that_apply/utils'
-import {createMatchRule, createRuleForIds, getChoiceIds, getCorrectResponse, getIncorrectResponse, getResponseId, getTargetedResponses, invertRule, unionRules} from 'components/activities/common/authoring/feedback/TargetedFeedback'
+import { CATASchema, defaultCATAModel } from 'components/activities/check_all_that_apply/schema';
+import {
+  createMatchRule,
+  createRuleForIds,
+  getChoiceIds,
+  getCorrectResponse,
+  getIncorrectResponse,
+  getResponseId,
+  getTargetedResponses,
+  invertRule,
+  unionRules,
+} from 'components/activities/common/feedback/targeted/Unconnected';
 
-const applyAction = (model: CheckAllThatApplyModelSchemaV2, action: any) => {
+const applyAction = (model: CATASchema, action: any) => {
   return produce(model, (draftState) => action(draftState));
 };
 

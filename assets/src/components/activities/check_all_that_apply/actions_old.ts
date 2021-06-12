@@ -1,4 +1,4 @@
-// import { CheckAllThatApplyModelSchemaV2 as CATA } from './schema';
+// import { CATASchema as CATA } from './schema';
 // import {
 //   createRuleForIds,
 //   getCorrectResponse,
@@ -28,7 +28,6 @@
 //     };
 //   },
 
-
 //   addChoice: () => {
 //     return (model: CATA) => {
 //       // const newChoice: Choice = fromText('');
@@ -38,7 +37,6 @@
 //       updateResponseRules(model);
 //     };
 //   },
-
 
 //   removeChoice: (id: string) => {
 //     return (model: CATA) => {
@@ -68,7 +66,6 @@
 //       updateResponseRules(model);
 //     };
 //   },
-
 
 //   addTargetedFeedback: () => {
 //     return (model: CATA) => {
@@ -140,5 +137,3 @@
 //     list.splice(index, 1);
 //   }
 // }
-
-

@@ -11,12 +11,12 @@ import { MultipleChoiceModelSchema } from './schema';
 import * as ActivityTypes from '../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { Maybe } from 'tsmonad';
-import { Hints } from '../common/delivery/DisplayedHints';
 import { Reset } from '../common/delivery/Reset';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
-import {StemDelivery} from '../common/stem/Stem'
+import { Hints } from '../common/hints';
+import { Stem } from '../common/stem';
 
 type Evaluation = {
   score: number;
@@ -156,7 +156,7 @@ export const MultipleChoiceComponent = (props: DeliveryElementProps<MultipleChoi
     ? null
     : [
         evaluationSummary,
-        <Hints
+        <Hints.Delivery
           key="hints"
           onClick={onRequestHint}
           hints={hints}
@@ -184,7 +184,7 @@ export const MultipleChoiceComponent = (props: DeliveryElementProps<MultipleChoi
   return (
     <div className={`activity multiple-choice-activity ${isEvaluated ? 'evaluated' : ''}`}>
       <div className="activity-content">
-        <StemDelivery stem={stem} context={writerContext} />
+        <Stem.Delivery stem={stem} context={writerContext} />
         {gradedPoints}
         <Choices
           choices={choices}

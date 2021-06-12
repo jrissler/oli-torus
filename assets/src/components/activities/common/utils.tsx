@@ -2,6 +2,7 @@ import * as ContentModel from 'data/content/model';
 import { Operation, RichText, Transformation } from '../types';
 import guid from 'utils/guid';
 import React from 'react';
+import { isShuffled } from './authoring/utils';
 
 export function fromText(text: string): { id: string; content: RichText } {
   return {
@@ -25,8 +26,7 @@ export const makeTransformation = (path: string, operation: Operation): Transfor
   operation,
 });
 
-export const isShuffled = (transformations: Transformation[]): boolean =>
-  !!transformations.find((xform) => xform.operation === Operation.shuffle);
+
 
 export const toggleAnswerChoiceShuffling = () => {
   return (model: { authoring: { transformations: Transformation[] } }): void => {
