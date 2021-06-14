@@ -1,6 +1,9 @@
 import { makeTransformation } from 'components/activities/common/utils';
 import { IPart, ScoringStrategy } from '../common/authoring/parts/types';
-import { ResponseChoice } from '../common/authoring/responseChoices/responseChoicesSlice';
+import {
+  HasResponseMappings,
+  ResponseMapping,
+} from '../common/authoring/responseChoices/responseChoicesSlice';
 import { makeResponse } from '../common/authoring/responses/types';
 import { IOperation, ITransformation } from '../common/authoring/transformations/types';
 import { IChoice, makeChoice } from '../common/choices/types';
@@ -9,7 +12,7 @@ import { makeHint } from '../common/hints/types';
 import { IStem, makeStem } from '../common/stem/types';
 import { ActivityModelSchema, ChoiceId, ResponseId } from '../types';
 
-export interface CATASchema extends ActivityModelSchema {
+export type CATASchema = ActivityModelSchema & {
   stem: IStem;
   choices: IChoice[];
   authoring: {
@@ -18,7 +21,7 @@ export interface CATASchema extends ActivityModelSchema {
     parts: IPart[];
     // Responses don't have a tie to the choices that trigger them,
     // so we make a relationship table to keep track of the mappings
-    responsesChoices: ResponseChoice[];
+
     // Keep track of which choice IDs are "correct" or "incorrect" since the choice
     // itself is only meant to have delivery-friendly content.
     // This is used to update parts' response rules to match correct/incorrect answer choices.
@@ -29,7 +32,16 @@ export interface CATASchema extends ActivityModelSchema {
 
     // feedback: HasTargetedFeedback['authoring']['feedback'];
   };
-}
+} & HasResponseMappings;
+
+// import { Model, ORM } from 'redux-orm';
+// class Stem extends Model {}
+// Stem.modelName = 'Stem';
+
+// export const orm = new ORM();
+// orm.register(Stem, Choice);
+
+import { schema } from 'normalizr';
 
 /*
 1. No targeted feedback, no partial credit
@@ -109,10 +121,11 @@ export const defaultCATAModel = (): CATASchema => {
       // },
 
       // response/choices are M:M relationship. join table between them
-      responsesChoices: [
-        { choiceId: correctChoice.id, responseId: correctResponse.id },
-        { choiceId: incorrectChoice.id, responseId: incorrectChoice.id },
-      ],
+      responseMappings: {
+        correct: { responseId: correctResponse.id, choiceIds: [correctChoice.id] },
+        targeted: [],
+        incorrect: { responseId: incorrectResponse.id },
+      },
     },
   };
 };

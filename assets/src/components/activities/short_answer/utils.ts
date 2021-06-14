@@ -1,6 +1,8 @@
+import { ScoringStrategy } from '../common/authoring/parts/types';
+import { makeResponse } from '../common/authoring/responses/types';
+import { makeHint } from '../common/hints/types';
+import { makeStem } from '../common/stem/types';
 import { ShortAnswerModelSchema } from './schema';
-import { ScoringStrategy } from '../types';
-import { makeHint, makeResponse, makeStem } from 'components/activities/common/authoring/utils';
 
 export const parseInputFromRule = (rule: string) => {
   return rule.substring(rule.indexOf('{') + 1, rule.indexOf('}'));

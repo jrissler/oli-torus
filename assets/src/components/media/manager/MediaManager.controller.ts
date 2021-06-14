@@ -31,6 +31,7 @@ interface OwnProps {
 }
 
 const mapStateToProps = (state: State, ownProps: OwnProps): StateProps => {
+  console.log('state', state);
   return {
     media: state.media,
   };

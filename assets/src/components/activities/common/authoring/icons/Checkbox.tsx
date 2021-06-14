@@ -5,6 +5,7 @@ const Checked = () => (
     style={{
       color: '#00bc8c',
       fontSize: '30px',
+      cursor: 'pointer',
     }}
     className="material-icons-outlined"
   >
@@ -17,6 +18,7 @@ const Unchecked = () => (
     style={{
       color: 'rgba(0,0,0,0.26)',
       fontSize: '30px',
+      cursor: 'pointer',
     }}
     className="material-icons-outlined"
   >

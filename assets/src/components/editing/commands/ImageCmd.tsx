@@ -36,7 +36,7 @@ export function selectImage(
           onMediaSelectionChange={(mediaOrUrl: MediaItem[]) => (selectedUrl = mediaOrUrl[0]?.url)}
           projectSlug={projectSlug}
           // eslint-disable-next-line
-          onEdit={() => { }}
+          onEdit={() => {}}
           mimeFilter={MIMETYPE_FILTERS.IMAGE}
           selectionType={SELECTION_TYPES.SINGLE}
           initialSelectionPaths={selectedUrl ? [selectedUrl] : []}
@@ -55,7 +55,7 @@ const command: Command = {
       Maybe.maybe(img).caseOf({
         just: (img: string) => Transforms.insertNodes(editor, ContentModel.image(img), { at }),
         // eslint-disable-next-line
-        nothing: () => { },
+        nothing: () => {},
       }),
     );
   },

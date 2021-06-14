@@ -1,5 +1,5 @@
 /** Authoring Styles **/
-@import "authoring/variables";
+@import 'authoring/variables';
 
 /* fixes an issue with contenteditable (slate) not being selectable in safari */
 [contenteditable] {
@@ -26,7 +26,7 @@ body.modal-open {
 }
 
 .oli-logo {
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .screenreader-text {

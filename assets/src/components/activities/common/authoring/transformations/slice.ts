@@ -1,14 +1,20 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {
+  createEntityAdapter,
+  createSelector,
+  createSlice,
+  EntityState,
+  Slice,
+} from '@reduxjs/toolkit';
 import { toggleAnswerChoiceShuffling } from '../../utils';
-import { makeTransformation } from '../utils';
-import { IOperation, ITransformation } from './types';
+import { HasTransformations, IOperation, ITransformation, makeTransformation } from './types';
 
 export const isShuffled = (transformations: ITransformation[]): boolean =>
   !!transformations.find((xform) => xform.operation === IOperation.shuffle);
 
+type TransformationsState = ITransformation[];
 export const transformationsSlice = createSlice({
   name: 'transformations',
-  initialState: [] as ITransformation[],
+  initialState: [] as TransformationsState,
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(toggleAnswerChoiceShuffling.name, (state, action) => {
@@ -19,3 +25,6 @@ export const transformationsSlice = createSlice({
     });
   },
 });
+
+const selectState = (state: HasTransformations) => state.authoring.transformations;
+export const selectAllTransformations = createSelector(selectState, (state) => state);

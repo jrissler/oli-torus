@@ -1,11 +1,9 @@
+import { HasParts, ScoringStrategy } from '../common/authoring/parts/types';
+import { IResponse, makeResponse } from '../common/authoring/responses/types';
+import { HasChoices, IChoice, makeChoice } from '../common/choices/types';
+import { makeHint } from '../common/hints/types';
+import { makeStem } from '../common/stem/types';
 import { MultipleChoiceModelSchema } from './schema';
-import { Choice, HasChoices, HasParts, Response, ScoringStrategy } from '../types';
-import {
-  makeChoice,
-  makeHint,
-  makeResponse,
-  makeStem,
-} from 'components/activities/common/authoring/utils';
 
 export const defaultMCModel: () => MultipleChoiceModelSchema = () => {
   const choiceA = makeChoice('Choice A');
@@ -32,11 +30,11 @@ export const defaultMCModel: () => MultipleChoiceModelSchema = () => {
   };
 };
 
-const isCorrect = (response: Response) => response.score === 1;
+const isCorrect = (response: IResponse) => response.score === 1;
 
 export const correctChoice = (model: HasChoices & HasParts) =>
   model.choices.reduce((correct, choice) => {
-    const responseMatchesChoice = (response: Response, choice: Choice) =>
+    const responseMatchesChoice = (response: IResponse, choice: IChoice) =>
       response.rule === `input like {${choice.id}}`;
     if (correct) return correct;
 

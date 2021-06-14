@@ -15,6 +15,9 @@ import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { Choices } from '../common/choices';
 import { Hints } from '../common/hints';
+import { FeedbackAction } from '../common/feedback/types';
+import { Stem } from '../common/stem';
+import { Checkbox } from '../common/authoring/icons/Checkbox';
 
 type Evaluation = {
   score: number;
@@ -39,6 +42,7 @@ export const CheckAllThatApplyComponent = (
             [],
           ),
   );
+  console.log('attempt state', attemptState);
 
   const { stem, choices } = model;
 
@@ -62,8 +66,7 @@ export const CheckAllThatApplyComponent = (
       )
       .then((response: EvaluationResponse) => {
         if (response.actions.length > 0) {
-          const action: ActivityTypes.FeedbackAction = response
-            .actions[0] as ActivityTypes.FeedbackAction;
+          const action: FeedbackAction = response.actions[0] as FeedbackAction;
 
           const { score, out_of, feedback, error } = action;
           const parts = [Object.assign({}, attemptState.parts[0], { feedback, error })];
@@ -174,11 +177,12 @@ export const CheckAllThatApplyComponent = (
     <div className={`activity cata-activity ${isEvaluated ? 'evaluated' : ''}`}>
       <div className="activity-content">
         <div>
-          {/* <Stem.Delivery stem={stem} context={writerContext} /> */}
+          {/* <UngradedStem */}
+          <Stem.Delivery stem={stem} context={writerContext} />
           {gradedPoints}
           <Choices.Delivery
-            unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}
-            selectedIcon={<i className="material-icons-outlined">check_box</i>}
+            unselectedIcon={<Checkbox.Unchecked />}
+            selectedIcon={<Checkbox.Checked />}
             choices={choices}
             selected={selected}
             onSelect={onSelect}

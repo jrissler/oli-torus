@@ -4,17 +4,14 @@ import {
   TargetedOrdering,
   SimpleOrdering,
 } from './schema';
-import { Operation, ScoringStrategy } from '../types';
-import {
-  getResponse,
-  getResponses,
-  makeChoice,
-  makeResponse,
-  makeStem,
-  makeHint,
-  makeTransformation,
-} from 'components/activities/common/authoring/utils';
 import { ID } from 'data/content/model';
+import { getResponse, getResponses } from '../common/authoring/utils';
+import { makeChoice } from '../common/choices/types';
+import { makeResponse } from '../common/authoring/responses/types';
+import { makeStem } from '../common/stem/types';
+import { makeHint } from '../common/hints/types';
+import { ScoringStrategy } from '../common/authoring/parts/types';
+import { IOperation, makeTransformation } from '../common/authoring/transformations/types';
 
 // Types
 export function isSimpleOrdering(model: Ordering): model is SimpleOrdering {
@@ -86,7 +83,7 @@ export const defaultOrderingModel = (): Ordering => {
         },
       ],
       correct: [[choice1.id, choice2.id], correctResponse.id],
-      transformations: [makeTransformation('choices', Operation.shuffle)],
+      transformations: [makeTransformation('choices', IOperation.shuffle)],
       previewText: '',
     },
   };

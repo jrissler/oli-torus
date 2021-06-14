@@ -1,8 +1,11 @@
 
-import { ActivityModelSchema, Stem, Part, Feedback } from '../types';
+import { IPart } from '../common/authoring/parts/types';
+import { IFeedback } from '../common/feedback/types';
+import { IStem } from '../common/stem/types';
+import { ActivityModelSchema } from '../types';
 
 export interface ImageCodingModelSchema extends ActivityModelSchema {
-  stem: Stem;
+  stem: IStem;
   isExample: boolean;
   starterCode: string;
   solutionCode: string;
@@ -10,9 +13,9 @@ export interface ImageCodingModelSchema extends ActivityModelSchema {
   // for evaluation:
   tolerance: number;
   regex: string;
-  feedback: Feedback[];
+  feedback: IFeedback[];
   authoring: {
-    parts: Part[];
+    parts: IPart[];
     previewText: string;
   };
 }

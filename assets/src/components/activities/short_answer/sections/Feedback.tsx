@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Heading } from 'components/misc/Heading';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { ModelEditorProps } from '../schema';
-import { RichText, Response } from '../../types';
+import { RichText } from '../../types';
 import { Description } from 'components/misc/Description';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { parseInputFromRule } from '../utils';
 import { ProjectSlug } from 'data/types';
 import { RemoveButton } from 'components/misc/RemoveButton';
 import { AuthoringButton } from 'components/misc/AuthoringButton';
+import { IResponse } from 'components/activities/common/authoring/responses/types';
 
 interface FeedbackProps {
   onEditResponse: (id: string, content: RichText) => void;
@@ -19,7 +20,7 @@ interface FeedbackProps {
 }
 
 interface ItemProps extends FeedbackProps {
-  response: Response;
+  response: IResponse;
 }
 
 export const Item = (props: ItemProps) => {
@@ -108,7 +109,7 @@ export const Feedback = (props: FeedbackProps) => {
         id="feedback"
       />
 
-      {parts[0].responses.map((response: Response) => (
+      {parts[0].responses.map((response: IResponse) => (
         <Item key={response.id} {...props} response={response} />
       ))}
 

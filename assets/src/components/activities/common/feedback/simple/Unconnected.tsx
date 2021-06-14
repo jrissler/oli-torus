@@ -1,13 +1,15 @@
 import React from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { Response, ResponseId, RichText } from 'components/activities/types';
+import { RichText } from 'components/activities/types';
 import { Card } from 'components/common/Card';
+import { ID } from 'data/content/model';
+import { IFeedback } from '../types';
 
 const FeedbackCard: React.FC<{
-  response: Response;
+  feedback: IFeedback;
   title: React.ReactNode;
-  update: (id: ResponseId, content: RichText) => void;
-}> = ({ title, response, update }) => {
+  update: (id: ID, content: RichText) => void;
+}> = ({ title, feedback, update }) => {
   return (
     <Card.Card>
       <Card.Title>{title}</Card.Title>
@@ -15,22 +17,22 @@ const FeedbackCard: React.FC<{
         <RichTextEditor
           style={{ backgroundColor: 'white' }}
           placeholder="Enter feedback"
-          text={response.feedback.content}
-          onEdit={(content) => update(response.id, content)}
+          text={feedback.content}
+          onEdit={(content) => update(feedback.id, content)}
         />
       </Card.Content>
     </Card.Card>
   );
 };
 
-interface AuthoringProps {
-  correctResponse: Response;
-  incorrectResponse: Response;
-  update: (id: ResponseId, content: RichText) => void;
+interface Props {
+  correctFeedback: IFeedback;
+  incorrectFeedback: IFeedback;
+  update: (id: ID, content: RichText) => void;
 }
-export const Unconnected: React.FC<AuthoringProps> = ({
-  correctResponse,
-  incorrectResponse,
+export const Unconnected: React.FC<Props> = ({
+  correctFeedback,
+  incorrectFeedback,
   update,
   children,
 }) => {
@@ -38,12 +40,12 @@ export const Unconnected: React.FC<AuthoringProps> = ({
     <>
       <FeedbackCard
         title="Feedback for correct answer"
-        response={correctResponse}
+        feedback={correctFeedback}
         update={update}
       />
       <FeedbackCard
         title="Feedback for incorrect answers"
-        response={incorrectResponse}
+        feedback={incorrectFeedback}
         update={update}
       />
       {children}

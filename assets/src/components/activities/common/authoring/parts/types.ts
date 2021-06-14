@@ -1,5 +1,5 @@
 import { Identifiable } from 'data/content/model';
-import { FeedbackAction, FeedbackActionDesc } from '../../feedback/simple/types';
+import { FeedbackAction, FeedbackActionDesc } from '../../feedback/types';
 import { IHint } from '../../hints/types';
 import { IResponse } from '../responses/types';
 

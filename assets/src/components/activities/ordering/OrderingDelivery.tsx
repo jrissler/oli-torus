@@ -16,6 +16,8 @@ import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
 import { Hints } from '../common/hints';
 import { Stem } from '../common/stem';
+import { IChoice } from '../common/choices/types';
+import { FeedbackAction } from '../common/feedback/types';
 
 type Evaluation = {
   score: number;
@@ -52,7 +54,7 @@ const Selection = ({ selected, onDeselect, isEvaluated }: SelectionProps) => {
 };
 
 interface ChoicesProps {
-  choices: ActivityTypes.Choice[];
+  choices: IChoice[];
   selected: ActivityTypes.ChoiceId[];
   context: WriterContext;
   onSelect: (id: string) => void;
@@ -79,7 +81,7 @@ const Choices = ({ choices, selected, context, onSelect, isEvaluated }: ChoicesP
 };
 
 interface ChoiceProps {
-  choice: ActivityTypes.Choice;
+  choice: IChoice;
   index: number;
   selected: boolean;
   context: WriterContext;
@@ -135,8 +137,7 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
       ])
       .then((response: EvaluationResponse) => {
         if (response.actions.length > 0) {
-          const action: ActivityTypes.FeedbackAction = response
-            .actions[0] as ActivityTypes.FeedbackAction;
+          const action: FeedbackAction = response.actions[0] as FeedbackAction;
           const { score, out_of, feedback, error } = action;
           const parts = [Object.assign({}, attemptState.parts[0], { feedback, error })];
           const updated = Object.assign({}, attemptState, { score, outOf: out_of, parts });

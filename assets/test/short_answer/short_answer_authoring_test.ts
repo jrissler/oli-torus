@@ -1,8 +1,8 @@
 import { ShortAnswerActions } from 'components/activities/short_answer/actions';
 import * as ContentModel from 'data/content/model';
 import { ShortAnswerModelSchema } from 'components/activities/short_answer/schema';
-import { ScoringStrategy } from 'components/activities/types';
 import produce from 'immer';
+import { ScoringStrategy } from 'components/activities/common/authoring/parts/types';
 
 const applyAction = (model: ShortAnswerModelSchema, action: any) => {
   return produce(model, (draftState) => action(draftState));

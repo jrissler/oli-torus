@@ -4,37 +4,23 @@ import { ID, Identifiable } from 'data/content/model';
 export const findById = <Entity extends Identifiable>(state: Entity[], idToFind: ID) =>
   state.find(({ id }) => id === idToFind);
 
-export const addOne = <Entity extends Identifiable>(
-  state: Entity[],
-  action: PayloadAction<Entity>,
-) => {
-  state.push(action.payload);
+export const addOne = <Entity extends Identifiable>(state: Entity[], entity: Entity) => {
+  state.push(entity);
 };
 
-export const setAll = <Entity extends Identifiable>(
-  state: Entity[],
-  action: PayloadAction<Entity[]>,
-) => {
-  return action.payload;
+export const setAll = <Entity extends Identifiable>(state: Entity[], newState: Entity[]) => {
+  return newState;
 };
 
-export const update = <Entity extends Identifiable>(
-  state: Entity,
-  action: { payload: { changes: Partial<Entity> } },
-) => Object.assign(state, action.payload.changes);
+export const update = <Entity extends Identifiable>(state: Entity, changes: Partial<Entity>) =>
+  Object.assign(state, changes);
 
-export const updateOne = <Entity extends Identifiable>(
-  state: Entity[],
-  action: { payload: Update<Entity> },
-) => {
+export const updateOne = <Entity extends Identifiable>(state: Entity[], update: Update<Entity>) => {
   Object.assign(
-    state.find(({ id }) => id === action.payload.id),
-    action.payload.changes,
+    state.find(({ id }) => id === update.id),
+    update.changes,
   );
 };
-export const removeOne = <Entity extends Identifiable>(
-  state: Entity[],
-  action: { payload: ID },
-) => {
-  return state.filter(({ id }) => id !== action.payload);
+export const removeOne = <Entity extends Identifiable>(state: Entity[], id: ID) => {
+  return state.filter((s) => s.id !== id);
 };

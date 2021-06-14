@@ -13,8 +13,7 @@ interface Props {
   onEdit: (updated: Media) => void;
   onMediaSelectionChange: (items: MediaItem[]) => void;
 }
-export const UrlOrUpload = (props: Props) => {
-
+export const UrlOrUpload: React.FC<Props> = (props) => {
   const { toggleDisableInsert, onUrlChange } = props;
   const [source, setSource] = useState<Source>('url');
   const [url, setUrl] = useState('');
@@ -38,7 +37,8 @@ export const UrlOrUpload = (props: Props) => {
             type="radio"
             name="inlineRadioOptions"
             id="inlineRadio2"
-            value="url" />
+            value="url"
+          />
           <label className="form-check-label" htmlFor="inlineRadio2">
             Use external media item
           </label>
@@ -51,23 +51,26 @@ export const UrlOrUpload = (props: Props) => {
             type="radio"
             name="inlineRadioOptions"
             id="inlineRadio1"
-            value="upload" />
+            value="upload"
+          />
           <label className="form-check-label" htmlFor="inlineRadio1">
             Upload new or use existing media library item
           </label>
         </div>
       </div>
-      {source === 'upload'
-        ? <MediaManager
+      {source === 'upload' ? (
+        <MediaManager
           toggleDisableInsert={props.toggleDisableInsert}
           projectSlug={props.projectSlug}
           // eslint-disable-next-line
-          onEdit={() => { }}
+          onEdit={() => {}}
           mimeFilter={props.mimeFilter}
           selectionType={SELECTION_TYPES.SINGLE}
           initialSelectionPaths={props.initialSelectionPaths}
-          onSelectionChange={props.onMediaSelectionChange} />
-        : <div className="media-url">
+          onSelectionChange={props.onMediaSelectionChange}
+        />
+      ) : (
+        <div className="media-url">
           <input
             className="form-control w-100"
             placeholder="Enter the media URL address"
@@ -79,13 +82,11 @@ export const UrlOrUpload = (props: Props) => {
               if (!toggleDisableInsert) {
                 return;
               }
-              return value.trim()
-                ? toggleDisableInsert(false)
-                : toggleDisableInsert(true);
+              return value.trim() ? toggleDisableInsert(false) : toggleDisableInsert(true);
             }}
           />
         </div>
-      }
+      )}
     </>
   );
 };

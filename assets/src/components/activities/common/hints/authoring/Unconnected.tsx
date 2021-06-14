@@ -1,15 +1,16 @@
 import React from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { RichText, HintId, Hint } from '../../../types';
+import { RichText, HintId } from '../../../types';
 import { RemoveButton } from 'components/misc/RemoveButton';
 import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { Card as CardComponent } from 'components/common/Card';
 import { Tooltip } from 'components/activities/common/authoring/Tooltip';
+import { IHint } from '../types';
 
 export const Card: React.FC<{
   title: JSX.Element;
   placeholder: string;
-  hint: Hint;
+  hint: IHint;
   updateOne: (id: HintId, content: RichText) => void;
 }> = ({ title, placeholder, hint, updateOne }) => {
   return (
@@ -28,7 +29,7 @@ export const Card: React.FC<{
 };
 
 interface HintProps {
-  hint: Hint;
+  hint: IHint;
   updateOne: (id: HintId, content: RichText) => void;
 }
 const DeerInHeadlightsHint: React.FC<HintProps> = ({ hint, updateOne }) => (
@@ -51,7 +52,7 @@ const CognitiveHints = ({
   removeOne,
   addOne,
 }: {
-  hints: Hint[];
+  hints: IHint[];
   updateOne: (id: HintId, content: RichText) => void;
   removeOne: any;
   addOne: any;
@@ -88,7 +89,7 @@ const CognitiveHints = ({
   </CardComponent.Card>
 );
 
-const BottomOutHint = ({ hint, updateOne }: { hint: Hint; updateOne: any }) => (
+const BottomOutHint = ({ hint, updateOne }: { hint: IHint; updateOne: any }) => (
   <Card
     title={
       <>
@@ -106,9 +107,9 @@ interface HintsProps {
   addOne: () => void;
   updateOne: (id: HintId, content: RichText) => void;
   removeOne: (id: HintId) => void;
-  deerInHeadlightsHint: Hint;
-  cognitiveHints: Hint[];
-  bottomOutHint: Hint;
+  deerInHeadlightsHint: IHint;
+  cognitiveHints: IHint[];
+  bottomOutHint: IHint;
 }
 export const Unconnected: React.FC<HintsProps> = ({
   deerInHeadlightsHint,

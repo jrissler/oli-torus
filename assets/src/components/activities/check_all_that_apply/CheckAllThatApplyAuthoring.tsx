@@ -6,20 +6,21 @@ import { Navigation } from 'components/common/navigation';
 import { CATASchema } from 'components/activities/check_all_that_apply/schema';
 import { Manifest } from '../types';
 import { combineReducers } from '@reduxjs/toolkit';
-import { configureStore as configureStore2 } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { Checkbox } from '../common/authoring/icons/Checkbox';
-import { Feedback } from '../common/feedback';
 import { choicesSlice } from '../common/choices/authoring/slice';
 import { Choices } from '../common/choices';
 import { Hints } from '../common/hints';
 import { stemSlice } from '../common/stem/authoring/slice';
 import { Stem } from '../common/stem';
-import { AnswerKey } from '../common/authoring/AnswerKey';
 import { previewTextSlice } from '../common/authoring/preview_text/slice';
 import { partsSlice } from '../common/authoring/parts/slice';
 import { CheckAllThatApplySettings } from './components/settings';
 import { transformationsSlice } from '../common/authoring/transformations/slice';
-import { responsesChoicesSlice } from '../common/authoring/responseChoices/responseChoicesSlice';
+import { AnswerKey } from '../common/authoring/answerKey/simple';
+import { Feedback } from '../common/feedback';
+import { settings } from 'nprogress';
+import { responseMappingSlice } from '../common/authoring/responseChoices/responseChoicesSlice';
 
 export const ActivityContext: React.Context<AuthoringElementProps<CATASchema> | undefined> =
   React.createContext<AuthoringElementProps<CATASchema> | undefined>(undefined);
@@ -32,23 +33,26 @@ export function useActivityContext() {
   return context;
 }
 
+const cataReducer = combineReducers({
+  [stemSlice.name]: stemSlice.reducer,
+  [choicesSlice.name]: choicesSlice.reducer,
+  authoring: combineReducers({
+    [partsSlice.name]: partsSlice.reducer,
+    [previewTextSlice.name]: previewTextSlice.reducer,
+    [transformationsSlice.name]: transformationsSlice.reducer,
+    responseMappings: responseMappingSlice.reducer,
+    // settings: settingsSlice.reducer,
+  }),
+});
+export type CataRootState = ReturnType<typeof cataReducer>;
+
 export const ActivityProvider: React.FC<AuthoringElementProps<CATASchema>> = (props) => {
-  const store = configureStore2<CATASchema>({
+  const store = configureStore({
     // The UI state is coupled to the model state. This could be refactored
     // to normalize out the entity relationships in the model, but since every
     // edit creates and pushes out a complete new model, the choice was made to keep the
     // state coupled and prevent a normalize/denormalize step on every model change.
-    reducer: combineReducers({
-      stem: stemSlice.reducer,
-      choices: choicesSlice.reducer,
-      authoring: combineReducers({
-        parts: partsSlice.reducer,
-        previewText: previewTextSlice.reducer,
-        transformations: transformationsSlice.reducer,
-        // correctness: choiceCorrectnessSlice.reducer,
-        responsesChoices: responsesChoicesSlice.reducer,
-      }),
-    }),
+    reducer: cataReducer,
     preloadedState: props.model,
   });
 
@@ -58,12 +62,27 @@ export const ActivityProvider: React.FC<AuthoringElementProps<CATASchema>> = (pr
     console.log('about to call onEdit with state', store.getState());
     props.onEdit(store.getState());
   });
-
   return (
     <Provider store={store}>
       <ActivityContext.Provider value={{ ...props }}>{props.children}</ActivityContext.Provider>
     </Provider>
   );
+};
+
+const selectAnswerKey = (state: any) => {
+  switch (state) {
+    case 'simple':
+    case 'targeted_only':
+    case 'partial_credit_only':
+    case 'targeted_and_partial_credit':
+    default:
+      return (
+        <>
+          <AnswerKey.Authoring.Simple.Connected />
+          <Feedback.Authoring.Simple.Connected />
+        </>
+      );
+  }
 };
 
 const CheckAllThatApply: React.FC = () => {
@@ -84,11 +103,74 @@ const CheckAllThatApply: React.FC = () => {
           <Choices.Authoring.Connected icon={<Checkbox.Unchecked />} />
         </Navigation.Tabbed.Tab>
 
+        {/*
+          Targeted Feedback + Partial Credit
+
+            MAIN COMPONENT: (Call answer key)
+            Stem.Delivery | Max Points (Also show in answer key as label)
+            Answer Choices
+
+            Card
+              "Feedback for this selection" | Points
+              Answer Choices
+              Feedback box
+
+            Card
+              "Feedback for incorrect answers"
+              Feedback Box
+
+
+          Targeted Feedback (no partial credit)
+
+            Stem.Delivery
+            Answer Choices
+
+            Card
+              "Feedback for correct answer" | Points
+              Feedback box
+
+            Card
+              "Feedback for incorrect answers"
+              Feedback Box
+
+            Card
+              "Feedback for this selection"
+              Answer Choices
+              Feedback box
+
+            Add targeted feedback button
+
+          No targeted feedback, no partial credit
+            Answer Key -> selecting an answer
+
+            Card
+              "Feedback for correct answer" | Points
+              Feedback box
+
+            Card
+              "Feedback for incorrect answers"
+              Feedback Box
+
+
+          Need:
+            choicesResponses mapping
+            actions:
+              no targeted feedback, no partial credit:
+                toggle answer choice ->
+                  add or remove choice id from correct response mapping
+                  add or remove choice id from incorrect response mapping
+                  update correct response rule (needs choice id mappings)
+                  update incorrect response rule (needs choice id mappings)
+              targeted feedback, no partial credit:
+                toggle answer choice ->
+
+
+
+        */}
+
         <Navigation.Tabbed.Tab label="Answer Key">
-          <AnswerKey.Authoring.Connected correctChoiceIds={[]} />
-          {/* <Feedback.Authoring.Targeted.Connected> */}
-          <Feedback.Authoring.Simple.Connected />
-          {/* </Feedback.Authoring.Targeted.Connected> */}
+          {selectAnswerKey('none')}
+          {/* <Feedback.Authoring.Targeted.Connected /> */}
         </Navigation.Tabbed.Tab>
 
         <Navigation.Tabbed.Tab label="Hints">

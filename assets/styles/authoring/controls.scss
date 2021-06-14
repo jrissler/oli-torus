@@ -1,3 +1,8 @@
+.material-icons,
+.material-icons-outlined {
+  user-select: none;
+}
+
 .drag-handle {
   cursor: -webkit-grab;
   cursor: -moz-grab;

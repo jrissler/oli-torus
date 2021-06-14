@@ -1,11 +1,12 @@
 import { MCActions } from 'components/activities/multiple_choice/actions';
 import * as ContentModel from 'data/content/model';
 import { MultipleChoiceModelSchema } from 'components/activities/multiple_choice/schema';
-import { Choice, ScoringStrategy } from 'components/activities/types';
 import produce from 'immer';
+import { IChoice } from 'components/activities/common/choices/types';
+import { ScoringStrategy } from 'components/activities/common/authoring/parts/types';
 
 const applyAction = (model: MultipleChoiceModelSchema, action: any) => {
-  return produce(model, (draftState) => action(draftState));
+  return produce(model, (draftState: any) => action(draftState));
 };
 
 function testContentFromText(text: string) {
@@ -34,8 +35,8 @@ function testResponse(text: string, rule: string, score = 0) {
 }
 
 function testDefaultModel(): MultipleChoiceModelSchema {
-  const choiceA: Choice = testContentFromText('Choice A');
-  const choiceB: Choice = testContentFromText('Choice B');
+  const choiceA: IChoice = testContentFromText('Choice A');
+  const choiceB: IChoice = testContentFromText('Choice B');
 
   const responseA = testResponse('', `input like {${choiceA.id}}`, 1);
   const responseB = testResponse('', `input like {${choiceB.id}}`, 0);

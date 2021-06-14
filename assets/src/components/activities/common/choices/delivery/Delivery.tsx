@@ -1,12 +1,12 @@
-import { Choice as ChoiceT, ChoiceId } from 'components/activities/types';
+import { ChoiceId } from 'components/activities/types';
 import { WriterContext } from 'data/content/writers/context';
-import { Choice } from 'components/activities/common/choices/authoring/choice';
 import React from 'react';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
-import './Choices.scss';
+import './Delivery.scss';
+import { IChoice } from '../types';
 
 interface Props {
-  choices: ChoiceT[];
+  choices: IChoice[];
   selected: ChoiceId[];
   context: WriterContext;
   onSelect: (id: ChoiceId) => void;

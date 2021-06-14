@@ -1,45 +1,35 @@
-import {
-  Choice,
-  ChoiceId,
-  Feedback,
-  Hint,
-  HintId,
-  Part,
-  Stem,
-  Transformation,
-} from 'components/activities/types';
 import { denormalize, normalize, schema } from 'normalizr';
 import { Id } from 'react-beautiful-dnd';
 import { CATASchema } from '../schema';
 
-const choice = new schema.Entity<Choice>('choices');
-const stem = new schema.Entity<Stem>('stem');
-const hint = new schema.Entity<Hint>('hints');
-const feedback = new schema.Entity<Feedback>('feedback');
-const response = new schema.Entity<Response>('responses', {
-  feedback,
-});
-const transformation = new schema.Entity<Transformation>('transformation');
-const part = new schema.Entity<Part>('parts', {
-  responses: [response],
-  hints: [hint],
-});
+// const choice = new schema.Entity<Choice>('choices');
+// const stem = new schema.Entity<Stem>('stem');
+// const hint = new schema.Entity<Hint>('hints');
+// const feedback = new schema.Entity<Feedback>('feedback');
+// const response = new schema.Entity<Response>('responses', {
+//   feedback,
+// });
+// const transformation = new schema.Entity<Transformation>('transformation');
+// const part = new schema.Entity<Part>('parts', {
+//   responses: [response],
+//   hints: [hint],
+// });
 
-export const mySchema = {
-  stem,
-  choices: [choice],
-  authoring: {
-    transformations: [transformation],
-    feedback: [feedback],
-    parts: [part],
-  },
-};
+// export const mySchema = {
+//   stem,
+//   choices: [choice],
+//   authoring: {
+//     transformations: [transformation],
+//     feedback: [feedback],
+//     parts: [part],
+//   },
+// };
 
-const mySchema2 = {
-  choices: [choice],
-  transformations: [transformation],
-  parts: [part],
-};
+// const mySchema2 = {
+//   choices: [choice],
+//   transformations: [transformation],
+//   parts: [part],
+// };
 
 // export const normalizeModel = (model: CATASchema) => {};
 // export const normalizeModel2 = (model: CATASchema) => {

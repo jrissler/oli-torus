@@ -1,10 +1,10 @@
 import React from 'react';
-import * as ActivityTypes from '../../../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
+import {  IHint  } from '../types';;
 
 interface DisplayedHintProps {
-  hint: ActivityTypes.Hint;
+  hint: IHint;
   context: WriterContext;
   index: number;
 }
@@ -22,7 +22,7 @@ const DisplayedHint = ({ hint, context, index }: DisplayedHintProps) => {
 
 interface HintsProps {
   isEvaluated: boolean;
-  hints: ActivityTypes.Hint[];
+  hints: IHint[];
   hasMoreHints: boolean;
   context: WriterContext;
   onClick: () => void;

@@ -10,5 +10,5 @@ export const selectStem = createSelector(
   (stem) => ({ stem }),
 );
 export const Connected = connect(selectStem, (dispatch) => ({
-  onStemChange: (text: RichText) => dispatch(stemSlice.actions.set(text)),
+  update: (content: RichText) => dispatch(stemSlice.actions.update({ changes: { content } })),
 }))(Unconnected);

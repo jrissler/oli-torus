@@ -3,11 +3,7 @@ import { RichTextEditor } from 'components/content/RichTextEditor';
 import { Description } from 'components/misc/Description';
 import { IconIncorrect } from 'components/misc/Icons';
 import { Typeahead } from 'react-bootstrap-typeahead';
-import {
-  getResponse,
-  getResponses,
-  makeResponse,
-} from 'components/activities/common/authoring/utils';
+import { getResponse, getResponses } from 'components/activities/common/authoring/utils';
 import { RemoveButton } from 'components/misc/RemoveButton';
 import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
@@ -18,6 +14,7 @@ import { ChoiceIdsToResponseId } from 'components/activities/check_all_that_appl
 import { HasTargetedFeedback, TargetedFeedbackEnabled } from './types';
 import { ChoiceId, ResponseId, RichText } from 'components/activities/types';
 import { HasParts } from '../../authoring/parts/types';
+import {IResponse} from '../../authoring/responses/types'
 
 interface Option {
   id: string;
@@ -170,9 +167,10 @@ export function setDifference<T>(subtractedFrom: T[], toSubtract: T[]): T[] {
 
 interface Props {
   onEditFeedback?: (id: string, content: RichText) => void;
-  onAddTargetedFeedback?: () => void;
-  onRemoveTargetedFeedback?: (responseId: ResponseId) => void;
-  onEditTargetedFeedbackChoices?: (responseId: ResponseId, choiceIds: ChoiceId[]) => void;
+  onAddTargetedFeedback: () => void;
+  onRemoveTargetedFeedback: (responseId: ResponseId) => void;
+  onEditTargetedFeedbackChoices: (responseId: ResponseId, choiceIds: ChoiceId[]) => void;
+  responses: IResponse[];
 }
 export const Unconnected: React.FC<Props> = ({
   onEditFeedback,
@@ -181,15 +179,7 @@ export const Unconnected: React.FC<Props> = ({
   onEditTargetedFeedbackChoices,
   children,
 }) => {
-  // const {
-  // model,
-  // editMode,
-  // // setResponseFeedback,
-  // addTargetedFeedback,
-  // removeTargetedFeedback,
-  // editTargetedFeedbackChoices,
-  // dispatch,
-  // } = useTargetedFeedback();
+  return <></>
 
   // const createSelection = (assocs: ChoiceIdsToResponseId[]) =>
   //   assocs.reduce((acc, assoc) => {
@@ -206,66 +196,66 @@ export const Unconnected: React.FC<Props> = ({
   // const allChoiceOptions = toOptions(model.choices.map((choice) => choice.id));
   // const selected = createSelection(model.authoring.feedback.targeted);
 
-  return (
-    <>
-      {/* {children}
+  // return (
+  //   <>
 
-      {model.authoring.feedback.targeted.map((assoc) => {
-        const response = getResponse(model, getResponseId(assoc));
-        return (
-          <div className="mb-3" key={response.id}>
-            <Description>
-              <IconIncorrect /> Feedback for Incorrect Combination
-              <Typeahead
-                id={response.id}
-                disabled={!editMode}
-                placeholder="Select choices..."
-                options={allChoiceOptions}
-                selected={selected[response.id]}
-                selectHintOnEnter
-                multiple
-                onChange={(selection) =>
-                  onEditTargetedFeedbackChoices
-                    ? onEditTargetedFeedbackChoices(
-                        response.id,
-                        selection.map((s) => s.id),
-                      )
-                    : dispatch(
-                        editTargetedFeedbackChoices(
-                          response.id,
-                          selection.map((s) => s.id),
-                        ),
-                      )
-                }
-              />
-            </Description>
-            <div className="d-flex align-items-center" style={{ flex: 1 }}>
-              <RichTextEditor
-                className="flex-fill"
-                text={response.feedback.content}
-                onEdit={(content) =>
-                  onEditFeedback
-                    ? onEditFeedback(response.id, content)
-                    : setResponseFeedback(response.id, content)
-                }
-              />
-              <RemoveButton
-                onClick={() =>
-                  onRemoveTargetedFeedback
-                    ? onRemoveTargetedFeedback(response.id)
-                    : removeTargetedFeedback(response.id)
-                }
-              />
-            </div>
-          </div>
-        );
-      })}
-      <AuthoringButton
-        className="btn btn-sm btn-primary my-2"
-        onClick={onAddTargetedFeedback ? onAddTargetedFeedback : addTargetedFeedback}
-      >
-        Add targeted feedback
-      </AuthoringButton> */}
-    </>
-  );
+
+  //     {model.authoring.feedback.targeted.map((assoc) => {
+  //       const response = getResponse(model, getResponseId(assoc));
+  //       return (
+  //         <div className="mb-3" key={response.id}>
+  //           <Description>
+  //             <IconIncorrect /> Feedback for Incorrect Combination
+  //             <Typeahead
+  //               id={response.id}
+  //               disabled={!editMode}
+  //               placeholder="Select choices..."
+  //               options={allChoiceOptions}
+  //               selected={selected[response.id]}
+  //               selectHintOnEnter
+  //               multiple
+  //               onChange={(selection) =>
+  //                 onEditTargetedFeedbackChoices
+  //                   ? onEditTargetedFeedbackChoices(
+  //                       response.id,
+  //                       selection.map((s) => s.id),
+  //                     )
+  //                   : dispatch(
+  //                       editTargetedFeedbackChoices(
+  //                         response.id,
+  //                         selection.map((s) => s.id),
+  //                       ),
+  //                     )
+  //               }
+  //             />
+  //           </Description>
+  //           <div className="d-flex align-items-center" style={{ flex: 1 }}>
+  //             <RichTextEditor
+  //               className="flex-fill"
+  //               text={response.feedback.content}
+  //               onEdit={(content) =>
+  //                 onEditFeedback
+  //                   ? onEditFeedback(response.id, content)
+  //                   : setResponseFeedback(response.id, content)
+  //               }
+  //             />
+  //             <RemoveButton
+  //               onClick={() =>
+  //                 onRemoveTargetedFeedback
+  //                   ? onRemoveTargetedFeedback(response.id)
+  //                   : removeTargetedFeedback(response.id)
+  //               }
+  //             />
+  //           </div>
+  //         </div>
+  //       );
+  //     })}
+  //     <AuthoringButton
+  //       className="btn btn-sm btn-primary my-2"
+  //       onClick={onAddTargetedFeedback}
+  //     >
+  //       Add targeted feedback
+  //     </AuthoringButton>
+  //   </>
+  // );
 };

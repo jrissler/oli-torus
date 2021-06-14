@@ -2,15 +2,18 @@
 @import 'bootstrap';
 
 .choices__container {
+  width: 100%;
   // display: flex;
   // flex-direction: column;
 }
 .choices__choice-row {
+  width: 100%;
 }
 .choices__choice-content {
   @extend .d-flex;
   align-items: center;
   padding: 0.5em 0.5em 0.5em 0;
+  width: 100%;
 }
 .choices__choice-label {
   margin: 0;
@@ -47,7 +50,6 @@
   align-items: center;
   justify-content: center;
   border: 2px solid #e5e5e5;
-  color: #afafaf;
   height: 30px;
   width: 30px;
   font-weight: bold;

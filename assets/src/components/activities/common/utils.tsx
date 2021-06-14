@@ -1,8 +1,9 @@
 import * as ContentModel from 'data/content/model';
-import { Operation, RichText, Transformation } from '../types';
 import guid from 'utils/guid';
 import React from 'react';
 import { isShuffled } from './authoring/utils';
+import { IOperation, ITransformation } from './authoring/transformations/types';
+import {  RichText  } from '../types';;
 
 export function fromText(text: string): { id: string; content: RichText } {
   return {
@@ -20,29 +21,27 @@ export function fromText(text: string): { id: string; content: RichText } {
   };
 }
 
-export const makeTransformation = (path: string, operation: Operation): Transformation => ({
+export const makeTransformation = (path: string, operation: IOperation): ITransformation => ({
   id: guid(),
   path,
   operation,
 });
 
-
-
 export const toggleAnswerChoiceShuffling = () => {
-  return (model: { authoring: { transformations: Transformation[] } }): void => {
+  return (model: { authoring: { transformations: ITransformation[] } }): void => {
     const transformations = model.authoring.transformations;
 
     isShuffled(transformations)
       ? (model.authoring.transformations = transformations.filter(
-          (xform) => xform.operation !== Operation.shuffle,
+          (xform) => xform.operation !== IOperation.shuffle,
         ))
-      : model.authoring.transformations.push(makeTransformation('choices', Operation.shuffle));
+      : model.authoring.transformations.push(makeTransformation('choices', IOperation.shuffle));
   };
 };
 
 interface ShuffleChoicesOptionProps {
   onShuffle: () => void;
-  model: { authoring: { transformations: Transformation[] } };
+  model: { authoring: { transformations: ITransformation[] } };
 }
 export const ShuffleChoicesOption: React.FC<ShuffleChoicesOptionProps> = ({
   onShuffle,

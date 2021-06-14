@@ -1,19 +1,20 @@
 import React from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { RichText, Stem } from 'components/activities/types';
+import { IStem } from '../types';
+import { RichText } from 'components/activities/types';
 
 interface Props {
-  stem: Stem;
-  onStemChange: (text: RichText) => void;
+  stem: IStem;
+  update: (text: RichText) => void;
 }
 
-export const Unconnected: React.FC<Props> = ({ stem, onStemChange }) => {
+export const Unconnected: React.FC<Props> = ({ stem, update }) => {
   return (
     <div className="mb-2 flex-grow-1">
       <RichTextEditor
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}
-        onEdit={onStemChange}
+        onEdit={update}
         placeholder="Question"
       />
     </div>

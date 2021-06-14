@@ -2,7 +2,8 @@ import React from 'react';
 import * as ActivityTypes from '../../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
-import { makeContent, makeFeedback } from 'components/activities/common/authoring/utils';
+import { makeContent } from 'components/activities/common/authoring/utils';
+import { makeFeedback } from '../feedback/types';
 
 export const Evaluation = ({
   attemptState,

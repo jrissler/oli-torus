@@ -1,7 +1,8 @@
 import guid from 'utils/guid';
 import * as ContentModel from 'data/content/model';
 import { AdaptiveModelSchema } from './schema';
-import { RichText, Operation, ScoringStrategy } from '../types';
+import { RichText } from '../types';
+import { ScoringStrategy } from '../common/authoring/parts/types';
 
 export const defaultModel: () => AdaptiveModelSchema = () => {
   return {

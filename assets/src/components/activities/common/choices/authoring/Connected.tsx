@@ -1,20 +1,20 @@
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector, Dispatch } from '@reduxjs/toolkit';
+import { CataRootState } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 import { ChoiceId, RichText } from 'components/activities/types';
-import { connect } from 'react-redux';
-import { makeChoice } from '../../authoring/utils';
-import { HasChoices, IChoice } from '../types';
-import { choicesSlice } from './slice';
+import { connect, MapDispatchToProps } from 'react-redux';
+import { HasChoices, IChoice, makeChoice } from '../types';
+import { choicesSlice, selectAllChoices } from './slice';
 import { Unconnected } from './Unconnected';
 
-export const selectChoices = createSelector(
-  (state: HasChoices) => state.choices,
-  (choices) => ({ choices }),
-);
+const mapStateToProps = (state: CataRootState) => ({ choices: state.choices });
+// const mapStateToProps = (state: any) => ({ choices: state.choices });
 
-export const Connected = connect(selectChoices, (dispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   addOne: () => dispatch(choicesSlice.actions.addOne(makeChoice(''))),
   updateOne: (id: ChoiceId, content: RichText) =>
     dispatch(choicesSlice.actions.updateOne({ id, changes: { content } })),
   setAll: (choices: IChoice[]) => dispatch(choicesSlice.actions.setAll(choices)),
   removeOne: (id: ChoiceId) => dispatch(choicesSlice.actions.removeOne(id)),
-}))(Unconnected);
+});
+
+export const Connected = connect(mapStateToProps, mapDispatchToProps)(Unconnected);

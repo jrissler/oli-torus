@@ -17,6 +17,7 @@ import { lastPart } from './utils';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { ImageCodeEditor } from './sections/ImageCodeEditor';
 import { Hints } from '../common/hints';
+import { FeedbackAction } from '../common/feedback/types';
 
 type Evaluation = {
   score: number;
@@ -129,8 +130,7 @@ const ImageCoding = (props: ImageCodingDeliveryProps) => {
       ])
       .then((response: EvaluationResponse) => {
         if (response.actions.length > 0) {
-          const action: ActivityTypes.FeedbackAction = response
-            .actions[0] as ActivityTypes.FeedbackAction;
+          const action: FeedbackAction = response.actions[0] as FeedbackAction;
           const { error } = action;
           const parts = [Object.assign({}, partState, { feedback, error })];
           const updated = Object.assign({}, attemptState, { score, outOf, parts });

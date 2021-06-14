@@ -1,12 +1,13 @@
-import { Choice, RichText } from 'components/activities/types';
+import { RichText } from 'components/activities/types';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { Description } from 'components/misc/Description';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { RemoveButton } from 'components/misc/RemoveButton';
 import React from 'react';
+import {  IChoice  } from './types';;
 
 interface Props {
-  choice: Choice;
+  choice: IChoice;
   isCorrectChoice: (id: string) => boolean;
   index: number;
   onEditChoice: (id: string, content: RichText) => void;

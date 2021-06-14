@@ -1,8 +1,9 @@
 import { ShortAnswerModelSchema, InputType } from './schema';
-import { getResponse, makeResponse } from 'components/activities/common/authoring/utils';
+import { getResponse } from 'components/activities/common/authoring/utils';
 import { editStem } from '../common/authoring/actions/stem';
 import {addHint, editHint, removeHint} from '../common/authoring/actions/hints'
 import {editFeedback} from '../common/authoring/actions/feedback'
+import { makeResponse } from '../common/authoring/responses/types';
 
 export class ShortAnswerActions {
   static setModel(model: ShortAnswerModelSchema) {

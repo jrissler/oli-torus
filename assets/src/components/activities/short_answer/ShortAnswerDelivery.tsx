@@ -15,6 +15,8 @@ import { valueOr } from 'utils/common';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext } from 'data/content/writers/context';
 import { Hint } from 'react-bootstrap-typeahead';
+import { IHint } from '../common/hints/types';
+import { FeedbackAction } from '../common/feedback/types';
 
 type Evaluation = {
   score: number;
@@ -72,7 +74,7 @@ const Input = (props: InputProps) => {
 export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerModelSchema>) => {
   const [model, setModel] = useState<ShortAnswerModelSchema>(props.model);
   const [attemptState, setAttemptState] = useState<ActivityTypes.ActivityState>(props.state);
-  const [hints, setHints] = useState<ActivityTypes.Hint[]>(props.state.parts[0].hints);
+  const [hints, setHints] = useState<IHint[]>(props.state.parts[0].hints);
   const [hasMoreHints, setHasMoreHints] = useState<boolean>(props.state.parts[0].hasMoreHints);
   const [input, setInput] = useState<string>(valueOr((attemptState.parts[0] as any).response, ''));
   const { stem } = model;
@@ -96,8 +98,7 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
       ])
       .then((response: EvaluationResponse) => {
         if (response.actions.length > 0) {
-          const action: ActivityTypes.FeedbackAction = response
-            .actions[0] as ActivityTypes.FeedbackAction;
+          const action: FeedbackAction = response.actions[0] as FeedbackAction;
           const { score, out_of, feedback, error } = action;
           const parts = [Object.assign({}, attemptState.parts[0], { feedback, error })];
           const updated = Object.assign({}, attemptState, { score, outOf: out_of, parts });

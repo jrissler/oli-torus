@@ -4,21 +4,23 @@ import { connect } from 'react-redux';
 import { Unconnected } from './Unconnected';
 import { feedbackSlice } from '../slice';
 import { HasParts } from '../../authoring/parts/types';
+import { CataRootState } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
+import { ID } from 'data/content/model';
+import { selectAllResponsesByPartId } from '../../authoring/parts/slice';
 
 export const Connected: React.FC = connect(
-  (state: HasParts) => {
-    const getCorrectResponse = (model: HasParts) =>
-      model.authoring.parts[0].responses.find((r) => r.score === 1);
-    const getIncorrectResponse = (model: HasParts) =>
-      model.authoring.parts[0].responses.find((r) => r.score === 0);
+  (state: CataRootState) => {
+    const partId = '1';
 
     return {
-      correctResponse: getCorrectResponse(state),
-      incorrectResponse: getIncorrectResponse(state),
+      correctFeedback: selectAllResponsesByPartId(partId, state)?.find((r) => r.score === 1)
+        ?.feedback,
+      incorrectFeedback: selectAllResponsesByPartId(partId, state)?.find((r) => r.score === 0)
+        ?.feedback,
     };
   },
   (dispatch) => ({
-    update: (responseId: ResponseId, content: RichText) =>
-      dispatch(feedbackSlice.actions.update({ partId: '1', responseId, changes: { content } })),
+    update: (id: ID, content: RichText) =>
+      dispatch(feedbackSlice.actions.update({ id, changes: { content } })),
   }),
 )(Unconnected);

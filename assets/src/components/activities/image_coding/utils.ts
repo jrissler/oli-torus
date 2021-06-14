@@ -1,6 +1,8 @@
+import { ScoringStrategy } from '../common/authoring/parts/types';
+import { makeFeedback } from '../common/feedback/types';
+import { makeHint } from '../common/hints/types';
+import { makeStem } from '../common/stem/types';
 import { ImageCodingModelSchema } from './schema';
-import { ScoringStrategy } from '../types';
-import { makeFeedback, makeHint, makeStem } from 'components/activities/common/authoring/utils';
 
 export const defaultICModel: () => ImageCodingModelSchema = () => {
   return {

@@ -1,15 +1,15 @@
 import {
   ActivityModelSchema,
   ActivityState,
-  Hint,
   PartResponse,
   PartState,
   StudentResponse,
   ClientEvaluation,
-  Action,
   Success,
 } from './types';
 import { valueOr } from 'utils/common';
+import { Action } from './common/authoring/parts/types';
+import { IHint } from './common/hints/types';
 
 export interface EvaluationResponse extends Success {
   actions: Action[];
@@ -20,7 +20,7 @@ export interface EvaluationResponse extends Success {
 // will return an instance of this interface with hasMoreHints set to false
 // and the hint attribute missing.
 export interface RequestHintResponse extends Success {
-  hint?: Hint;
+  hint?: IHint;
   hasMoreHints: boolean;
 }
 

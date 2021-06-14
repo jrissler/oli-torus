@@ -1,11 +1,11 @@
-
-import { makeChoice, makeResponse } from 'components/activities/common/authoring/utils';
-import { HasChoices, HasParts } from 'components/activities/types';
-import {editChoice, removeChoice} from '../common/authoring/actions/choices'
-import {editFeedback} from '../common/authoring/actions/feedback'
-import {addHint, editHint, removeHint} from '../common/authoring/actions/hints'
-import {editStem} from '../common/authoring/actions/stem'
-import {toggleAnswerChoiceShuffling} from '../common/utils'
+import { editChoice, removeChoice } from '../common/authoring/actions/choices';
+import { editFeedback } from '../common/authoring/actions/feedback';
+import { addHint, editHint, removeHint } from '../common/authoring/actions/hints';
+import { editStem } from '../common/authoring/actions/stem';
+import {  HasParts  } from '../common/authoring/parts/types';;
+import {  makeResponse  } from '../common/authoring/responses/types';;
+import {  HasChoices, makeChoice  } from '../common/choices/types';;
+import { toggleAnswerChoiceShuffling } from '../common/utils';
 
 export class MCActions {
   static editStem = editStem;

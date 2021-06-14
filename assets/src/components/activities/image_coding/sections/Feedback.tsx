@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Heading } from 'components/misc/Heading';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { ModelEditorProps } from '../schema';
-import { RichText, Feedback as FeedbackItem } from '../../types';
+import { RichText } from '../../types';
 import { Description } from 'components/misc/Description';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { ProjectSlug } from 'data/types';
+import { IFeedback } from 'components/activities/common/feedback/types';
 
 interface FeedbackProps extends ModelEditorProps {
   onEditResponse: (score: number, content: RichText) => void;
@@ -13,7 +14,7 @@ interface FeedbackProps extends ModelEditorProps {
 }
 
 interface ItemProps extends FeedbackProps {
-  feedback: FeedbackItem;
+  feedback: IFeedback;
   score: number;
 }
 
@@ -46,7 +47,7 @@ export const Feedback = (props: FeedbackProps) => {
         id="feedback"
       />
 
-      {model.feedback.map((f: FeedbackItem, index) => (
+      {model.feedback.map((f: IFeedback, index) => (
         <Item key={index} {...props} feedback={f} score={index} />
       ))}
     </div>

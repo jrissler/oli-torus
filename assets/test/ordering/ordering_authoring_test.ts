@@ -2,7 +2,6 @@ import { Actions } from 'components/activities/ordering/actions';
 import * as ContentModel from 'data/content/model';
 import produce from 'immer';
 import { OrderingModelSchema } from 'components/activities/ordering/schema';
-import { Choice } from 'components/activities/types';
 import {defaultOrderingModel} from 'components/activities/ordering/utils'
 
 const applyAction = (model: OrderingModelSchema, action: any) => {

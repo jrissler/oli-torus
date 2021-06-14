@@ -1,10 +1,10 @@
-import { Choice as ChoiceT } from 'components/activities/types';
 import { WriterContext } from 'data/content/writers/context';
 import React from 'react';
 import { Maybe } from 'tsmonad';
+import {  IChoice  } from './types';;
 
 interface ChoicesProps {
-  choices: ChoiceT[];
+  choices: IChoice[];
   selected: Maybe<string>;
   context: WriterContext;
   onSelect: (id: string) => void;
@@ -12,7 +12,8 @@ interface ChoicesProps {
 }
 
 const Choices = ({ choices, selected, context, onSelect, isEvaluated }: ChoicesProps) => {
-  return (<></>
+  return (
+    <></>
     // <div className="choices" aria-label="multiple choice choices">
     //   {choices.map((choice, index) => (
     //     <Choice.Delivery

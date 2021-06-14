@@ -1,6 +1,7 @@
 import { Unconnected as SimpleUnconnected } from './simple/Unconnected';
 import { Connected as SimpleConnected } from './simple/Connected';
-import { Unconnected as TargetedConnected } from './targeted/Unconnected';
+import { Unconnected as TargetedUnconnected } from './targeted/Unconnected';
+// import { Connected as TargetedConnected } from './targeted/Connected';
 
 export const Feedback = {
   Authoring: {
@@ -9,7 +10,8 @@ export const Feedback = {
       Connected: SimpleConnected,
     },
     Targeted: {
-      Unconnected: TargetedConnected,
+      Unconnected: TargetedUnconnected,
+      // Connected: TargetedConnected,
     },
   },
   // Delivery

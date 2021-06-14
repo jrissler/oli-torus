@@ -11,16 +11,13 @@ import {
   getResponseId,
 } from './utils';
 import { ChoiceId, ResponseId } from '../types';
-import {
-  getResponse,
-  getResponses,
-  makeChoice,
-  makeResponse,
-} from 'components/activities/common/authoring/utils';
+import { getResponse, getResponses } from 'components/activities/common/authoring/utils';
 import {editStem} from '../common/authoring/actions/stem'
 import {editChoice, moveChoice} from '../common/authoring/actions/choices'
 import {editFeedback} from '../common/authoring/actions/feedback'
 import {addHint, editHint, removeHint} from '../common/authoring/actions/hints'
+import { makeChoice } from '../common/choices/types';
+import { makeResponse } from '../common/authoring/responses/types';
 
 export class Actions {
   static toggleType() {

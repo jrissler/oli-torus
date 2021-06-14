@@ -1,6 +1,8 @@
-import {makeFeedback, makeHint} from 'components/activities/common/authoring/utils'
+import { Action } from 'components/activities/common/authoring/parts/types';
+import { makeFeedback } from 'components/activities/common/feedback/types';
+import { makeHint } from 'components/activities/common/hints/types';
 import { EvaluationResponse, RequestHintResponse } from 'components/activities/DeliveryElement';
-import { Action, ActivityState, PartState } from 'components/activities/types';
+import { ActivityState, PartState } from 'components/activities/types';
 import { createFalse } from 'typescript';
 
 const partState: PartState = {
