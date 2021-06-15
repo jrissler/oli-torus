@@ -22,6 +22,32 @@ export const Choices = ({
 
   onShuffle,
 }: ChoicesProps) => {
+  // const {
+  //   authoring: { parts },
+  //   choices,
+  // } = model;
+  // const isCorrect = (response: Response) => response.score === 1;
+
+  // const correctChoice = choices.reduce((correct, choice) => {
+  //   if (correct !== null) return correct;
+
+  //   if (
+  //     parts[0].responses.find(
+  //       (response) => response.rule === `input like {${choice.id}}` && isCorrect(response),
+  //     )
+  //   ) {
+  //     return choice;
+  //   } else {
+  //     return null;
+  //   }
+  // }, null);
+
+  // if (correctChoice === null || correctChoice === undefined) {
+  //   throw new Error('Correct choice could not be found:' + JSON.stringify(choices));
+  // }
+
+  // const incorrectChoices = choices.filter((choice) => choice.id !== correctChoice.id);
+
   return (
     <div className="my-5">
       {/* <Heading

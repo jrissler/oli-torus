@@ -1,4 +1,8 @@
 /* eslint-disable react/prop-types */
+import {
+  NotificationType,
+  subscribeToNotification,
+} from '../../../apps/delivery/components/NotificationContext';
 import { usePrevious } from 'components/hooks/usePrevious';
 import { shuffle } from 'lodash';
 import React, { CSSProperties, useCallback, useEffect, useState } from 'react';
@@ -236,6 +240,120 @@ const MultipleChoiceQuestion: React.FC<JanusMultipleChoiceQuestionItemProperties
     props.onReady({ id, responses: [] });
   }, [ready]);
 
+  const getOptionTextFromNode = (children: any): any => {
+    let optionText = '';
+    if (children.tag === 'text') {
+      optionText = children.text;
+    } else {
+      optionText = getOptionTextFromNode(children.children[0]);
+    }
+    return optionText;
+  };
+
+  const getOptionTextById = (options: any, optionId: any): any => {
+    const text = options.map((option: any) => {
+      if (option.value === optionId) {
+        if (option.nodes[0].tag === 'text') {
+          return option.nodes[0].text;
+        } else {
+          return getOptionTextFromNode(option.nodes[0]);
+        }
+      }
+    });
+    return text.filter((option: any) => option !== undefined);
+  };
+
+  const getOptionTextByText = (options: any, optionText: any): any => {
+    const text = options.map((option: any) => {
+      const text = getOptionTextFromNode(option.nodes[0]);
+      if (text === optionText) {
+        return option.value;
+      }
+    });
+
+    return text.filter((option: any) => option !== undefined);
+  };
+
+  useEffect(() => {
+    if (!props.notify) {
+      return;
+    }
+    const notificationsHandled = [
+      NotificationType.CHECK_STARTED,
+      NotificationType.CHECK_COMPLETE,
+      NotificationType.CONTEXT_CHANGED,
+      NotificationType.STATE_CHANGED,
+    ];
+    const notifications = notificationsHandled.map((notificationType: NotificationType) => {
+      const handler = (payload: any) => {
+        /* console.log(`${notificationType.toString()} notification handled [MCQ]`, payload); */
+        switch (notificationType) {
+          case NotificationType.CHECK_STARTED:
+            // should disable input during check?
+            break;
+          case NotificationType.CHECK_COMPLETE:
+            // if disabled above then re-enable now
+            break;
+          case NotificationType.STATE_CHANGED:
+            {
+              const { mutateChanges: changes } = payload;
+              const sEnabled = changes[`stage.${id}.enabled`];
+              if (sEnabled !== undefined) {
+                setEnabled(sEnabled);
+              }
+              const sRandomized = changes[`stage.${id}.randomized`];
+              if (sRandomized !== undefined) {
+                setRandomized(sRandomized);
+              }
+              const sSelectedChoice = changes[`stage.${id}.selectedChoice`];
+              if (sSelectedChoice !== undefined) {
+                const choice = parseInt(String(sSelectedChoice), 10);
+                if (selectedChoice !== choice) {
+                  setSelectedChoice(choice);
+                }
+              }
+              const sSelectedChoiceText = changes[`stage.${id}.selectedChoiceText`];
+              if (sSelectedChoiceText !== undefined) {
+                const updatedSelectedOptions = getOptionTextByText(options, sSelectedChoiceText);
+                setSelectedChoice(updatedSelectedOptions);
+              }
+              const sSelectedChoices = changes[`stage.${id}.selectedChoices`];
+              if (sSelectedChoices !== undefined && Array.isArray(sSelectedChoices)) {
+                const updatedValues = sSelectedChoices.map((item) =>
+                  !Number.isNaN(parseFloat(item)) ? parseFloat(item) : item,
+                );
+                setSelectedChoices(updatedValues);
+              }
+              const sSelectedChoicesText = changes[`stage.${id}.selectedChoicesText`];
+              if (sSelectedChoicesText !== undefined) {
+                if (Array.isArray(sSelectedChoicesText)) {
+                  const updatedSelectedOptions = sSelectedChoicesText
+                    .map((item) => getOptionTextByText(options, item))
+                    .map((option) => {
+                      return option[0];
+                    });
+                  setSelectedChoices(updatedSelectedOptions);
+                }
+              }
+              // NOTE: it doesn't make sense (SS doesn't let you) to allow the things like
+              // numberOfSelectedChoices to be set via mutate state
+            }
+            break;
+          case NotificationType.CONTEXT_CHANGED:
+            // nothing
+            break;
+        }
+      };
+      const unsub = subscribeToNotification(props.notify, notificationType, handler);
+      return unsub;
+    });
+    return () => {
+      notifications.forEach((unsub) => {
+        unsub();
+      });
+    };
+  }, [props.notify, options]);
+
   // Set up the styles
   const styles: CSSProperties = {
     position: 'absolute',
@@ -252,68 +370,6 @@ const MultipleChoiceQuestion: React.FC<JanusMultipleChoiceQuestionItemProperties
       ),
     );
   }
-
-  const handleStateChange = (stateData: CapiVariable[]) => {
-    // this runs every time state is updated from *any* source
-    // the global variable state
-    const interested = stateData.filter((stateVar) => stateVar.id.indexOf(`stage.${id}.`) === 0);
-    if (interested?.length) {
-      interested.forEach((stateVar) => {
-        switch (stateVar.key) {
-          case 'enabled':
-            // will check for boolean and string truthiness for enabled
-            setEnabled(parseBool(stateVar.value));
-            break;
-          case 'randomize':
-            // will check for boolean and string truthiness for randomize
-            setRandomized(parseBool(stateVar.value));
-            break;
-          case 'numberOfSelectedChoices':
-            {
-              const num = parseInt(stateVar.value as string, 10);
-              if (numberOfSelectedChoices !== num) {
-                setNumberOfSelectedChoices(num);
-              }
-            }
-            break;
-          case 'selectedChoice':
-            {
-              const choice = parseInt(stateVar.value as string, 10);
-              if (selectedChoice !== choice) {
-                setSelectedChoice(choice);
-              }
-            }
-            break;
-          case 'selectedChoiceText':
-            setSelectedChoiceText(stateVar.value.toString());
-            break;
-          case 'selectedChoices':
-            if (Array.isArray(stateVar.value)) {
-              // converts string values to numbers
-              const updatedValues = stateVar.value.map((item) =>
-                !Number.isNaN(parseFloat(item)) ? parseFloat(item) : item,
-              );
-              setSelectedChoices(updatedValues);
-            }
-            break;
-          case 'selectedChoicesText':
-            {
-              const vals = stateVar.value;
-              if (Array.isArray(vals)) {
-                // compare selectedChoicesText with array of strings from state
-                // then update 'checked' value based on strings
-                const choices = selectedChoicesText.map((choice) => ({
-                  ...choice,
-                  checked: vals.includes(choice.textValue),
-                }));
-                setSelectedChoicesText(choices);
-              }
-            }
-            break;
-        }
-      });
-    }
-  };
 
   useEffect(() => {
     // we need to set up a new list so that we can shuffle while maintaining correct index/values

@@ -1,9 +1,13 @@
 /* eslint-disable react/prop-types */
-import { CapiVariable, CapiVariableTypes, coerceCapiValue } from '../../../adaptivity/capi';
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { getJanusCAPIRequestTypeString, JanusCAPIRequestTypes } from './JanusCAPIRequestTypes';
-import { parseBool } from '../../../utils/common';
 import debounce from 'lodash/debounce';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import { CapiVariable, CapiVariableTypes } from '../../../adaptivity/capi';
+import {
+  NotificationType,
+  subscribeToNotification,
+} from '../../../apps/delivery/components/NotificationContext';
+import { parseBool } from '../../../utils/common';
+import { getJanusCAPIRequestTypeString, JanusCAPIRequestTypes } from './JanusCAPIRequestTypes';
 
 const fakeUserStorage: any = {};
 const getFromUserStorage = async (simId: string | number, key: string | number) =>
@@ -30,7 +34,7 @@ const ExternalActivity: React.FC<any> = (props) => {
   const [state, setState] = useState<any[]>(Array.isArray(props.state) ? props.state : []);
   const [model, setModel] = useState<any>(Array.isArray(props.model) ? props.model : {});
   const [ready, setReady] = useState<boolean>(false);
-
+  const [activityChanged, setActivityChanged] = useState(false);
   const [initState, setInitState] = useState<any>(null);
   const [initStateReceived, setInitStateReceived] = useState(false);
 
@@ -126,8 +130,11 @@ const ExternalActivity: React.FC<any> = (props) => {
     // result of init has a state snapshot with latest (init state applied)
     writeCapiLog('INIT RESULT CAPI', initResult);
     const currentStateSnapshot = initResult.snapshot;
-    writeCapiLog('SNAP', currentStateSnapshot);
 
+    processInitStateVariable(currentStateSnapshot);
+  }, []);
+
+  const processInitStateVariable = (currentStateSnapshot: any) => {
     const sVisible = currentStateSnapshot[`stage.${id}.IFRAME_frameVisible`];
     if (sVisible !== undefined) {
       setFrameVisible(sVisible);
@@ -181,7 +188,7 @@ const ExternalActivity: React.FC<any> = (props) => {
     setInitState(interestedSnapshot);
 
     setInitStateReceived(true);
-  }, []);
+  };
 
   useEffect(() => {
     let pModel;
@@ -285,6 +292,7 @@ const ExternalActivity: React.FC<any> = (props) => {
   };
 
   const writeCapiLog = (msg: any, ...rest: any[]) => {
+    // TODO: change to a config value?
     const boolWriteLog = false;
     let colorStyle = 'background: #222; color: #bada55';
     const [logStyle] = rest;
@@ -307,6 +315,83 @@ const ExternalActivity: React.FC<any> = (props) => {
       console.log(`%c Capi(${id}) - ${msg}`, colorStyle, ...args);
     }
   };
+
+  useEffect(() => {
+    if (!props.notify) {
+      return;
+    }
+    const notificationsHandled = [
+      NotificationType.CHECK_STARTED,
+      NotificationType.CHECK_COMPLETE,
+      NotificationType.CONTEXT_CHANGED,
+      NotificationType.STATE_CHANGED,
+    ];
+    const notifications = notificationsHandled.map((notificationType: NotificationType) => {
+      const handler = (payload: any) => {
+        /* console.log(`${notificationType.toString()} notification handled [CAPI_IFRAME]`, payload); */
+        switch (notificationType) {
+          case NotificationType.CHECK_STARTED:
+            {
+              writeCapiLog('CHECK REQUEST STARTED STATE!!!!', 3, {
+                payload,
+                simLife,
+              });
+              sendFormedResponse(
+                simLife.handshake,
+                {},
+                JanusCAPIRequestTypes.CHECK_START_RESPONSE,
+                {},
+              );
+            }
+            break;
+          case NotificationType.CHECK_COMPLETE:
+            {
+              writeCapiLog('CHECK REQUEST COMPLETED STATE!!!!', 3, {
+                simLife,
+                payload,
+              });
+              // Need to reply to sim with type === 8
+              sendFormedResponse(
+                simLife.handshake,
+                {},
+                JanusCAPIRequestTypes.CHECK_COMPLETE_RESPONSE,
+                {},
+              );
+            }
+            break;
+          case NotificationType.STATE_CHANGED:
+            {
+              writeCapiLog('MUTATE STATE!!!!', 3, {
+                simLife,
+                payload,
+              });
+              const currentMutateStateSnapshot = payload.mutateChanges;
+              processInitStateVariable(currentMutateStateSnapshot);
+              setSimIsInitStatePassedOnce(false);
+            }
+            break;
+          case NotificationType.CONTEXT_CHANGED:
+            {
+              writeCapiLog('CONTEXT CHANGED!!!!', 3, {
+                simLife,
+                payload,
+              });
+              const currentStateSnapshot = payload.snapshot;
+              processInitStateVariable(currentStateSnapshot);
+              setSimIsInitStatePassedOnce(false);
+            }
+            break;
+        }
+      };
+      const unsub = subscribeToNotification(props.notify, notificationType, handler);
+      return unsub;
+    });
+    return () => {
+      notifications.forEach((unsub) => {
+        unsub();
+      });
+    };
+  }, [props.notify, simLife]);
 
   //#region Capi Handlers
   const updateInternalState = (vars: any[]) => {
@@ -392,6 +477,8 @@ const ExternalActivity: React.FC<any> = (props) => {
     if (simLife.ready) {
       return;
     }
+    simLife.init = true;
+    simLife.ready = true;
     const updateSimLife = { ...simLife };
     updateSimLife.ready = true;
     updateSimLife.init = true;
@@ -575,45 +662,6 @@ const ExternalActivity: React.FC<any> = (props) => {
     }
   };
 
-  const getInterestedVars = (newVars: any[]) => {
-    const interested = newVars.filter((ms) => {
-      const isMine = ms.id.indexOf(`stage.${id}.`) === 0;
-      if (!isMine) {
-        return false;
-      }
-      const internalValue = externalActivityMap.get(ms.id);
-      let mineValue = ms.value;
-      let intenalVal = internalValue?.value;
-      if (ms.type === CapiVariableTypes.BOOLEAN && typeof intenalVal === 'string') {
-        mineValue = JSON.stringify(mineValue);
-      }
-      if (ms.type === CapiVariableTypes.NUMBER && typeof intenalVal === 'string') {
-        mineValue = JSON.stringify(mineValue);
-      }
-      if (
-        typeof ms.value === 'object' &&
-        Array.isArray(ms.value) &&
-        typeof intenalVal === 'string'
-      ) {
-        intenalVal = coerceCapiValue(intenalVal, ms.type);
-        if (Array.isArray(intenalVal) && Array.isArray(mineValue)) {
-          return JSON.stringify(intenalVal) !== JSON.stringify(mineValue);
-        }
-      }
-      if (
-        typeof ms.value === 'object' &&
-        Array.isArray(ms.value) &&
-        typeof intenalVal === 'object' &&
-        Array.isArray(intenalVal)
-      ) {
-        return JSON.stringify(intenalVal) !== JSON.stringify(mineValue);
-      }
-      if (mineValue == '' && intenalVal == null) return false;
-      return !internalValue || intenalVal != mineValue;
-    });
-    return interested;
-  };
-
   useEffect(() => {
     if (!simFrame) {
       return;
@@ -625,28 +673,21 @@ const ExternalActivity: React.FC<any> = (props) => {
 
     // state should be updated already with init state by the time we get it
     // so here we want to apply configData FIRST, then overwrite it with anything already set in the state
-    const newInternalState: any = [
+    const configDataState: any = [
       ...configData.map((cdVar: { key: any }) => {
         return { ...cdVar, id: `stage.${id}.${cdVar.key}` };
       }),
     ];
-    //TODO commenting for now. Need to revisit once state structure logic is in place
-    /*     state.forEach((stateVar) => {
-      const exists = newInternalState.find((iVar: { id: any }) => iVar.id === stateVar.id);
-      if (exists) {
-        exists.value =
-          stateVar?.value?.toString().trim().length > 0 ? stateVar.value : exists.value;
-      } else if (
-        initState?.length <= 0 ||
-        initState?.find((item: any) => item.id === stateVar.id)
-      ) {
-        newInternalState.push(stateVar);
-      } else if (stateVar.value === '[]') {
-        //hack for Absorbance
-        stateVar.value = '[""]';
-        newInternalState.push(stateVar);
-      }
-    }); */
+    // override configData values from init trap state data.
+    const newInternalState =
+      configDataState?.map((item: any) => {
+        const initStateValue = initState[item.id];
+        if (initStateValue?.length || initStateValue?.toString()?.length) {
+          item.value = initStateValue;
+        }
+        return item;
+      }) || [];
+
     setInternalState(newInternalState);
 
     simLife.currentState = newInternalState;
@@ -725,32 +766,53 @@ const ExternalActivity: React.FC<any> = (props) => {
   }, [simFrame]);
 
   useEffect(() => {
-    //TODO commenting for now. Need to revisit once state structure logic is in place
-    //updateInternalState(state);
-    // setSimIsInitStatePassedOnce(false);
-  }, [state]);
-
-  useEffect(() => {
     if (!simLife.ready || simIsInitStatePassedOnce || !initState) {
       return;
     }
 
+    writeCapiLog('INIT STATE APPLIED', 3);
+
     // This will send inital data when we navigate to next screen inside that layer
     /* const filterVars = createCapiObjectFromStateVars(initState); */
     const initStateVars = Object.keys(initState).reduce((formatted: any, key) => {
+      const baseKey = key.replace(`stage.${id}.`, '');
       const value = initState[key];
       const cVar = new CapiVariable({
-        key,
+        key: baseKey,
         value,
       });
-      formatted[key] = cVar;
+      if (baseKey.indexOf('Settings') === -1) formatted[baseKey] = cVar;
       return formatted;
     }, {});
     if (initStateVars && Object.keys(initStateVars)?.length !== 0) {
-      /* handleIFrameSpecificProperties(initState); */
       sendFormedResponse(simLife.handshake, {}, JanusCAPIRequestTypes.VALUE_CHANGE, initStateVars);
     }
-
+    // for some reason when trap state variable contains 'Settings' then SIM does not behave properly so it needs to be
+    // handled different i.e. on first value change filter the 'Settings' variables and send them in another value_change event
+    const initStateVarsWithSettingsVariable = Object.keys(initState).reduce(
+      (formatted: any, key) => {
+        const baseKey = key.replace(`stage.${id}.`, '');
+        const value = initState[key];
+        const cVar = new CapiVariable({
+          key: baseKey,
+          value,
+        });
+        if (baseKey.indexOf('Settings') !== -1) formatted[baseKey] = cVar;
+        return formatted;
+      },
+      {},
+    );
+    if (
+      initStateVarsWithSettingsVariable &&
+      Object.keys(initStateVarsWithSettingsVariable)?.length !== 0
+    ) {
+      sendFormedResponse(
+        simLife.handshake,
+        {},
+        JanusCAPIRequestTypes.VALUE_CHANGE,
+        initStateVarsWithSettingsVariable,
+      );
+    }
     setSimIsInitStatePassedOnce(true);
   }, [simLife, initState, simIsInitStatePassedOnce]);
 

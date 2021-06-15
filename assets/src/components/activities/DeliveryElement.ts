@@ -1,6 +1,10 @@
+import { EventEmitter } from 'events';
+import { valueOr } from 'utils/common';
 import {
+  Action,
   ActivityModelSchema,
   ActivityState,
+<<<<<<< HEAD
   PartResponse,
   PartState,
   StudentResponse,
@@ -10,6 +14,15 @@ import {
 import { valueOr } from 'utils/common';
 import { Action } from './common/authoring/parts/types';
 import { IHint } from './common/hints/types';
+=======
+  ClientEvaluation,
+  Hint,
+  PartResponse,
+  PartState,
+  StudentResponse,
+  Success,
+} from './types';
+>>>>>>> master
 
 export interface EvaluationResponse extends Success {
   actions: Action[];
@@ -29,7 +42,6 @@ export interface ResetActivityResponse extends Success {
   model: ActivityModelSchema;
 }
 
-
 export interface PartActivityResponse extends Success {
   attemptState: PartState;
 }
@@ -42,21 +54,32 @@ export interface DeliveryElementProps<T extends ActivityModelSchema> {
   review: boolean;
   sectionSlug?: string;
   userId: number;
+  notify?: EventEmitter;
 
   onSaveActivity: (attemptGuid: string, partResponses: PartResponse[]) => Promise<Success>;
-  onSubmitActivity: (attemptGuid: string,
-    partResponses: PartResponse[]) => Promise<EvaluationResponse>;
+  onSubmitActivity: (
+    attemptGuid: string,
+    partResponses: PartResponse[],
+  ) => Promise<EvaluationResponse>;
   onResetActivity: (attemptGuid: string) => Promise<ResetActivityResponse>;
 
   onRequestHint: (attemptGuid: string, partAttemptGuid: string) => Promise<RequestHintResponse>;
-  onSavePart: (attemptGuid: string, partAttemptGuid: string,
-    response: StudentResponse) => Promise<Success>;
-  onSubmitPart: (attemptGuid: string, partAttemptGuid: string,
-    response: StudentResponse) => Promise<EvaluationResponse>;
+  onSavePart: (
+    attemptGuid: string,
+    partAttemptGuid: string,
+    response: StudentResponse,
+  ) => Promise<Success>;
+  onSubmitPart: (
+    attemptGuid: string,
+    partAttemptGuid: string,
+    response: StudentResponse,
+  ) => Promise<EvaluationResponse>;
   onResetPart: (attemptGuid: string, partAttemptGuid: string) => Promise<PartActivityResponse>;
-  onSubmitEvaluations: (attemptGuid: string, clientEvaluations: ClientEvaluation[]) =>
-    Promise<EvaluationResponse>;
-  onReady?: (attemptGuid: string) => Promise<Success>
+  onSubmitEvaluations: (
+    attemptGuid: string,
+    clientEvaluations: ClientEvaluation[],
+  ) => Promise<EvaluationResponse>;
+  onReady?: (attemptGuid: string) => Promise<Success>;
 }
 
 // An abstract delivery web component, designed to delegate to
@@ -64,33 +87,48 @@ export interface DeliveryElementProps<T extends ActivityModelSchema> {
 // the underlying React component when the 'model' attribute of the
 // the web component changes
 export abstract class DeliveryElement<T extends ActivityModelSchema> extends HTMLElement {
-
   mountPoint: HTMLDivElement;
   connected: boolean;
   review: string;
 
+  protected _notify: EventEmitter;
+
   onRequestHint: (attemptGuid: string, partAttemptGuid: string) => Promise<RequestHintResponse>;
 
   onSaveActivity: (attemptGuid: string, partResponses: PartResponse[]) => Promise<Success>;
-  onSubmitActivity: (attemptGuid: string,
-    partResponses: PartResponse[]) => Promise<EvaluationResponse>;
+  onSubmitActivity: (
+    attemptGuid: string,
+    partResponses: PartResponse[],
+  ) => Promise<EvaluationResponse>;
   onResetActivity: (attemptGuid: string) => Promise<ResetActivityResponse>;
 
-  onSavePart: (attemptGuid: string, partAttemptGuid: string,
-    response: StudentResponse) => Promise<Success>;
-  onSubmitPart: (attemptGuid: string, partAttemptGuid: string,
-    response: StudentResponse) => Promise<EvaluationResponse>;
+  onSavePart: (
+    attemptGuid: string,
+    partAttemptGuid: string,
+    response: StudentResponse,
+  ) => Promise<Success>;
+  onSubmitPart: (
+    attemptGuid: string,
+    partAttemptGuid: string,
+    response: StudentResponse,
+  ) => Promise<EvaluationResponse>;
   onResetPart: (attemptGuid: string, partAttemptGuid: string) => Promise<PartActivityResponse>;
-  onSubmitEvaluations: (attemptGuid: string, clientEvaluations: ClientEvaluation[]) =>
-    Promise<EvaluationResponse>;
-  onReady: (attemptGuid: string) => Promise<Success>
+  onSubmitEvaluations: (
+    attemptGuid: string,
+    clientEvaluations: ClientEvaluation[],
+  ) => Promise<EvaluationResponse>;
+  onReady: (attemptGuid: string) => Promise<Success>;
 
   constructor() {
     super();
     this.mountPoint = document.createElement('div');
     this.connected = false;
 
-    this.onRequestHint = (attemptGuid: string, partAttemptGuid: string) => this.dispatch('requestHint', attemptGuid, partAttemptGuid);
+    // need a way to push into the react component w/o rerendering the custom element
+    this._notify = new EventEmitter();
+
+    this.onRequestHint = (attemptGuid: string, partAttemptGuid: string) =>
+      this.dispatch('requestHint', attemptGuid, partAttemptGuid);
 
     this.onSaveActivity = (attemptGuid: string, partResponses: PartResponse[]) =>
       this.dispatch('saveActivity', attemptGuid, undefined, partResponses);
@@ -115,8 +153,12 @@ export abstract class DeliveryElement<T extends ActivityModelSchema> extends HTM
     return ['model', 'state'];
   }
 
-  dispatch(name: string, attemptGuid: string,
-    partAttemptGuid: string | undefined, payload?: any): Promise<any> {
+  dispatch(
+    name: string,
+    attemptGuid: string,
+    partAttemptGuid: string | undefined,
+    payload?: any,
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       const continuation = (result: any, error: any) => {
         if (error !== undefined) {
@@ -129,13 +171,17 @@ export abstract class DeliveryElement<T extends ActivityModelSchema> extends HTM
         continuation(null, 'in review mode');
         return;
       }
-      this.dispatchEvent(new CustomEvent(
-        name, this.details(continuation, attemptGuid, partAttemptGuid, payload)));
+      this.dispatchEvent(
+        new CustomEvent(name, this.details(continuation, attemptGuid, partAttemptGuid, payload)),
+      );
     });
   }
 
-  props(): DeliveryElementProps<T> {
+  notify(eventName: string, payload: any): void {
+    this._notify.emit(eventName, payload);
+  }
 
+  props(): DeliveryElementProps<T> {
     const model = JSON.parse(this.getAttribute('model') as any);
     const graded = JSON.parse(this.getAttribute('graded') as any);
     const state = JSON.parse(this.getAttribute('state') as any) as ActivityState;
@@ -163,11 +209,16 @@ export abstract class DeliveryElement<T extends ActivityModelSchema> extends HTM
       onSubmitEvaluations: this.onSubmitEvaluations,
       onReady: this.onReady,
       userId,
+      notify: this._notify,
     };
   }
 
-  details(continuation: (result: any, error: any) => void,
-    attemptGuid: string, partAttemptGuid: string | undefined, payload?: any) {
+  details(
+    continuation: (result: any, error: any) => void,
+    attemptGuid: string,
+    partAttemptGuid: string | undefined,
+    payload?: any,
+  ) {
     return {
       bubbles: true,
       detail: {

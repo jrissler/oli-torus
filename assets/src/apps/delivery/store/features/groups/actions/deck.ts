@@ -9,10 +9,10 @@ import {
 import { ResourceId } from 'data/types';
 import guid from 'utils/guid';
 import {
-  applyState,
   ApplyStateOperation,
   bulkApplyState,
   defaultGlobalEnv,
+  getEnvState,
 } from '../../../../../../adaptivity/scripting';
 import { RootState } from '../../../rootReducer';
 import {
@@ -21,7 +21,8 @@ import {
   setActivities,
   setCurrentActivityId,
 } from '../../activities/slice';
-import { loadActivityAttemptState } from '../../attempt/slice';
+import { setLessonEnd } from '../../adaptivity/slice';
+import { loadActivityAttemptState, updateExtrinsicState } from '../../attempt/slice';
 import {
   selectActivityTypes,
   selectPreviewMode,
@@ -54,6 +55,11 @@ export const initializeActivity = createAsyncThunk(
       operator: '+',
       value: 1,
     };
+    const timeOnQuestion: ApplyStateOperation = {
+      target: 'session.timeOnQuestion',
+      operator: '=',
+      value: 0,
+    };
     const timeStartOp: ApplyStateOperation = {
       target: 'session.timeStartQuestion',
       operator: '=',
@@ -64,7 +70,7 @@ export const initializeActivity = createAsyncThunk(
       operator: '=',
       value: false,
     };
-    const currentAttempNumber = 1; // TODO: increment the server value
+    const currentAttempNumber = 0; // TODO: increment the server value
     const attemptNumberOp: ApplyStateOperation = {
       target: 'session.attemptNumber',
       operator: '=',
@@ -88,6 +94,7 @@ export const initializeActivity = createAsyncThunk(
     const sessionOps = [
       visitOperation,
       timeStartOp,
+      timeOnQuestion,
       timeExceededOp,
       attemptNumberOp,
       targettedAttemptNumberOp,
@@ -115,15 +122,28 @@ export const initializeActivity = createAsyncThunk(
     });
 
     const results = bulkApplyState([...sessionOps, ...globalizedInitState], defaultGlobalEnv);
+    // now that the scripting env should be up to date, need to update attempt state in redux and server
     /* console.log('INIT STATE OPS', { results, ops: [...sessionOps, ...globalizedInitState] }); */
-    const currentState = await getPageAttemptState(sectionSlug, resourceAttemptGuid, isPreviewMode);
-    const currentVisitCount = currentState[`session.visits.${currentSequenceId}`] || 0;
-    // TODO: more state
-    const sessionState = {
-      [`session.visits.${currentSequenceId}`]: currentVisitCount + 1,
-    };
+    const currentState = getEnvState(defaultGlobalEnv);
+    const sessionState = Object.keys(currentState).reduce((collect: any, key) => {
+      if (key.indexOf('session.') === 0) {
+        collect[key] = currentState[key];
+      }
+      return collect;
+    }, {});
 
-    await writePageAttemptState(sectionSlug, resourceAttemptGuid, sessionState, isPreviewMode);
+    // optimistically write to redux
+    thunkApi.dispatch(updateExtrinsicState({ state: sessionState }));
+
+    // in preview mode we don't talk to the server, so we're done
+    if (isPreviewMode) {
+      const allGood = results.every(({ result }) => result === null);
+      // TODO: report actual errors?
+      const status = allGood ? 'success' : 'error';
+      return { result: status };
+    }
+
+    await writePageAttemptState(sectionSlug, resourceAttemptGuid, sessionState);
   },
 );
 
@@ -132,11 +152,14 @@ const getSessionVisitHistory = async (
   resourceAttemptGuid: string,
   isPreviewMode = false,
 ) => {
-  const pageAttemptState = await getPageAttemptState(
-    sectionSlug,
-    resourceAttemptGuid,
-    isPreviewMode,
-  );
+  let pageAttemptState: any;
+  if (isPreviewMode) {
+    const allState = getEnvState(defaultGlobalEnv);
+    pageAttemptState = allState;
+  } else {
+    const { result } = await getPageAttemptState(sectionSlug, resourceAttemptGuid);
+    pageAttemptState = result;
+  }
   return Object.keys(pageAttemptState)
     .filter((key) => key.indexOf('session.visits.') === 0)
     .map((visitKey: string) => ({
@@ -196,7 +219,7 @@ export const navigateToNextActivity = createAsyncThunk(
       }
       if (!nextSequenceEntry) {
         // If is end of sequence, return and set isEnd to truthy
-        // thunkApi.dispatch(setIsEnd({ isEnd: true }));
+        thunkApi.dispatch(setLessonEnd({ lessonEnded: true }));
         return;
       }
     } else {
@@ -226,7 +249,7 @@ export const navigateToFirstActivity = createAsyncThunk(
   async (_, thunkApi) => {
     const rootState = thunkApi.getState() as RootState;
     const sequence = selectSequence(rootState);
-    const nextActivityId = 1;
+    const nextActivityId = sequence[0].custom.sequenceId;
 
     thunkApi.dispatch(setCurrentActivityId({ activityId: nextActivityId }));
   },
@@ -247,11 +270,56 @@ export const navigateToActivity = createAsyncThunk(
   `${GroupsSlice}/deck/navigateToActivity`,
   async (sequenceId: string, thunkApi) => {
     const rootState = thunkApi.getState() as RootState;
+    const isPreviewMode = selectPreviewMode(rootState);
+    const sectionSlug = selectSectionSlug(rootState);
+    const resourceAttemptGuid = selectResourceAttemptGuid(rootState);
     const sequence = selectSequence(rootState);
-    const nextActivityId = sequence.filter((s) => s.custom?.sequenceId === sequenceId)[0].custom
-      ?.sequenceId;
+    const desiredIndex = sequence.findIndex((s) => s.custom?.sequenceId === sequenceId);
+    let nextSequenceEntry: SequenceEntry<SequenceEntryType> | null = null;
+    let navError = '';
+    const visitHistory = await getSessionVisitHistory(
+      sectionSlug,
+      resourceAttemptGuid,
+      isPreviewMode,
+    );
+    if (desiredIndex >= 0) {
+      nextSequenceEntry = sequence[desiredIndex];
+      while (nextSequenceEntry?.custom?.isBank || nextSequenceEntry?.custom?.isLayer) {
+        while (nextSequenceEntry && nextSequenceEntry?.custom?.isBank) {
+          // this runs when we're about to enter a QB for the first time
+          nextSequenceEntry = getNextQBEntry(
+            sequence,
+            nextSequenceEntry as SequenceEntry<SequenceBank>,
+            visitHistory,
+          );
+        }
+        while (nextSequenceEntry && nextSequenceEntry?.custom?.isLayer) {
+          // for layers if you try to navigate it should go to first child
+          const firstChild = sequence.find(
+            (entry) =>
+              entry.custom?.layerRef ===
+              (nextSequenceEntry as SequenceEntry<SequenceEntryType>).custom.sequenceId,
+          );
 
-    thunkApi.dispatch(setCurrentActivityId({ activityId: nextActivityId }));
+          if (!firstChild) {
+            navError = 'Target Layer has no children!';
+          }
+          nextSequenceEntry = firstChild;
+        }
+      }
+      if (!nextSequenceEntry) {
+        // If is end of sequence, return and set isEnd to truthy
+        thunkApi.dispatch(setLessonEnd({ lessonEnded: true }));
+        return;
+      }
+    } else {
+      navError = `Current Activity ${sequenceId} not found in sequence`;
+    }
+    if (navError) {
+      throw new Error(navError);
+    }
+
+    thunkApi.dispatch(setCurrentActivityId({ activityId: nextSequenceEntry?.custom.sequenceId }));
   },
 );
 
