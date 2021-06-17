@@ -1,28 +1,16 @@
 import { EventEmitter } from 'events';
 import { valueOr } from 'utils/common';
 import {
-  Action,
   ActivityModelSchema,
   ActivityState,
-<<<<<<< HEAD
+  ClientEvaluation,
   PartResponse,
   PartState,
   StudentResponse,
-  ClientEvaluation,
   Success,
 } from './types';
-import { valueOr } from 'utils/common';
-import { Action } from './common/authoring/parts/types';
 import { IHint } from './common/hints/types';
-=======
-  ClientEvaluation,
-  Hint,
-  PartResponse,
-  PartState,
-  StudentResponse,
-  Success,
-} from './types';
->>>>>>> master
+import { Action } from './common/authoring/parts/types';
 
 export interface EvaluationResponse extends Success {
   actions: Action[];

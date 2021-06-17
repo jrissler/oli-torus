@@ -19,3 +19,5 @@ export const makeTransformation = (path: string, operation: IOperation): ITransf
   path: 'choices',
   operation,
 });
+
+export type UITransformation = ITransformation;

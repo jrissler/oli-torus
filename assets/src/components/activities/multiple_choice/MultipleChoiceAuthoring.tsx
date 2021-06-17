@@ -9,6 +9,8 @@ import { configureStore } from 'state/store';
 import produce from 'immer';
 import { areAnswerChoicesShuffled } from 'components/activities/common/authoring/utils';
 import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
+import { Stem } from '../common/stem';
+import { MCActions } from './actions';
 
 const store = configureStore();
 
@@ -26,12 +28,13 @@ const MultipleChoice = (props: AuthoringElementProps<MultipleChoiceModelSchema>)
 
   return (
     <React.Fragment>
-      {/* <Stem
+      <Stem.Authoring.Unconnected
         projectSlug={props.projectSlug}
         editMode={props.editMode}
         stem={props.model.stem}
-        onEditContent={(content) => dispatch(MCActions.editStem(content))}
+        update={(content) => dispatch(MCActions.editStem(content))}
       />
+      {/*
       <Choices
         {...sharedProps}
         onShuffle={() => dispatch(toggleAnswerChoiceShuffling())}

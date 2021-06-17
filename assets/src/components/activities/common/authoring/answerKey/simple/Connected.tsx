@@ -1,34 +1,36 @@
-import { HasChoices } from 'components/activities/common/choices/types';
-import { HasStem } from 'components/activities/common/stem/types';
-import { ChoiceId } from 'components/activities/types';
+import { selectAllChoices } from 'components/activities/common/choices/authoring/slice';
+import { selectStem } from 'components/activities/common/stem/authoring/slice';
+import { ChoiceId, ResponseId } from 'components/activities/types';
+import { ID } from 'data/content/model';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { HasParts } from '../../parts/types';
 import {
   HasResponseMappings,
-  selectCorrectResponseMapping,
-  TargetedResponseMapping,
+  responseMappingSlice,
+  selectResponseMappingsByPartId,
 } from '../../responseChoices/responseChoicesSlice';
-import { toggleAnswerChoice } from './slice';
 import { Unconnected } from './Unconnected';
 
-const mapStateToProps = (state: HasChoices & HasStem & HasParts & HasResponseMappings) => ({
-  stem: state.stem,
-  choices: state.choices,
-  correctResponseMapping: selectCorrectResponseMapping(state),
-});
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  onSelectChoiceId: (mapping: TargetedResponseMapping) => (id: ChoiceId) =>
-    dispatch(toggleAnswerChoice({ id, responseMapping: mapping })),
-});
-
 export const Connected = connect(
-  mapStateToProps,
-  mapDispatchToProps,
+  (state: HasResponseMappings, ownProps: { partId: ID }) => ({
+    stem: selectStem(state),
+    choices: selectAllChoices(state),
+    correctResponseMapping: selectResponseMappingsByPartId(state, ownProps.partId).correct,
+  }),
+  (dispatch: Dispatch, ownProps: { partId: ID }) => ({
+    onSelectChoiceId: (responseId: ResponseId) => (id: ChoiceId) =>
+      dispatch(
+        responseMappingSlice.actions.toggleChoice({
+          partId: ownProps.partId,
+          choiceId: id,
+          responseId: responseId,
+        }),
+      ),
+  }),
   (stateProps, dispatchProps) => ({
     stem: stateProps.stem,
     choices: stateProps.choices,
     selectedChoiceIds: stateProps.correctResponseMapping.choiceIds,
-    onSelectChoiceId: dispatchProps.onSelectChoiceId(stateProps.correctResponseMapping),
+    onSelectChoiceId: dispatchProps.onSelectChoiceId(stateProps.correctResponseMapping.responseId),
   }),
 )(Unconnected);

@@ -1,29 +1,9 @@
 import React from 'react';
-import { RichTextEditor } from 'components/content/RichTextEditor';
 import { RichText } from 'components/activities/types';
-import { Card } from 'components/common/Card';
 import { ID } from 'data/content/model';
 import { IFeedback } from '../types';
-
-const FeedbackCard: React.FC<{
-  feedback: IFeedback;
-  title: React.ReactNode;
-  update: (id: ID, content: RichText) => void;
-}> = ({ title, feedback, update }) => {
-  return (
-    <Card.Card>
-      <Card.Title>{title}</Card.Title>
-      <Card.Content>
-        <RichTextEditor
-          style={{ backgroundColor: 'white' }}
-          placeholder="Enter feedback"
-          text={feedback.content}
-          onEdit={(content) => update(feedback.id, content)}
-        />
-      </Card.Content>
-    </Card.Card>
-  );
-};
+import { FeedbackCard } from '../common/FeedbackCard';
+import { Tooltip } from '../../authoring/Tooltip';
 
 interface Props {
   correctFeedback: IFeedback;
@@ -44,7 +24,16 @@ export const Unconnected: React.FC<Props> = ({
         update={update}
       />
       <FeedbackCard
-        title="Feedback for incorrect answers"
+        title={
+          <>
+            Feedback for incorrect answers{' '}
+            <Tooltip
+              title={
+                'Shown for all student responses that do not match the correct answer or targeted feedback combinations'
+              }
+            />
+          </>
+        }
         feedback={incorrectFeedback}
         update={update}
       />
@@ -52,3 +41,4 @@ export const Unconnected: React.FC<Props> = ({
     </>
   );
 };
+Unconnected.displayName = 'SimpleFeedbackAuthoringEditor';

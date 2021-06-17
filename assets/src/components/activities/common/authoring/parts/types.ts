@@ -1,4 +1,5 @@
-import { Identifiable } from 'data/content/model';
+import { HintId, ResponseId } from 'components/activities/types';
+import { ID, Identifiable } from 'data/content/model';
 import { FeedbackAction, FeedbackActionDesc } from '../../feedback/types';
 import { IHint } from '../../hints/types';
 import { IResponse } from '../responses/types';
@@ -56,4 +57,10 @@ export interface HasParts {
   authoring: {
     parts: IPart[];
   };
+}
+export interface UIPart extends Identifiable {
+  responses: ResponseId[];
+  outcomes?: ConditionalOutcome[];
+  hints: HintId[];
+  scoringStrategy: ScoringStrategy;
 }

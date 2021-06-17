@@ -1,7 +1,9 @@
 @import 'bootstrap';
 
-.settings__open-button {
-  padding: 6px;
+.btn.settings__open-button {
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
   margin-left: auto;
 }
 

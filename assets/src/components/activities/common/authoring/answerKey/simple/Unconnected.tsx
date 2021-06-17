@@ -5,6 +5,7 @@ import { Stem } from '../../../stem';
 import { IStem } from '../../../stem/types';
 import { IChoice } from '../../../choices/types';
 import { ChoiceId } from 'components/activities/types';
+import { Checkbox } from '../../icons/Checkbox';
 
 interface Props {
   stem: IStem;
@@ -23,11 +24,12 @@ export const Unconnected: React.FC<Props> = ({
     <>
       <div className="d-flex">
         <Stem.Delivery stem={stem} context={context} />
+        {/* TODO: Add Points here */}
       </div>
 
       <Choices.Delivery
-        unselectedIcon={<i className="material-icons-outlined">check_box_outline_blank</i>}
-        selectedIcon={<i className="material-icons-outlined">check_box</i>}
+        unselectedIcon={<Checkbox.Unchecked />}
+        selectedIcon={<Checkbox.Unchecked />}
         choices={choices}
         selected={selectedChoiceIds}
         onSelect={onSelectChoiceId}
@@ -37,3 +39,4 @@ export const Unconnected: React.FC<Props> = ({
     </>
   );
 };
+Unconnected.displayName = 'AnswerKeyAuthoringEditor';

@@ -1,13 +1,11 @@
-import { createSelector, Dispatch } from '@reduxjs/toolkit';
-import { CataRootState } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
+import { Dispatch } from '@reduxjs/toolkit';
 import { ChoiceId, RichText } from 'components/activities/types';
-import { connect, MapDispatchToProps } from 'react-redux';
+import { connect } from 'react-redux';
 import { HasChoices, IChoice, makeChoice } from '../types';
 import { choicesSlice, selectAllChoices } from './slice';
 import { Unconnected } from './Unconnected';
 
-const mapStateToProps = (state: CataRootState) => ({ choices: state.choices });
-// const mapStateToProps = (state: any) => ({ choices: state.choices });
+const mapStateToProps = (state: HasChoices) => ({ choices: selectAllChoices(state) });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   addOne: () => dispatch(choicesSlice.actions.addOne(makeChoice(''))),

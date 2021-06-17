@@ -1,14 +1,14 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { CataRootState } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 import { RichText } from 'components/activities/types';
 import { connect } from 'react-redux';
 import { HasStem } from '../types';
-import { stemSlice } from './slice';
+import { selectStem, stemSlice } from './slice';
 import { Unconnected } from './Unconnected';
 
-export const selectStem = createSelector(
-  (state: HasStem) => state.stem,
-  (stem) => ({ stem }),
-);
-export const Connected = connect(selectStem, (dispatch) => ({
-  update: (content: RichText) => dispatch(stemSlice.actions.update({ changes: { content } })),
-}))(Unconnected);
+export const Connected = connect(
+  (state: CataRootState) => ({ stem: selectStem(state) }),
+  (dispatch) => ({
+    update: (content: RichText) => dispatch(stemSlice.actions.update({ changes: { content } })),
+  }),
+)(Unconnected);

@@ -1,4 +1,5 @@
-import { Identifiable } from 'data/content/model';
+import { ResponseId } from 'components/activities/types';
+import { ID, Identifiable } from 'data/content/model';
 import guid from 'utils/guid';
 import { IFeedback, makeFeedback } from '../../feedback/types';
 
@@ -17,3 +18,10 @@ export const makeResponse = (rule: string, score: number, text: ''): IResponse =
   score,
   feedback: makeFeedback(text),
 });
+
+export interface UIResponse extends Identifiable {
+  partId: ID;
+  rule: IRule;
+  score: number;
+  feedback: ID;
+}

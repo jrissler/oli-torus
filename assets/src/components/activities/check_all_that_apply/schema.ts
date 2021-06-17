@@ -3,6 +3,7 @@ import { IPart, ScoringStrategy } from '../common/authoring/parts/types';
 import {
   HasResponseMappings,
   ResponseMapping,
+  ResponseMappings,
 } from '../common/authoring/responseChoices/responseChoicesSlice';
 import { makeResponse } from '../common/authoring/responses/types';
 import { IOperation, ITransformation } from '../common/authoring/transformations/types';
@@ -12,13 +13,14 @@ import { makeHint } from '../common/hints/types';
 import { IStem, makeStem } from '../common/stem/types';
 import { ActivityModelSchema, ChoiceId, ResponseId } from '../types';
 
-export type CATASchema = ActivityModelSchema & {
+export interface CATASchema extends ActivityModelSchema {
   stem: IStem;
   choices: IChoice[];
   authoring: {
     previewText: string;
     transformations: ITransformation[];
     parts: IPart[];
+    responseMappings: ResponseMappings[];
     // Responses don't have a tie to the choices that trigger them,
     // so we make a relationship table to keep track of the mappings
 
@@ -32,7 +34,7 @@ export type CATASchema = ActivityModelSchema & {
 
     // feedback: HasTargetedFeedback['authoring']['feedback'];
   };
-} & HasResponseMappings;
+}
 
 // import { Model, ORM } from 'redux-orm';
 // class Stem extends Model {}
@@ -93,6 +95,7 @@ export const defaultCATAModel = (): CATASchema => {
     '',
   );
   const incorrectResponse = makeResponse(invertRule(correctResponse.rule), 0, '');
+  const PART_ID = '1'; // only has one part, so it is safe to hardcode the id
 
   return {
     stem: makeStem(''),
@@ -100,7 +103,7 @@ export const defaultCATAModel = (): CATASchema => {
     authoring: {
       parts: [
         {
-          id: '1', // only has one part, so it is safe to hardcode the id
+          id: PART_ID,
           scoringStrategy: ScoringStrategy.average,
           responses: [correctResponse, incorrectResponse],
           hints: [makeHint(''), makeHint(''), makeHint('')],
@@ -121,11 +124,14 @@ export const defaultCATAModel = (): CATASchema => {
       // },
 
       // response/choices are M:M relationship. join table between them
-      responseMappings: {
-        correct: { responseId: correctResponse.id, choiceIds: [correctChoice.id] },
-        targeted: [],
-        incorrect: { responseId: incorrectResponse.id },
-      },
+      responseMappings: [
+        {
+          partId: PART_ID,
+          correct: { responseId: correctResponse.id, choiceIds: [correctChoice.id] },
+          targeted: [],
+          incorrect: { responseId: incorrectResponse.id },
+        },
+      ],
     },
   };
-};
+};;

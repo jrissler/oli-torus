@@ -3,7 +3,7 @@
 
 <%= render OliWeb.SharedView, "_admin_edit_banner.html", %{is_admin?: @is_admin?, project_slug: @project_slug, revision_slug: @activity_slug} %>
 
-<div id="editor" class="container"/>
+<div id="editor" class="container"></div>
 
 <script>
   window.oliMountApplication(document.getElementById('editor'), "<%= Base.encode64(@context) %>");

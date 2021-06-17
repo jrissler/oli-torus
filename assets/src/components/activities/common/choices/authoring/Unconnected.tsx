@@ -11,7 +11,7 @@ interface Props {
   addOne: () => void;
   setAll: (choices: IChoice[]) => void;
 }
-export const Unconnected = ({ icon, choices, addOne, setAll }: Props) => {
+export const Unconnected: React.FC<Props> = ({ icon, choices, addOne, setAll }) => {
   console.log('choices', choices);
   return (
     <>
@@ -60,3 +60,4 @@ export const Unconnected = ({ icon, choices, addOne, setAll }: Props) => {
     </>
   );
 };
+Unconnected.displayName = 'ChoicesAuthoringEditor';

@@ -10,7 +10,7 @@ interface Props {
 
 export const Unconnected: React.FC<Props> = ({ stem, update }) => {
   return (
-    <div className="mb-2 flex-grow-1">
+    <div className="mb-2 flex-grow-1" style={{ minHeight: '61px' }}>
       <RichTextEditor
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}
@@ -20,3 +20,4 @@ export const Unconnected: React.FC<Props> = ({ stem, update }) => {
     </div>
   );
 };
+Unconnected.displayName = 'StemAuthoringEditor';

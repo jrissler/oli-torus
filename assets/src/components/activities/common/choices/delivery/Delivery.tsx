@@ -14,7 +14,7 @@ interface Props {
   unselectedIcon: JSX.Element;
   selectedIcon: JSX.Element;
 }
-export const Delivery = ({
+export const Delivery: React.FC<Props> = ({
   choices,
   selected,
   context,
@@ -22,7 +22,7 @@ export const Delivery = ({
   isEvaluated,
   unselectedIcon,
   selectedIcon,
-}: Props) => {
+}) => {
   const isSelected = (choiceId: ChoiceId) => !!selected.find((s) => s === choiceId);
   return (
     <div className="choices__container" aria-label="answer choices">
@@ -46,3 +46,4 @@ export const Delivery = ({
     </div>
   );
 };
+Delivery.displayName = 'ChoicesDelivery';

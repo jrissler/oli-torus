@@ -14,7 +14,14 @@ interface Props {
   onEdit: (id: ChoiceId, content: RichText) => void;
   onRemove: (id: ChoiceId) => void;
 }
-export const Unconnected = ({ canRemove, icon, index, choice, onEdit, onRemove }: Props) => {
+export const Unconnected: React.FC<Props> = ({
+  canRemove,
+  icon,
+  index,
+  choice,
+  onEdit,
+  onRemove,
+}) => {
   const getStyle = (style: DraggingStyle | NotDraggingStyle | undefined) => {
     if (style?.transform) {
       const axisLockY = `translate(0px, ${style.transform.split(',').pop()}`;
@@ -58,3 +65,4 @@ export const Unconnected = ({ canRemove, icon, index, choice, onEdit, onRemove }
     </Draggable>
   );
 };
+Unconnected.displayName = 'ChoiceAuthoringEditor';

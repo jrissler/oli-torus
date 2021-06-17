@@ -46,17 +46,13 @@ const DeerInHeadlightsHint: React.FC<HintProps> = ({ hint, updateOne }) => (
   />
 );
 
-const CognitiveHints = ({
-  hints,
-  updateOne,
-  removeOne,
-  addOne,
-}: {
+interface CognitiveProps {
   hints: IHint[];
   updateOne: (id: HintId, content: RichText) => void;
-  removeOne: any;
-  addOne: any;
-}) => (
+  removeOne: (id: HintId) => void;
+  addOne: () => void;
+}
+const CognitiveHints: React.FC<CognitiveProps> = ({ hints, updateOne, removeOne, addOne }) => (
   <CardComponent.Card>
     <CardComponent.Title>
       {'"Cognitive" hints'}
@@ -79,7 +75,7 @@ const CognitiveHints = ({
         </div>
       ))}
       <AuthoringButton
-        onClick={() => addOne()}
+        onClick={addOne}
         style={{ marginLeft: '22px' }}
         className="btn btn-sm btn-link"
       >
@@ -132,3 +128,4 @@ export const Unconnected: React.FC<HintsProps> = ({
     </>
   );
 };
+Unconnected.displayName = 'HintsAuthoringEditor';

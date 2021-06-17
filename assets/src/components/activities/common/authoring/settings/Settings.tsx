@@ -3,8 +3,8 @@ import { Popover } from 'react-tiny-popover';
 import React, { useState } from 'react';
 import { classNames } from 'utils/classNames';
 import { IconCorrect } from 'components/misc/Icons';
+import { useActivityContext } from 'components/activities/ActivityContext';
 import './Settings.scss';
-import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 
 interface SettingProps {
   isEnabled: boolean;

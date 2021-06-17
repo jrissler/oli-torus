@@ -1,20 +1,11 @@
-import {
-  createEntityAdapter,
-  createSelector,
-  createSlice,
-  EntityState,
-  PayloadAction,
-  Slice,
-} from '@reduxjs/toolkit';
+import { createEntityAdapter, createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CataRootState } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
 import { ChoiceId } from 'components/activities/types';
-import { updateOne, addOne, setAll, removeOne } from '../../reduxUtils';
+import { addOne, removeOne, setAll, updateOne } from '../../reduxUtils';
 import { HasChoices, IChoice } from '../types';
 
 // export const adapter = createEntityAdapter<IChoice>();
-// export type ChoicesState = EntityState<IChoice>;
-// const initialState: ChoicesState = adapter.getInitialState();
-// export const initChoices = (choices: IChoice[]) => adapter.upsertMany(initialState, choices);
+// export type ChoicesState = ReturnType<typeof adapter.getInitialState>;
 export const choicesSlice = createSlice({
   name: 'choices',
   initialState: [] as IChoice[],
@@ -25,25 +16,19 @@ export const choicesSlice = createSlice({
       removeOne<IChoice>(state, action.payload),
     updateOne: (state, action: PayloadAction<{ id: string; changes: Partial<IChoice> }>) =>
       updateOne<IChoice>(state, action.payload),
-    // addOne: (state, action) => ,
+    // addOne: adapter.addOne,
     // setAll: adapter.setAll,
     // removeOne: adapter.removeOne,
     // updateOne: adapter.updateOne,
-    // (state, action: PayloadAction<{ id: string; changes: Partial<IChoice> }>) =>
-    //   updateOne<IChoice>(state, action),
   },
 });
 
 // SELECTORS
-const selectState = (state: HasChoices): IChoice[] => state[choicesSlice.name];
+const selectState = (state: HasChoices) => state[choicesSlice.name];
+// export const selectAllChoices = createSelector(selectState, (state) => state);
+// export const selectChoiceById = (state: HasChoices, id: ChoiceId) =>
+//   selectAllChoices(state).find((choice) => choice.id === id);
+// const { selectAll } = adapter.getSelectors(selectState);
 export const selectAllChoices = createSelector(selectState, (state) => state);
 export const selectChoiceById = (state: HasChoices, id: ChoiceId) =>
-  selectAllChoices(state).find((choice) => choice.id === id);
-// export const selectCurrentActivityId = createSelector(
-//   selectState,
-//   (state) => state.currentActivityId,
-// );
-// const { selectAll, selectById, selectTotal } = createEntityAdapter().getSelectors(s =>);
-// export const selectAllChoices = selectAll;
-// export const selectChoiceById = selectById;
-// export const selectTotalChoices = selectTotal;
+  selectState(state).find((choice) => choice.id === id);

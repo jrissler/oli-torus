@@ -50,6 +50,8 @@ export const getTargetedResponses = (model: TargetedOrdering) =>
   model.authoring.targeted.map((assoc) => getResponse(model, getResponseId(assoc)));
 
 // Rules
+// a default rule that never matches
+export const makeEmptyRule = () => `!input like {}`;
 export const createMatchRule = (id: ID) => `input like {${id}}`;
 export const createRuleForIds = (orderedIds: ID[]) => `input like {${orderedIds.join(' ')}}`;
 export const invertRule = (rule: string) => `(!(${rule}))`;

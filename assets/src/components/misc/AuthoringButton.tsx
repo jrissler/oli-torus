@@ -1,4 +1,4 @@
-import { useActivityContext } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
+import { useActivityContext } from 'components/activities/ActivityContext';
 import React, { MouseEventHandler } from 'react';
 import { classNames } from 'utils/classNames';
 

@@ -7,14 +7,16 @@ import {
 } from 'components/activities/common/authoring/settings/setting/main';
 import { HasTransformations } from 'components/activities/common/authoring/transformations/types';
 import { HasTargetedFeedback } from 'components/activities/common/feedback/targeted/types';
+import { selectAllTransformations } from 'components/activities/common/authoring/transformations/slice';
+import { CataRootState } from '../CheckAllThatApplyAuthoring';
 
 const toggleAnswerChoiceShuffling = createAction<void>('settings/toggleAnswerChoiceShuffling');
 const toggleTargetedFeedback = createAction<void>('settings/toggleTargetedFeedback');
 export const CheckAllThatApplySettings = connect(
-  (state: HasTransformations & HasTargetedFeedback) => ({
+  (state: CataRootState) => ({
     settingsState: [
       {
-        isEnabled: isShuffled(getTransformations(state)),
+        isEnabled: isShuffled(selectAllTransformations(state)),
         label: 'Shuffle answer choice order',
       },
       {
