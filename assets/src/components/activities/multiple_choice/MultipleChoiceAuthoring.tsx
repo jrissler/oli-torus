@@ -2,15 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { MultipleChoiceModelSchema } from './schema';
-import * as ActivityTypes from '../types';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
 import produce from 'immer';
-import { areAnswerChoicesShuffled } from 'components/activities/common/authoring/utils';
-import { toggleAnswerChoiceShuffling } from 'components/activities/common/utils';
 import { Stem } from '../common/stem';
 import { MCActions } from './actions';
+import { Manifest } from 'data/content/activities/activities';
+import { Choices } from '../common/choices';
 
 const store = configureStore();
 
@@ -29,21 +28,18 @@ const MultipleChoice = (props: AuthoringElementProps<MultipleChoiceModelSchema>)
   return (
     <React.Fragment>
       <Stem.Authoring.Unconnected
-        projectSlug={props.projectSlug}
-        editMode={props.editMode}
         stem={props.model.stem}
         update={(content) => dispatch(MCActions.editStem(content))}
       />
-      {/*
-      <Choices
-        {...sharedProps}
-        onShuffle={() => dispatch(toggleAnswerChoiceShuffling())}
-        onAddChoice={() => dispatch(MCActions.addChoice())}
-        onEditChoice={(id, content) => dispatch(MCActions.editChoice(id, content))}
-        onRemoveChoice={(id) => dispatch(MCActions.removeChoice(id))}
+
+      {/* <Choices.Authoring.Unconnected
+        addOne={() => dispatch(MCActions.addChoice())}
+        setAll={(id, content) => dispatch(MCActions.editChoice(id, content))}
+        onRemoveOne={(id) => dispatch(MCActions.removeChoice(id))}
         onToggleAnswerChoiceShuffling={() => dispatch(MCActions.toggleAnswerChoiceShuffling())}
         isShuffled={areAnswerChoicesShuffled(props.model)}
-      />
+      /> */}
+      {/*}
       <TargetedFeedback>
         <Feedback
           {...sharedProps}
@@ -74,5 +70,5 @@ export class MultipleChoiceAuthoring extends AuthoringElement<MultipleChoiceMode
   }
 }
 // eslint-disable-next-line
-const manifest = require('./manifest.json') as ActivityTypes.Manifest;
+const manifest = require('./manifest.json') as Manifest;
 window.customElements.define(manifest.authoring.element, MultipleChoiceAuthoring);

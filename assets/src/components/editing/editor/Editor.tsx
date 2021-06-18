@@ -138,18 +138,18 @@ export const Editor = React.memo((props: EditorProps) => {
           next();
         }}
       >
-        {/* <InsertionToolbar
+        <InsertionToolbar
           isPerformingAsyncAction={isPerformingAsyncAction}
           toolbarItems={props.toolbarItems}
           commandContext={props.commandContext}
-        /> */}
+        />
 
-        {/* <HoveringToolbar isOpen={shouldShowFormattingToolbar}>
+        <HoveringToolbar isOpen={shouldShowFormattingToolbar}>
           <FormattingToolbar
             commandDescs={formatMenuCommands}
             commandContext={props.commandContext}
           />
-        </HoveringToolbar> */}
+        </HoveringToolbar>
 
         <Editable
           style={props.style}

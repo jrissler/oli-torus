@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
-import { Provider } from 'react-redux';
 import { Navigation } from 'components/common/navigation';
 import { CATASchema } from 'components/activities/check_all_that_apply/schema';
 import { Manifest } from '../types';
@@ -14,23 +13,16 @@ import { stemSlice } from '../common/stem/authoring/slice';
 import { Stem } from '../common/stem';
 import { previewTextSlice } from '../common/authoring/preview_text/slice';
 import { CheckAllThatApplySettings } from './components/settings';
-import {
-  transformationsSlice,
-} from '../common/authoring/transformations/slice';
+import { transformationsSlice } from '../common/authoring/transformations/slice';
 import { AnswerKey } from '../common/authoring/answerKey/simple';
 import { Feedback } from '../common/feedback';
-import {
-  responseMappingSlice,
-} from '../common/authoring/responseChoices/responseChoicesSlice';
+import { responseMappingSlice } from '../common/authoring/responseChoices/responseChoicesSlice';
 import { ActivityProvider } from '../ActivityContext';
-import { configureStore as cs2 } from 'state/store';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { ErrorBoundary } from 'components/common/ErrorBoundary';
 import { partsSlice } from '../common/authoring/parts/slice';
 
-const store = cs2();
-
-const cataReducer = combineReducers<CATASchema>({
+export const cataReducer = combineReducers<CATASchema>({
   [stemSlice.name]: stemSlice.reducer,
   [choicesSlice.name]: choicesSlice.reducer,
   authoring: combineReducers({
@@ -101,12 +93,10 @@ export class CheckAllThatApplyAuthoring extends AuthoringElement<CATASchema> {
   render(mountPoint: HTMLDivElement, props: AuthoringElementProps<CATASchema>) {
     ReactDOM.render(
       <ErrorBoundary>
-        <Provider store={store}>
-          <ActivityProvider {...props} reducer={cataReducer}>
-            <CheckAllThatApply />
-          </ActivityProvider>
-          <ModalDisplay />
-        </Provider>
+        <ActivityProvider {...props} reducer={cataReducer}>
+          <CheckAllThatApply />
+        </ActivityProvider>
+        <ModalDisplay />
       </ErrorBoundary>,
       mountPoint,
     );

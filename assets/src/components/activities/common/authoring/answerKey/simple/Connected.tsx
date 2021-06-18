@@ -18,14 +18,15 @@ export const Connected = connect(
     correctResponseMapping: selectResponseMappingsByPartId(state, ownProps.partId).correct,
   }),
   (dispatch: Dispatch, ownProps: { partId: ID }) => ({
-    onSelectChoiceId: (responseId: ResponseId) => (id: ChoiceId) =>
+    onSelectChoiceId: (responseId: ResponseId) => (id: ChoiceId) => {
       dispatch(
         responseMappingSlice.actions.toggleChoice({
           partId: ownProps.partId,
           choiceId: id,
           responseId: responseId,
         }),
-      ),
+      );
+    },
   }),
   (stateProps, dispatchProps) => ({
     stem: stateProps.stem,

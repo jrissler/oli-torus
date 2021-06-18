@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Choice } from './choice';
@@ -12,7 +12,6 @@ interface Props {
   setAll: (choices: IChoice[]) => void;
 }
 export const Unconnected: React.FC<Props> = ({ icon, choices, addOne, setAll }) => {
-  console.log('choices', choices);
   return (
     <>
       <DragDropContext
@@ -52,10 +51,15 @@ export const Unconnected: React.FC<Props> = ({ icon, choices, addOne, setAll }) 
           )}
         </Droppable>
       </DragDropContext>
-      <div className="d-flex align-items-center" style={{ marginLeft: '32px' }}>
-        <AuthoringButton className="btn btn-link pl-2" onClick={addOne}>
-          Add choice
-        </AuthoringButton>
+      <div className="d-flex align-items-center" style={{ marginLeft: '24px' }}>
+        <>
+          <div style={{ width: 30, lineHeight: 1, pointerEvents: 'none', cursor: 'default' }}>
+            {icon}
+          </div>
+          <AuthoringButton className="btn btn-link pl-2" onClick={addOne}>
+            Add choice
+          </AuthoringButton>
+        </>
       </div>
     </>
   );

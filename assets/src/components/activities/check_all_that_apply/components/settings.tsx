@@ -1,19 +1,18 @@
 import { connect } from 'react-redux';
-import { getTransformations, isShuffled } from 'components/activities/common/authoring/utils';
+import { isShuffled } from 'components/activities/common/authoring/utils';
 import { createAction } from '@reduxjs/toolkit';
 import {
   CheckAllThatApplySettingsComponent,
   Setting,
 } from 'components/activities/common/authoring/settings/setting/main';
 import { HasTransformations } from 'components/activities/common/authoring/transformations/types';
-import { HasTargetedFeedback } from 'components/activities/common/feedback/targeted/types';
 import { selectAllTransformations } from 'components/activities/common/authoring/transformations/slice';
-import { CataRootState } from '../CheckAllThatApplyAuthoring';
+import { HasResponseMappings } from 'components/activities/common/authoring/responseChoices/responseChoicesSlice';
 
 const toggleAnswerChoiceShuffling = createAction<void>('settings/toggleAnswerChoiceShuffling');
 const toggleTargetedFeedback = createAction<void>('settings/toggleTargetedFeedback');
 export const CheckAllThatApplySettings = connect(
-  (state: CataRootState) => ({
+  (state: HasTransformations & HasResponseMappings) => ({
     settingsState: [
       {
         isEnabled: isShuffled(selectAllTransformations(state)),

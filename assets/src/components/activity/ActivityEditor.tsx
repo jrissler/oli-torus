@@ -281,7 +281,6 @@ class ActivityEditor extends React.Component<ActivityEditorProps, ActivityEditor
             messages={this.state.messages}
           />
           <TitleBar
-            className="mb-4"
             title={this.state.undoable.current.title}
             onTitleEdit={onTitleEdit}
             editMode={this.state.editMode}

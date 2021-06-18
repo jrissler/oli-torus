@@ -37,7 +37,11 @@ export const Delivery: React.FC<Props> = ({
             <label className="choices__choice-label" htmlFor={`choice-${index}`}>
               <div className="d-flex align-items-center flex-shrink-1">
                 {isSelected(choice.id) ? selectedIcon : unselectedIcon}
-                <HtmlContentModelRenderer text={choice.content} context={context} />
+                <HtmlContentModelRenderer
+                  style={{ marginLeft: '0.6rem' }}
+                  text={choice.content}
+                  context={context}
+                />
               </div>
             </label>
           </div>

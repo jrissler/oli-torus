@@ -27,7 +27,7 @@ export function defineApplication<T extends State>(Component: React.FunctionComp
     const props = {
       ...params,
       content: parsedContent,
-      activityTypes: parsedActivityTypes
+      activityTypes: parsedActivityTypes,
     };
 
     /* console.log('MOUNT UP', props); */

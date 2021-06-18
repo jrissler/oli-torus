@@ -76,7 +76,11 @@ export const Unconnected: React.FC<Props> = ({
           updateFeedback={updateFeedback}
         />
       ))}
-      <AuthoringButton className="btn btn-sm btn-primary my-2" onClick={addTargetedResponse}>
+      <AuthoringButton
+        style={{ marginLeft: 13 }}
+        className="btn btn-link pl-2"
+        onClick={() => addTargetedResponse()}
+      >
         Add targeted feedback
       </AuthoringButton>
     </>

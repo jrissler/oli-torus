@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { ActivityState } from 'components/activities/types';
+import { ActivityState } from 'data/content/activities/activities';
 import { getBulkActivitiesForAuthoring } from 'data/persistence/activity';
 import {
   getBulkAttemptState,

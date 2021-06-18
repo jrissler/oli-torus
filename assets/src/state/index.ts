@@ -1,5 +1,4 @@
 import { ThunkDispatch } from 'redux-thunk';
-
 import { combineReducers } from 'redux';
 import { OtherAction } from 'state/other';
 import { MediaActions } from 'actions/media';
@@ -17,7 +16,7 @@ type AllActions = ModalActions | MediaActions | PreferencesActions | OtherAction
 
 export type Dispatch = ThunkDispatch<State, void, AllActions>;
 
-export default combineReducers<State>({
+export const rootReducer = combineReducers<State>({
   media,
   modal,
   preferences,
@@ -30,4 +29,3 @@ export function initState(json: any = {}) {
     preferences: new PreferencesState(json),
   };
 }
-

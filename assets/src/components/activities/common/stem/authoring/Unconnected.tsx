@@ -10,7 +10,7 @@ interface Props {
 
 export const Unconnected: React.FC<Props> = ({ stem, update }) => {
   return (
-    <div className="mb-2 flex-grow-1" style={{ minHeight: '61px' }}>
+    <div className="flex-grow-1">
       <RichTextEditor
         style={{ padding: '16px', fontSize: '18px' }}
         text={stem.content}

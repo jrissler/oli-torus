@@ -1,11 +1,10 @@
-import { createStore, applyMiddleware, Store } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
+import { configureStore as configureStoreReduxToolkit, Reducer } from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
-import thunk from 'redux-thunk';
-import rootReducer, { initState } from 'state';
-import nextReducer from './index';
+import { rootReducer as nextReducer, initState } from './index';
+import { initialState } from './preferences';
 
-export function configureStore(initialState?: any): Store {
+export const preloadState = initState;
+export function configureStore(preloaded: any = initialState, reducer?: Reducer) {
   const logger = createLogger({
     stateTransformer: (state) => {
       const newState: any = {};
@@ -22,18 +21,19 @@ export function configureStore(initialState?: any): Store {
     },
   });
 
-  let middleware;
-  if (process.env.NODE_ENV === 'development') {
-    middleware = composeWithDevTools(applyMiddleware(thunk, logger));
-  } else {
-    middleware = composeWithDevTools(applyMiddleware(thunk));
-  }
-
-  const store = createStore(rootReducer, initState(initialState), middleware);
+  const store = configureStoreReduxToolkit({
+    reducer: reducer || nextReducer,
+    middleware: (getDefaultMiddleware) =>
+      process.env.NODE_ENV === 'development'
+        ? getDefaultMiddleware().concat(logger)
+        : getDefaultMiddleware(),
+    devTools: process.env.NODE_ENV !== 'production',
+    preloadedState: preloadState(initialState),
+  });
 
   if ((module as any).hot) {
     (module as any).hot.accept('./index', () => {
-      store.replaceReducer(nextReducer);
+      store.replaceReducer(reducer || nextReducer);
     });
   }
 

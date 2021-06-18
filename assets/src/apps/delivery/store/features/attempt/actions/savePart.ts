@@ -1,9 +1,13 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { $CombinedState, createAsyncThunk } from '@reduxjs/toolkit';
 import { writePartAttemptState } from 'data/persistence/state/intrinsic';
-import { defaultGlobalEnv, evalScript, getAssignScript } from '../../../../../../adaptivity/scripting';
+import {
+  defaultGlobalEnv,
+  evalScript,
+  getAssignScript,
+} from '../../../../../../adaptivity/scripting';
 import { RootState } from '../../../rootReducer';
 import { selectPreviewMode, selectSectionSlug } from '../../page/slice';
-import { AttemptSlice, selectById, upsertActivityAttemptState } from '../slice';
+import { AttemptSlice, AttemptState, selectById, upsertActivityAttemptState } from '../slice';
 
 export const savePartState = createAsyncThunk(
   `${AttemptSlice}/savePartState`,
@@ -16,11 +20,13 @@ export const savePartState = createAsyncThunk(
     // update redux state to match optimistically
     const attemptRecord = selectById(rootState, attemptGuid);
     if (attemptRecord) {
-      const partAttemptRecord = attemptRecord.parts.find((p) => p.attemptGuid === partAttemptGuid);
+      const partAttemptRecord = attemptRecord.parts.find(
+        (p: any) => p.attemptGuid === partAttemptGuid,
+      );
       if (partAttemptRecord) {
         const updated = {
           ...attemptRecord,
-          parts: attemptRecord.parts.map((p) => {
+          parts: attemptRecord.parts.map((p: any) => {
             const result = { ...p };
             if (p.attemptGuid === partAttemptRecord.attemptGuid) {
               result.response = response;
@@ -44,12 +50,6 @@ export const savePartState = createAsyncThunk(
 
     const finalize = false;
 
-    return writePartAttemptState(
-      sectionSlug,
-      attemptGuid,
-      partAttemptGuid,
-      response,
-      finalize,
-    );
+    return writePartAttemptState(sectionSlug, attemptGuid, partAttemptGuid, response, finalize);
   },
 );

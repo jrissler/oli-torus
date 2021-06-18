@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { ActivityState, PartComponentDefinition } from 'components/activities/types';
+import { ActivityState, PartComponentDefinition } from 'data/content/activities/activities';
 import React from 'react';
 import PartComponent from './PartComponent';
 

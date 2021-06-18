@@ -5,8 +5,6 @@ import {
   PayloadAction,
   Update,
 } from '@reduxjs/toolkit';
-import { CataRootState } from 'components/activities/check_all_that_apply/CheckAllThatApplyAuthoring';
-import { RichText } from 'components/activities/types';
 import { update } from '../../reduxUtils';
 import { HasStem, IStem, makeStem } from '../types';
 
@@ -24,5 +22,5 @@ export const stemSlice = createSlice({
   },
 });
 
-const selectState = (state: CataRootState) => state.stem;
+const selectState = (state: HasStem) => state.stem;
 export const selectStem = createSelector(selectState, (stem) => stem);
