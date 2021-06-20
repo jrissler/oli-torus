@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { toSimpleText } from 'components/editing/utils';
+import { HasPreviewText } from 'data/content/activities/previewText';
 import { stemSlice } from '../../stem/authoring/slice';
-import { HasPreviewText } from './types';
 
 export const selectPreviewText = (state: HasPreviewText) => state.authoring.previewText;
 export const previewTextSlice = createSlice({

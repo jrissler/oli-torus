@@ -1,6 +1,6 @@
-import { IPart } from '../common/authoring/parts/types';
-import { ITransformation } from '../common/authoring/transformations/types';
-import { ActivityModelSchema, PartComponentDefinition } from '../types';
+import { ActivityModelSchema, PartComponentDefinition } from 'data/content/activities/activity';
+import { IPart } from 'data/content/activities/part';
+import { ITransformation } from 'data/content/activities/transformation';
 
 export interface AdaptiveModelSchema extends ActivityModelSchema {
   // eslint-disable-next-line

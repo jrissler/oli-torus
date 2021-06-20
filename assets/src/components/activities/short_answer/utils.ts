@@ -1,7 +1,7 @@
-import { ScoringStrategy } from '../common/authoring/parts/types';
-import { makeResponse } from '../common/authoring/responses/types';
-import { makeHint } from '../common/hints/types';
-import { makeStem } from '../common/stem/types';
+import { makeHint } from 'data/content/activities/hint';
+import { ScoringStrategy } from 'data/content/activities/part';
+import { makeResponse } from 'data/content/activities/response';
+import { makeStem } from 'data/content/activities/stem';
 import { ShortAnswerModelSchema } from './schema';
 
 export const parseInputFromRule = (rule: string) => {

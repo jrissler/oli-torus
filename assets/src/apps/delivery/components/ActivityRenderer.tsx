@@ -13,7 +13,7 @@ import {
   PartState,
   StudentResponse,
   Success,
-} from 'components/activities/types';
+} from 'data/content/activities/activity';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { defaultGlobalEnv, getEnvState } from '../../../adaptivity/scripting';

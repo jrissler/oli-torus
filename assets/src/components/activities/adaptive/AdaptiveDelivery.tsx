@@ -1,3 +1,4 @@
+import { Manifest, StudentResponse } from 'data/content/activities/activity';
 import { EventEmitter } from 'events';
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -8,7 +9,6 @@ import {
 } from '../../../apps/delivery/components/NotificationContext';
 import PartsLayoutRenderer from '../../../apps/delivery/components/PartsLayoutRenderer';
 import { DeliveryElement, DeliveryElementProps } from '../DeliveryElement';
-import * as ActivityTypes from '../types';
 import { AdaptiveModelSchema } from './schema';
 
 const sharedInitMap = new Map();
@@ -171,7 +171,7 @@ const Adaptive = (props: DeliveryElementProps<AdaptiveModelSchema>) => {
       console.error(`part attempt guid for ${id} not found!`);
       return;
     }
-    const response: ActivityTypes.StudentResponse = {
+    const response: StudentResponse = {
       input: responses.map((pr) => ({ ...pr, path: `${id}.${pr.key}` })),
     };
     const result = await props.onSavePart(
@@ -192,7 +192,7 @@ const Adaptive = (props: DeliveryElementProps<AdaptiveModelSchema>) => {
       console.error(`part attempt guid for ${id} not found!`);
       return;
     }
-    const response: ActivityTypes.StudentResponse = {
+    const response: StudentResponse = {
       input: responses.map((pr) => ({ ...pr, path: `${id}.${pr.key}` })),
     };
     const result = await props.onSubmitPart(
@@ -226,5 +226,5 @@ export class AdaptiveDelivery extends DeliveryElement<AdaptiveModelSchema> {
 
 // Register the web component:
 // eslint-disable-next-line
-const manifest = require('./manifest.json') as ActivityTypes.Manifest;
+const manifest = require('./manifest.json') as Manifest;
 window.customElements.define(manifest.delivery.element, AdaptiveDelivery);

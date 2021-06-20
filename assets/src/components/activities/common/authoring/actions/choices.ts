@@ -7,11 +7,11 @@ import {
   isShuffled,
 } from 'components/activities/common/authoring/utils';
 import { makeTransformation } from 'components/activities/common/utils';
-import { ChoiceId, RichText } from 'components/activities/types';
-import { HasChoices, IChoice, makeChoice } from '../../choices/types';
-import { HasParts } from '../parts/types';
-import { IResponse } from '../responses/types';
-import { HasTransformations, IOperation } from '../transformations/types';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
+import { HasChoices, IChoice, makeChoice } from 'data/content/activities/choice';
+import { HasParts } from 'data/content/activities/part';
+import { IResponse } from 'data/content/activities/response';
+import { HasTransformations, IOperation } from 'data/content/activities/transformation';
 
 // Only for activities with one part
 export const addChoice = () => {

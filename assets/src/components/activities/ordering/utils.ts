@@ -6,12 +6,12 @@ import {
 } from './schema';
 import { ID } from 'data/content/model';
 import { getResponse, getResponses } from '../common/authoring/utils';
-import { makeChoice } from '../common/choices/types';
-import { makeResponse } from '../common/authoring/responses/types';
-import { makeStem } from '../common/stem/types';
-import { makeHint } from '../common/hints/types';
-import { ScoringStrategy } from '../common/authoring/parts/types';
-import { IOperation, makeTransformation } from '../common/authoring/transformations/types';
+import { makeChoice } from 'data/content/activities/choice';
+import { makeResponse } from 'data/content/activities/response';
+import { makeStem } from 'data/content/activities/stem';
+import { makeHint } from 'data/content/activities/hint';
+import { ScoringStrategy } from 'data/content/activities/part';
+import { IOperation, makeTransformation } from 'data/content/activities/transformation';
 
 // Types
 export function isSimpleOrdering(model: Ordering): model is SimpleOrdering {

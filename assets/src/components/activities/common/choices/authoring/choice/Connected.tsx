@@ -1,4 +1,4 @@
-import { ChoiceId, RichText } from 'components/activities/types';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
 import { connect } from 'react-redux';
 import { choicesSlice } from '../slice';
 import { Unconnected } from './Unconnected';

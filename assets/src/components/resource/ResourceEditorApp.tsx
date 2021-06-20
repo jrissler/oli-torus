@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { Maybe } from 'tsmonad';
 import { configureStore } from 'state/store';
 import { b64DecodeUnicode } from 'utils/decode';
+import { initState } from 'state';
 
 let store = configureStore();
 
@@ -23,7 +24,7 @@ let store = configureStore();
 
 (window as any).store = {
   configureStore: (json: any) => {
-    store = configureStore(json);
+    store = configureStore(initState(json));
   },
 };
 

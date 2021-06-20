@@ -1,7 +1,7 @@
 import { getHint } from 'components/activities/common/authoring/utils';
-import { RichText } from 'components/activities/types';
-import { makeHint } from '../../hints/types';
-import { HasParts } from '../parts/types';
+import { RichText } from 'data/content/activities/activity';
+import { makeHint } from 'data/content/activities/hint';
+import { HasParts } from 'data/content/activities/part';
 
 // Only for activities with one part
 export const addHint = () => {

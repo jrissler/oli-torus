@@ -5,6 +5,8 @@ import { ResourceId } from 'data/types';
 export type ChoiceId = ID;
 export type ResponseId = ID;
 export type HintId = ID;
+export type PartId = ID;
+export type StemId = ID;
 
 export type RichText = {
   model: ModelElement[];

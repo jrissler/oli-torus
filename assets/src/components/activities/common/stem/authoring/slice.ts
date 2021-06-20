@@ -5,8 +5,9 @@ import {
   PayloadAction,
   Update,
 } from '@reduxjs/toolkit';
+import { RootActivityState } from 'components/activities/ActivityContext';
+import { HasStem, IStem, makeStem } from 'data/content/activities/stem';
 import { update } from '../../reduxUtils';
-import { HasStem, IStem, makeStem } from '../types';
 
 // const stemAdapter = createEntityAdapter<IStem>();
 export const stemSlice = createSlice({

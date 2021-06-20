@@ -1,14 +1,14 @@
-import { ChoiceId, RichText } from 'components/activities/types';
 import { Card } from 'components/common/Card';
 import { ID } from 'data/content/model';
 import React, { useMemo } from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { IChoice } from '../../choices/types';
 import { Choices } from '../../choices';
 import { defaultWriterContext } from 'data/content/writers/context';
-import { Checkbox } from '../../authoring/icons/Checkbox';
-import { IFeedback } from '../types';
+import { Checkbox } from '../../authoring/icons/checkbox/Checkbox';
 import { Tooltip } from '../../authoring/Tooltip';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
+import { IFeedback } from 'data/content/activities/feedback';
+import { IChoice } from 'data/content/activities/choice';
 
 export const ResponseFeedbackCard: React.FC<{
   title: React.ReactNode;

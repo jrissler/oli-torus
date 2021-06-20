@@ -1,7 +1,7 @@
-import { RichText } from 'components/activities/types';
+import { RichText } from 'data/content/activities/activity';
 import { toSimpleText } from 'components/editing/utils';
-import {  HasStem  } from '../../stem/types';;
-import {  HasPreviewText  } from '../preview_text/types';;
+import { HasStem } from 'data/content/activities/stem';
+import { HasPreviewText } from 'data/content/activities/previewText';
 
 export const editStem = (content: RichText) => {
   return (model: HasStem & HasPreviewText) => {

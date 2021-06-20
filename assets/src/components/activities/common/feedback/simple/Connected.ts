@@ -1,4 +1,4 @@
-import { RichText } from 'components/activities/types';
+import { RichText } from 'data/content/activities/activity';
 import { connect } from 'react-redux';
 import { Unconnected } from './Unconnected';
 import { feedbackSlice } from '../slice';
@@ -8,9 +8,10 @@ import {
   selectResponseMappingsByPartId,
 } from '../../authoring/responseChoices/responseChoicesSlice';
 import { selectFeedbackByResponseId } from '../../authoring/parts/slice';
+import { HasParts } from 'data/content/activities/part';
 
 export const Connected = connect(
-  (state: HasResponseMappings, ownProps: { partId: ID }) => {
+  (state: HasParts & HasResponseMappings, ownProps: { partId: ID }) => {
     return {
       correctFeedback: selectFeedbackByResponseId(
         state,

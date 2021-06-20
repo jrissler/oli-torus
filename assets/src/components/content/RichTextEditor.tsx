@@ -1,10 +1,10 @@
 import React from 'react';
-import { RichText } from 'components/activities/types';
 import { Editor } from 'components/editing/editor/Editor';
 import { getToolbarForResourceType } from 'components/editing/toolbars/insertion/items';
 import { ErrorBoundary } from 'components/common/ErrorBoundary';
 import { classNames } from 'utils/classNames';
 import { useActivityContext } from 'components/activities/ActivityContext';
+import { RichText } from 'data/content/activities/activity';
 type RichTextEditorProps = {
   text: RichText;
   onEdit: (text: RichText) => void;

@@ -3,3 +3,4 @@ export interface HasPreviewText {
     previewText: string;
   };
 }
+export const makePreviewText = () => '';

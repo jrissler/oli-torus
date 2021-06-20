@@ -17,8 +17,8 @@
 export { CheckAllThatApplyDelivery } from './CheckAllThatApplyDelivery';
 export { CheckAllThatApplyAuthoring } from './CheckAllThatApplyAuthoring';
 
+import { CreationContext, Manifest } from 'data/content/activities/activity';
 // Registers the creation function:
-import { Manifest, CreationContext } from '../types';
 import { registerCreationFunc } from '../creation';
 import { CATASchema, defaultCATAModel } from './schema';
 

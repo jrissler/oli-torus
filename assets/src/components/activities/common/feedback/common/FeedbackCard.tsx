@@ -1,9 +1,9 @@
-import { RichText } from 'components/activities/types';
+import { RichText } from 'data/content/activities/activity';
 import { Card } from 'components/common/Card';
 import { ID } from 'data/content/model';
-import { IFeedback } from '../types';
 import React from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
+import { IFeedback } from 'data/content/activities/feedback';
 
 export const FeedbackCard: React.FC<{
   feedback: IFeedback;

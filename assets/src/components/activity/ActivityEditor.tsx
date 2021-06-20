@@ -20,7 +20,6 @@ import {
 } from '../resource/undo';
 import { releaseLock, acquireLock, NotAcquired } from 'data/persistence/lock';
 import * as Persistence from 'data/persistence/activity';
-import { ActivityModelSchema } from 'components/activities/types';
 import { PersistenceStatus } from 'components/content/PersistenceStatus';
 import { Message, createMessage, Severity } from 'data/messages/messages';
 import { Banner } from '../messages/Banner';
@@ -28,6 +27,7 @@ import { PartObjectives } from 'components/activity/PartObjectives';
 import { valueOr } from 'utils/common';
 import { isFirefox } from 'utils/browser';
 import { loadPreferences } from 'state/preferences';
+import { ActivityModelSchema } from 'data/content/activities/activity';
 
 export interface ActivityEditorProps extends ActivityContext {
   onLoadPreferences: () => void;

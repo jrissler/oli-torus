@@ -1,11 +1,3 @@
-// const updateCorrectResponseRule = (
-//   model: HasTargetedFeedback,
-//   {
-//     correctChoiceIds,
-//     incorrectChoiceIds,
-//   }: { correctChoiceIds: ChoiceId[]; incorrectChoiceIds: ChoiceId[] },
-// ) => (getCorrectResponse(model).rule = createRuleForIds(correctChoiceIds, incorrectChoiceIds));
-
 // const getTargetedFeedbackRules = (
 //   model: HasTargetedFeedback,
 // ): { responseId: ResponseId; rule: Rule }[] => {
@@ -28,17 +20,6 @@
 //   targetedFeedbackRules.forEach(({ responseId, rule }) => {
 //     getResponse(model, responseId).rule = rule;
 //   });
-// };
-
-// const updateIncorrectCatchallRules = (
-//   model: HasTargetedFeedback,
-//   targetedFeedbackRules: { responseId: ResponseId; rule: Rule }[],
-// ) => {
-//   getIncorrectResponse(model).rule = unionRules(
-//     targetedFeedbackRules
-//       .map(({ rule }) => invertRule(rule))
-//       .concat([invertRule(getCorrectResponse(model).rule)]),
-//   );
 // };
 
 // export const targetedFeedbackSlice = createSlice({

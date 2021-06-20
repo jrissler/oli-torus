@@ -1,7 +1,7 @@
-import { ContentItem, HintId } from 'components/activities/types';
+import { makeContent } from 'components/activities/common/authoring/utils';
+import { ContentItem, HintId } from 'data/content/activities/activity';
 import { ID } from 'data/content/model';
-import { HasParts } from '../authoring/parts/types';
-import { makeContent } from '../authoring/utils';
+import { HasParts } from './part';
 
 export type IHint = ContentItem;
 export type HasHints = HasParts;

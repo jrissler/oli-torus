@@ -1,7 +1,8 @@
 import React from 'react';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
-import {  IHint  } from '../types';;
+import { IHint } from '../types';
+import { Card } from 'components/common/Card';
 
 interface DisplayedHintProps {
   hint: IHint;
@@ -26,36 +27,90 @@ interface HintsProps {
   hasMoreHints: boolean;
   context: WriterContext;
   onClick: () => void;
+  shouldShow?: boolean;
 }
 
-export const Delivery = (props: HintsProps) => {
-  const noHintsRequested = props.hints.length === 0;
+// export const Delivery: React.FC<HintsProps> = ({
+//   isEvaluated,
+//   hints,
+//   hasMoreHints,
+//   context,
+//   onClick,
+//   shouldShow = true,
+// }) => {
+//   if (!shouldShow) {
+//     return null;
+//   }
 
-  // Display nothing if the question has no hints, meaning no hints have been requested so far
-  // and there are no more available to be requested
-  if (noHintsRequested && !props.hasMoreHints) {
+//   // Display nothing if the question has no hints, meaning no hints have been requested so far
+//   // and there are no more available to be requested
+//   const noHintsRequested = hints.length === 0;
+//   if (noHintsRequested && !hasMoreHints) {
+//     return null;
+//   }
+
+//   return (
+//     <div className="hints my-2">
+//       <div className="hints-adornment"></div>
+//       <h6>Hints</h6>
+//       <div className="hints-list">
+//         {hints.map((hint, index) => (
+//           <DisplayedHint index={index} key={hint.id} hint={hint} context={context} />
+//         ))}
+//       </div>
+//       {hasMoreHints && (
+//         <button
+//           aria-label="request hint"
+//           onClick={onClick}
+//           disabled={isEvaluated || !hasMoreHints}
+//           className="btn btn-sm btn-primary muted mt-2"
+//         >
+//           Request Hint
+//         </button>
+//       )}
+//     </div>
+//   );
+// };
+
+export const Delivery: React.FC<HintsProps> = ({
+  isEvaluated,
+  hints,
+  hasMoreHints,
+  context,
+  onClick,
+  shouldShow = true,
+}) => {
+  if (!shouldShow) {
     return null;
   }
-
+  // Display nothing if the question has no hints, meaning no hints have been requested so far
+  // and there are no more available to be requested
+  const noHintsRequested = hints.length === 0;
+  if (noHintsRequested && !hasMoreHints) {
+    return null;
+  }
   return (
-    <div className="hints my-2">
-      <div className="hints-adornment"></div>
-      <h6>Hints</h6>
-      <div className="hints-list">
-        {props.hints.map((hint, index) => (
-          <DisplayedHint index={index} key={hint.id} hint={hint} context={props.context} />
+    <Card.Card>
+      <Card.Title>Hints</Card.Title>
+      <Card.Content>
+        {hints.map((hint, index) => (
+          <div key={hint.id} className="d-flex align-items-center mb-2">
+            <span className="mr-2">{index + 1}.</span>
+            <HtmlContentModelRenderer text={hint.content} context={context} />
+          </div>
         ))}
-      </div>
-      {props.hasMoreHints && (
-        <button
-          aria-label="request hint"
-          onClick={props.onClick}
-          disabled={props.isEvaluated || !props.hasMoreHints}
-          className="btn btn-sm btn-primary muted mt-2"
-        >
-          Request Hint
-        </button>
-      )}
-    </div>
+        {hasMoreHints && (
+          <button
+            aria-label="request hint"
+            onClick={onClick}
+            disabled={isEvaluated || !hasMoreHints}
+            className="btn btn-sm btn-link"
+            style={{ padding: 0 }}
+          >
+            Request Hint
+          </button>
+        )}
+      </Card.Content>
+    </Card.Card>
   );
 };

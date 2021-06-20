@@ -3,9 +3,8 @@ import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { Navigation } from 'components/common/navigation';
 import { CATASchema } from 'components/activities/check_all_that_apply/schema';
-import { Manifest } from '../types';
 import { combineReducers } from '@reduxjs/toolkit';
-import { Checkbox } from '../common/authoring/icons/Checkbox';
+import { Checkbox } from '../common/authoring/icons/checkbox/Checkbox';
 import { choicesSlice } from '../common/choices/authoring/slice';
 import { Choices } from '../common/choices';
 import { Hints } from '../common/hints';
@@ -21,14 +20,20 @@ import { ActivityProvider } from '../ActivityContext';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { ErrorBoundary } from 'components/common/ErrorBoundary';
 import { partsSlice } from '../common/authoring/parts/slice';
+import { Manifest } from 'data/content/activities/activity';
+import { configureStore } from 'state/store';
+import { Provider } from 'react-redux';
 
+const appStore = configureStore();
+
+// export type RootCataState = RootActivityState<CATASchema>;
 export const cataReducer = combineReducers<CATASchema>({
-  [stemSlice.name]: stemSlice.reducer,
-  [choicesSlice.name]: choicesSlice.reducer,
+  stem: stemSlice.reducer,
+  choices: choicesSlice.reducer,
   authoring: combineReducers({
-    [partsSlice.name]: partsSlice.reducer,
-    [previewTextSlice.name]: previewTextSlice.reducer,
-    [transformationsSlice.name]: transformationsSlice.reducer,
+    parts: partsSlice.reducer,
+    previewText: previewTextSlice.reducer,
+    transformations: transformationsSlice.reducer,
     responseMappings: responseMappingSlice.reducer,
   }),
   // settings: settingsSlice.reducer,
@@ -37,17 +42,10 @@ export const cataReducer = combineReducers<CATASchema>({
 const selectAnswerKey = (state: any) => {
   switch (state) {
     case 'simple':
-      return (
-        <>
-          <AnswerKey.Authoring.Simple.Connected partId="1" />
-          <Feedback.Authoring.Simple.Connected partId="1" />
-        </>
-      );
+      return <></>;
     case 'targeted_only':
       return (
         <>
-          <AnswerKey.Authoring.Simple.Connected partId="1" />
-          <Feedback.Authoring.Simple.Connected partId="1" />
           <Feedback.Authoring.Targeted.Connected partId="1" />
         </>
       );
@@ -77,6 +75,8 @@ const CheckAllThatApply: React.FC = () => {
         </Navigation.Tabbed.Tab>
 
         <Navigation.Tabbed.Tab label="Answer Key">
+          <AnswerKey.Authoring.Simple.Connected partId="1" />
+          <Feedback.Authoring.Simple.Connected partId="1" />
           {selectAnswerKey('targeted_only')}
         </Navigation.Tabbed.Tab>
 
@@ -92,12 +92,14 @@ const CheckAllThatApply: React.FC = () => {
 export class CheckAllThatApplyAuthoring extends AuthoringElement<CATASchema> {
   render(mountPoint: HTMLDivElement, props: AuthoringElementProps<CATASchema>) {
     ReactDOM.render(
-      <ErrorBoundary>
-        <ActivityProvider {...props} reducer={cataReducer}>
-          <CheckAllThatApply />
-        </ActivityProvider>
-        <ModalDisplay />
-      </ErrorBoundary>,
+      <Provider store={appStore}>
+        <ErrorBoundary>
+          <ActivityProvider {...props} modelReducer={cataReducer}>
+            <CheckAllThatApply />
+          </ActivityProvider>
+          <ModalDisplay />
+        </ErrorBoundary>
+      </Provider>,
       mountPoint,
     );
   }

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ChoiceId, RichText } from 'components/activities/types';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { RemoveButton } from 'components/misc/RemoveButton';
 import {
@@ -8,11 +7,12 @@ import {
   DraggingStyle,
   NotDraggingStyle,
 } from 'react-beautiful-dnd';
-import { IChoice } from '../../types';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
+import { IChoice } from 'data/content/activities/choice';
 
 interface Props {
   canRemove: boolean;
-  icon: JSX.Element;
+  icon: React.ReactNode;
   index: number;
 
   choice: IChoice;

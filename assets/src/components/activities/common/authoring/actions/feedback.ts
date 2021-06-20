@@ -1,12 +1,12 @@
 import { getResponse } from 'components/activities/common/authoring/utils';
-import { RichText } from 'components/activities/types';
+import { RichText } from 'data/content/activities/activity';
+import { HasParts } from 'data/content/activities/part';
 import produce, { Draft } from 'immer';
 import {
   HasTargetedFeedback,
   TargetedFeedbackDisabled,
   TargetedFeedbackEnabled,
 } from '../../feedback/targeted/types';
-import { HasParts } from '../parts/types';
 
 export const toggleTargetedFeedback = () =>
   produce((draft: Draft<HasTargetedFeedback>) => {

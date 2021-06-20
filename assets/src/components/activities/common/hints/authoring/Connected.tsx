@@ -1,11 +1,10 @@
-import { HintId, RichText } from 'components/activities/types';
 import { connect } from 'react-redux';
 import { Unconnected } from 'components/activities/common/hints/authoring/Unconnected';
 import { hintsSlice } from './slice';
-import { HasParts } from '../../authoring/parts/types';
-import { HasHints, makeHint } from '../types';
 import { ID } from 'data/content/model';
 import { selectAllHintsByPartId } from '../../authoring/parts/slice';
+import { HintId, RichText } from 'data/content/activities/activity';
+import { HasHints, makeHint } from 'data/content/activities/hint';
 
 export const Connected = connect(
   (state: HasHints, ownProps: { partId: ID }) => {

@@ -8,29 +8,29 @@ import {
   ResetActivityResponse,
 } from '../DeliveryElement';
 import { OrderingModelSchema } from './schema';
-import * as ActivityTypes from '../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
-import { Reset } from '../common/delivery/Reset';
+import { ResetButton } from '../common/delivery/ResetButton';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
 import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
 import { Hints } from '../common/hints';
 import { Stem } from '../common/stem';
-import { IChoice } from '../common/choices/types';
-import { FeedbackAction } from '../common/feedback/types';
+import { ChoiceId, Manifest, RichText } from 'data/content/activities/activity';
+import {IChoice} from 'data/content/activities/choice';
+import {FeedbackAction} from 'data/content/activities/feedback';
 
 type Evaluation = {
   score: number;
   outOf: number;
-  feedback: ActivityTypes.RichText;
+  feedback: RichText;
 };
 
 // [id, index]
-type Selection = [ActivityTypes.ChoiceId, number];
+type Selection = [ChoiceId, number];
 
 interface SelectionProps {
   selected: Selection[];
-  onDeselect: (id: ActivityTypes.ChoiceId) => void;
+  onDeselect: (id: ChoiceId) => void;
   isEvaluated: boolean;
 }
 
@@ -55,7 +55,7 @@ const Selection = ({ selected, onDeselect, isEvaluated }: SelectionProps) => {
 
 interface ChoicesProps {
   choices: IChoice[];
-  selected: ActivityTypes.ChoiceId[];
+  selected: ChoiceId[];
   context: WriterContext;
   onSelect: (id: string) => void;
   isEvaluated: boolean;
@@ -108,13 +108,13 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
   const [attemptState, setAttemptState] = useState(props.state);
   const [hints, setHints] = useState(props.state.parts[0].hints);
   const [hasMoreHints, setHasMoreHints] = useState(props.state.parts[0].hasMoreHints);
-  const [selected, setSelected] = useState<ActivityTypes.ChoiceId[]>(
+  const [selected, setSelected] = useState<ChoiceId[]>(
     props.state.parts[0].response === null
       ? []
       : (props.state.parts[0].response as any).input
           .split(' ')
           .reduce(
-            (acc: ActivityTypes.ChoiceId[], curr: ActivityTypes.ChoiceId) => acc.concat([curr]),
+            (acc: ChoiceId[], curr: ChoiceId) => acc.concat([curr]),
             [],
           ),
   );
@@ -199,7 +199,7 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
     isEvaluated && !props.graded ? (
       <div className="d-flex my-3">
         <div className="flex-fill"></div>
-        <Reset hasMoreAttempts={attemptState.hasMoreAttempts} onClick={onReset} />
+        <ResetButton hasMoreAttempts={attemptState.hasMoreAttempts} onClick={onReset} />
       </div>
     ) : null;
 
@@ -250,7 +250,7 @@ export const OrderingComponent = (props: DeliveryElementProps<OrderingModelSchem
           <Stem.Delivery stem={stem} context={writerContext} />
           {gradedPoints}
           <Selection
-            onDeselect={(id: ActivityTypes.ChoiceId) => updateSelection(id)}
+            onDeselect={(id: ChoiceId) => updateSelection(id)}
             selected={selected.map((s) => [s, choices.findIndex((c) => c.id === s)])}
             isEvaluated={isEvaluated}
           />
@@ -280,5 +280,5 @@ export class OrderingDelivery extends DeliveryElement<OrderingModelSchema> {
 
 // Register the web component:
 // eslint-disable-next-line
-const manifest = require('./manifest.json') as ActivityTypes.Manifest;
+const manifest = require('./manifest.json') as Manifest;
 window.customElements.define(manifest.delivery.element, OrderingDelivery);

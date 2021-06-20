@@ -1,9 +1,8 @@
-import { Action } from 'components/activities/common/authoring/parts/types';
-import { makeFeedback } from 'components/activities/common/feedback/types';
-import { makeHint } from 'components/activities/common/hints/types';
 import { EvaluationResponse, RequestHintResponse } from 'components/activities/DeliveryElement';
-import { ActivityState, PartState } from 'components/activities/types';
-import { createFalse } from 'typescript';
+import { ActivityState, PartState } from 'data/content/activities/activity';
+import { makeFeedback } from 'data/content/activities/feedback';
+import { makeHint } from 'data/content/activities/hint';
+import { Action } from 'data/content/activities/part';
 
 const partState: PartState = {
   attemptGuid: 'guid',

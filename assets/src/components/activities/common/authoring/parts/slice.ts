@@ -1,15 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ResponseId } from 'components/activities/types';
+import { ResponseId } from 'data/content/activities/activity';
+import { IFeedback } from 'data/content/activities/feedback';
+import { IHint } from 'data/content/activities/hint';
+import { HasParts, IPart } from 'data/content/activities/part';
+import { IResponse } from 'data/content/activities/response';
 import { ID } from 'data/content/model';
 import { Maybe } from 'tsmonad';
+import { choicesSlice } from '../../choices/authoring/slice';
 import { feedbackSlice } from '../../feedback/slice';
-import { IFeedback } from '../../feedback/types';
 import { hintsSlice } from '../../hints/authoring/slice';
-import { IHint } from '../../hints/types';
 import { updateOne } from '../../reduxUtils';
 import { responsesSlice } from '../responses/slice';
-import { IResponse } from '../responses/types';
-import { HasParts, IPart } from './types';
 
 export const partsSlice = createSlice({
   name: 'parts',
@@ -42,6 +43,8 @@ export const partsSlice = createSlice({
             responsesSlice.actions.addOne,
             responsesSlice.actions.removeOne,
             responsesSlice.actions.updateOne,
+            responsesSlice.actions.updateRulesForMappings,
+            // responsesSlice.actions.updateAllResponseRules,
           ].some((ac) => ac.match(action)),
         (state, action: PayloadAction<{ partId: ID }>) => {
           const part = Maybe.maybe(
@@ -53,6 +56,12 @@ export const partsSlice = createSlice({
           });
         },
       )
+      .addMatcher(choicesSlice.actions.removeOne.match, () => {
+        // updateresponserules
+      })
+      .addMatcher(choicesSlice.actions.addOne.match, () => {
+        // update response rules
+      })
       .addMatcher(feedbackSlice.actions.update.match, (state, action) => {
         const part = Maybe.maybe(
           state.find((part) => part.id === action.payload.partId),

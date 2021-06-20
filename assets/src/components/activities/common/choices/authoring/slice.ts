@@ -1,7 +1,8 @@
 import { createEntityAdapter, createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ChoiceId } from 'data/content/activities/activities';
+import { RootActivityState } from 'components/activities/ActivityContext';
+import { ChoiceId } from 'data/content/activities/activity';
+import { HasChoices, IChoice } from 'data/content/activities/choice';
 import { addOne, removeOne, setAll, updateOne } from '../../reduxUtils';
-import { HasChoices, IChoice } from '../types';
 
 // export const adapter = createEntityAdapter<IChoice>();
 // export type ChoicesState = ReturnType<typeof adapter.getInitialState>;
@@ -23,7 +24,7 @@ export const choicesSlice = createSlice({
 });
 
 // SELECTORS
-const selectState = (state: HasChoices) => state[choicesSlice.name];
+const selectState = (state: HasChoices) => state.choices;
 // export const selectAllChoices = createSelector(selectState, (state) => state);
 // export const selectChoiceById = (state: HasChoices, id: ChoiceId) =>
 //   selectAllChoices(state).find((choice) => choice.id === id);

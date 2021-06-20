@@ -5,7 +5,7 @@ import { Choice } from './choice';
 import { IChoice } from '../types';
 
 interface Props {
-  icon: JSX.Element;
+  icon: React.ReactNode;
 
   choices: IChoice[];
   addOne: () => void;

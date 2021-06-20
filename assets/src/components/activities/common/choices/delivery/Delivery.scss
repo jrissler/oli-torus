@@ -9,7 +9,7 @@
 .choices__choice-row {
   width: 100%;
 }
-.choices__choice-content {
+.choices__choice-wrapper {
   @extend .d-flex;
   align-items: center;
   padding: 0.5em 0.5em 0.5em 0;
@@ -80,4 +80,10 @@
     // border: 2px solid $choice-selected-color;
     // color: $white;
   }
+}
+
+.choices__choice-content {
+  margin-left: 0.6rem;
+  font-size: 14px;
+  line-height: 20px;
 }

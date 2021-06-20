@@ -1,9 +1,9 @@
-import { ChoiceId } from 'components/activities/types';
 import { WriterContext } from 'data/content/writers/context';
 import React from 'react';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import './Delivery.scss';
-import { IChoice } from '../types';
+import { ChoiceId } from 'data/content/activities/activity';
+import { IChoice } from 'data/content/activities/choice';
 
 interface Props {
   choices: IChoice[];
@@ -11,8 +11,8 @@ interface Props {
   context: WriterContext;
   onSelect: (id: ChoiceId) => void;
   isEvaluated: boolean;
-  unselectedIcon: JSX.Element;
-  selectedIcon: JSX.Element;
+  unselectedIcon: React.ReactNode;
+  selectedIcon: React.ReactNode;
 }
 export const Delivery: React.FC<Props> = ({
   choices,
@@ -33,15 +33,13 @@ export const Delivery: React.FC<Props> = ({
           onClick={isEvaluated ? undefined : () => onSelect(choice.id)}
           className={`choices__choice-row ${isSelected(choice.id) ? 'selected' : ''}`}
         >
-          <div className="choices__choice-content">
+          <div className="choices__choice-wrapper">
             <label className="choices__choice-label" htmlFor={`choice-${index}`}>
               <div className="d-flex align-items-center flex-shrink-1">
                 {isSelected(choice.id) ? selectedIcon : unselectedIcon}
-                <HtmlContentModelRenderer
-                  style={{ marginLeft: '0.6rem' }}
-                  text={choice.content}
-                  context={context}
-                />
+                <div className="choices__choice-content">
+                  <HtmlContentModelRenderer text={choice.content} context={context} />
+                </div>
               </div>
             </label>
           </div>

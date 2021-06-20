@@ -2,7 +2,7 @@ import { ProjectSlug, ResourceSlug, ActivitySlug, ResourceId } from 'data/types'
 import { Objective } from 'data/content/objective';
 
 import { ActivityEditorMap } from 'data/content/editors';
-import { ActivityModelSchema } from './activities/activities';
+import { ActivityModelSchema } from './activities/activity';
 
 export interface ObjectiveMap {
   [id: string]: ResourceId[];

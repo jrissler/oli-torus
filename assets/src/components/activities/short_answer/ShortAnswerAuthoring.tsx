@@ -2,13 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AuthoringElement, AuthoringElementProps } from '../AuthoringElement';
 import { ShortAnswerModelSchema, InputType } from './schema';
-import * as ActivityTypes from '../types';
 import { Feedback } from './sections/Feedback';
 import { ShortAnswerActions } from './actions';
 import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { configureStore } from 'state/store';
 import produce from 'immer';
+import { Manifest } from 'data/content/activities/activity';
 
 const store = configureStore();
 
@@ -103,5 +103,5 @@ export class ShortAnswerAuthoring extends AuthoringElement<ShortAnswerModelSchem
   }
 }
 // eslint-disable-next-line
-const manifest = require('./manifest.json') as ActivityTypes.Manifest;
+const manifest = require('./manifest.json') as Manifest;
 window.customElements.define(manifest.authoring.element, ShortAnswerAuthoring);

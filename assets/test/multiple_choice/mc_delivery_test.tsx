@@ -4,8 +4,7 @@ import { defaultState } from 'components/resource/TestModeHandler';
 import { defaultDeliveryElementProps } from '../utils/activity_mocks';
 import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
-import { defaultMCModel } from 'components/activities/multiple_choice/utils';
-import { MultipleChoiceComponent } from 'components/activities/multiple_choice/MultipleChoiceDelivery';
+import { MultipleChoiceComponent } from 'components/activities/multiple_choice/xMultipleChoiceDelivery';
 
 describe('multiple choice delivery', () => {
   it('pass', () => {

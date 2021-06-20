@@ -7,7 +7,7 @@ import {
   PayloadAction,
   Slice,
 } from '@reduxjs/toolkit';
-import { ActivityState } from 'components/activities/types';
+import { ActivityState } from 'data/content/activities/activity';
 import { RootState } from '../../rootReducer';
 
 export interface AttemptState extends EntityState<ActivityState> {

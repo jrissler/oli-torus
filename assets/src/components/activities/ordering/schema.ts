@@ -1,8 +1,9 @@
-import { IPart } from '../common/authoring/parts/types';
-import { ITransformation } from '../common/authoring/transformations/types';
-import { IChoice } from '../common/choices/types';
-import { IStem } from '../common/stem/types';
-import { ActivityModelSchema, ChoiceId, ResponseId } from '../types';
+import { ActivityModelSchema, ChoiceId, ResponseId } from 'data/content/activities/activity';
+import { IChoice } from 'data/content/activities/choice';
+import { IPart } from 'data/content/activities/part';
+import { IStem } from 'data/content/activities/stem';
+import { ITransformation } from 'data/content/activities/transformation';
+import { ResponseMappings } from '../common/authoring/responseChoices/responseChoicesSlice';
 
 export type OrderingModelSchema = SimpleOrdering | TargetedOrdering;
 
@@ -35,4 +36,17 @@ export type TargetedOrdering = BaseOrdering & {
 export interface ModelEditorProps {
   model: OrderingModelSchema;
   editMode: boolean;
+}
+
+export interface OrderingSchema extends ActivityModelSchema {
+  stem: IStem;
+  choices: IChoice[];
+  authoring: {
+    previewText: string;
+    transformations: ITransformation[];
+    parts: IPart[];
+    // Responses don't have a tie to the choices that trigger them,
+    // so we make a relationship table to keep track of the mappings
+    responseMappings: ResponseMappings[];
+  };
 }

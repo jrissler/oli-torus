@@ -2,10 +2,10 @@ import React from 'react';
 import { Heading } from 'components/misc/Heading';
 import { RichTextEditor } from 'components/content/RichTextEditor';
 import { ModelEditorProps } from '../schema';
-import { ChoiceId, RichText } from '../../types';
 import { ProjectSlug } from 'data/types';
 import { ShuffleChoicesOption } from 'components/activities/common/utils';
 import { DeleteButton } from 'components/misc/DeleteButton';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
 
 interface MoveButtonProps {
   choiceId: ChoiceId;

@@ -1,11 +1,10 @@
-import { ActivityModelSchema } from './types';
 import { ProjectSlug } from 'data/types';
 import React, { useContext } from 'react';
 import { ActivityEditorMap } from 'data/content/editors';
+import {  ActivityModelSchema  } from 'data/content/activities/activity';
 
-export const AuthoringElementContext: React.Context<
-  AuthoringElementProps<any> | undefined
-> = React.createContext<AuthoringElementProps<any> | undefined>(undefined);
+export const AuthoringElementContext: React.Context<AuthoringElementProps<any> | undefined> =
+  React.createContext<AuthoringElementProps<any> | undefined>(undefined);
 
 export function useAuthoringElementContext<T>() {
   const context = useContext<AuthoringElementProps<T> | undefined>(AuthoringElementContext);

@@ -7,7 +7,6 @@ import {
   createDefaultStructuredContent,
 } from 'data/content/resource';
 import { activeActivityEntries, ActivityEditorMap, EditorDesc } from 'data/content/editors';
-import { ActivityModelSchema } from 'components/activities/types';
 import { invokeCreationFunc } from 'components/activities/creation';
 import { Objective, ResourceId } from 'data/content/objective';
 import * as Persistence from 'data/persistence/activity';
@@ -23,6 +22,7 @@ const display = (c: any) => (window as any).oliDispatch(modalActions.display(c))
 import { classNames } from 'utils/classNames';
 import { ObjectiveSelection } from 'components/resource/ObjectiveSelection';
 import ModalSelection from 'components/modal/ModalSelection';
+import { ActivityModelSchema } from 'data/content/activities/activity';
 
 type AddCallback = (content: ResourceContent, index: number, a?: Activity) => void;
 
@@ -37,9 +37,7 @@ const promptForObjectiveSelection = (
         onRegisterNewObjective(title).then((objective) => {
           dismiss();
 
-          resolve(
-            Immutable.List<ResourceId>([objective.id]),
-          );
+          resolve(Immutable.List<ResourceId>([objective.id]));
         });
       });
     };

@@ -1,11 +1,14 @@
 import { Dispatch } from '@reduxjs/toolkit';
-import { ChoiceId, RichText } from 'components/activities/types';
+import { RootActivityState } from 'components/activities/ActivityContext';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
+import { HasChoices, IChoice, makeChoice } from 'data/content/activities/choice';
 import { connect } from 'react-redux';
-import { HasChoices, IChoice, makeChoice } from '../types';
 import { choicesSlice, selectAllChoices } from './slice';
 import { Unconnected } from './Unconnected';
 
-const mapStateToProps = (state: HasChoices) => ({ choices: selectAllChoices(state) });
+const mapStateToProps = (state: HasChoices) => ({
+  choices: selectAllChoices(state),
+});
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   addOne: () => dispatch(choicesSlice.actions.addOne(makeChoice(''))),

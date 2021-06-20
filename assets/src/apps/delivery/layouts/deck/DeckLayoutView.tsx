@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import chroma from 'chroma-js';
-import { ActivityState, PartResponse, StudentResponse } from 'components/activities/types';
+import { ActivityState, PartResponse, StudentResponse } from 'data/content/activities/activity';
 import React, { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {

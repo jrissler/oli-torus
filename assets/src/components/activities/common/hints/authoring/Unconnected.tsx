@@ -1,11 +1,11 @@
 import React from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { RichText, HintId } from '../../../types';
 import { RemoveButton } from 'components/misc/RemoveButton';
 import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { Card as CardComponent } from 'components/common/Card';
 import { Tooltip } from 'components/activities/common/authoring/Tooltip';
-import { IHint } from '../types';
+import { HintId, RichText } from 'data/content/activities/activity';
+import { IHint } from 'data/content/activities/hint';
 
 export const Card: React.FC<{
   title: JSX.Element;

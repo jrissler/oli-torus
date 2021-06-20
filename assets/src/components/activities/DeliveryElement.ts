@@ -8,9 +8,9 @@ import {
   PartState,
   StudentResponse,
   Success,
-} from './types';
-import { IHint } from './common/hints/types';
-import { Action } from './common/authoring/parts/types';
+} from 'data/content/activities/activity';
+import { Action } from 'data/content/activities/part';
+import { IHint } from 'data/content/activities/hint';
 
 export interface EvaluationResponse extends Success {
   actions: Action[];

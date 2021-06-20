@@ -1,17 +1,19 @@
 import React from 'react';
-import * as ActivityTypes from '../../types';
 import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
 import { WriterContext } from 'data/content/writers/context';
 import { makeContent } from 'components/activities/common/authoring/utils';
-import { makeFeedback } from '../feedback/types';
+import { ActivityState } from 'data/content/activities/activity';
+import {  makeFeedback  } from 'data/content/activities/feedback';
 
-export const Evaluation = ({
-  attemptState,
-  context,
-}: {
-  attemptState: ActivityTypes.ActivityState;
+interface Props {
+  shouldShow?: boolean;
+  attemptState: ActivityState;
   context: WriterContext;
-}) => {
+}
+export const Evaluation: React.FC<Props> = ({ shouldShow = true, attemptState, context }) => {
+  if (!shouldShow) {
+    return null;
+  }
   const { score, outOf, parts } = attemptState;
   const error = parts[0].error;
   const feedback = parts[0].feedback?.content;

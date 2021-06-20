@@ -1,9 +1,9 @@
 import React from 'react';
-import { RichText } from 'components/activities/types';
+import { RichText } from 'data/content/activities/activity';
 import { ID } from 'data/content/model';
-import { IFeedback } from '../types';
 import { FeedbackCard } from '../common/FeedbackCard';
 import { Tooltip } from '../../authoring/Tooltip';
+import { IFeedback } from 'data/content/activities/feedback';
 
 interface Props {
   correctFeedback: IFeedback;

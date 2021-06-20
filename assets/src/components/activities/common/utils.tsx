@@ -2,8 +2,8 @@ import * as ContentModel from 'data/content/model';
 import guid from 'utils/guid';
 import React from 'react';
 import { isShuffled } from './authoring/utils';
-import { IOperation, ITransformation } from './authoring/transformations/types';
-import {  RichText  } from '../types';;
+import { RichText } from 'data/content/activities/activity';
+import { IOperation, ITransformation } from 'data/content/activities/transformation';
 
 export function fromText(text: string): { id: string; content: RichText } {
   return {

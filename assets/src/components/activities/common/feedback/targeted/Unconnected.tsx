@@ -4,11 +4,11 @@ import { AuthoringButton } from 'components/misc/AuthoringButton';
 import { ID } from 'data/content/model';
 import { ChoiceIdsToResponseId } from 'components/activities/check_all_that_apply/schema_old';
 import { HasTargetedFeedback, TargetedFeedbackEnabled } from './types';
-import { ChoiceId, RichText } from 'components/activities/types';
-import { HasParts } from '../../authoring/parts/types';
-import { IResponse } from '../../authoring/responses/types';
 import { ResponseFeedbackCard } from '../common/ResponseCard';
-import { IChoice } from '../../choices/types';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
+import { HasParts } from 'data/content/activities/part';
+import { IResponse } from 'data/content/activities/response';
+import { IChoice } from 'data/content/activities/choice';
 
 // Choices
 export const getChoiceIds = ([choiceIds]: ChoiceIdsToResponseId) => choiceIds;
@@ -29,16 +29,6 @@ export const getIncorrectResponse = (model: HasTargetedFeedback) =>
   getResponse(model, getResponseId(model.authoring.feedback.incorrect));
 export const getTargetedResponses = (model: TargetedFeedbackEnabled & HasParts) =>
   model.authoring.feedback.targeted.map((assoc) => getResponse(model, getResponseId(assoc)));
-
-// Rules
-export const createRuleForIds = (toMatch: ID[], notToMatch: ID[]) =>
-  unionRules(
-    toMatch.map(createMatchRule).concat(notToMatch.map((id) => invertRule(createMatchRule(id)))),
-  );
-export const createMatchRule = (id: string) => `input like {${id}}`;
-export const invertRule = (rule: string) => `(!(${rule}))`;
-export const unionTwoRules = (rule1: string, rule2: string) => `${rule2} && (${rule1})`;
-export const unionRules = (rules: string[]) => rules.reduce(unionTwoRules);
 
 // Other
 export function setDifference<T>(subtractedFrom: T[], toSubtract: T[]): T[] {

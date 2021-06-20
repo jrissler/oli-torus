@@ -1,7 +1,7 @@
 import { ImageCodingModelSchema } from './schema';
-import { RichText } from 'components/activities/types';
-import {editStem} from '../common/authoring/actions/stem'
-import {addHint, editHint, removeHint} from '../common/authoring/actions/hints'
+import { RichText } from 'data/content/activities/activity';
+import { editStem } from '../common/authoring/actions/stem';
+import { addHint, editHint, removeHint } from '../common/authoring/actions/hints';
 
 export class ICActions {
   static editStem = editStem;

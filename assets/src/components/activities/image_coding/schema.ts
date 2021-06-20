@@ -1,8 +1,7 @@
-
-import { IPart } from '../common/authoring/parts/types';
-import { IFeedback } from '../common/feedback/types';
-import { IStem } from '../common/stem/types';
-import { ActivityModelSchema } from '../types';
+import { ActivityModelSchema } from 'data/content/activities/activity';
+import { IFeedback } from 'data/content/activities/feedback';
+import { IPart } from 'data/content/activities/part';
+import { IStem } from 'data/content/activities/stem';
 
 export interface ImageCodingModelSchema extends ActivityModelSchema {
   stem: IStem;

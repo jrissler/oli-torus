@@ -1,8 +1,7 @@
-import { HintId, ResponseId } from 'components/activities/types';
-import { ID, Identifiable } from 'data/content/model';
-import { FeedbackAction, FeedbackActionDesc } from '../../feedback/types';
-import { IHint } from '../../hints/types';
-import { IResponse } from '../responses/types';
+import { Identifiable } from '../model';
+import { FeedbackAction, FeedbackActionDesc } from './feedback';
+import { IHint } from './hint';
+import { IResponse } from './response';
 
 export interface NavigationActionCore {
   to: string;
@@ -57,10 +56,4 @@ export interface HasParts {
   authoring: {
     parts: IPart[];
   };
-}
-export interface UIPart extends Identifiable {
-  responses: ResponseId[];
-  outcomes?: ConditionalOutcome[];
-  hints: HintId[];
-  scoringStrategy: ScoringStrategy;
 }

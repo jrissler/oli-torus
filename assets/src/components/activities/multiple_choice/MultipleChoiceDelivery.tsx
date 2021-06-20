@@ -1,215 +1,116 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import {
-  DeliveryElement,
-  DeliveryElementProps,
-  EvaluationResponse,
-  RequestHintResponse,
-  ResetActivityResponse,
-} from '../DeliveryElement';
-import { MultipleChoiceModelSchema } from './schema';
-import * as ActivityTypes from '../types';
-import { HtmlContentModelRenderer } from 'data/content/writers/renderer';
-import { Maybe } from 'tsmonad';
-import { Reset } from '../common/delivery/Reset';
+import { DeliveryElement, DeliveryElementProps } from '../DeliveryElement';
+import { MCSchema } from './schema';
+import { ResetButton } from '../common/delivery/ResetButton';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
-import { defaultWriterContext, WriterContext } from 'data/content/writers/context';
+import { defaultWriterContext } from 'data/content/writers/context';
 import { Hints } from '../common/hints';
 import { Stem } from '../common/stem';
-import { IChoice } from '../common/choices/types';
-import { FeedbackAction } from '../common/feedback/types';
+import { Manifest, RichText } from 'data/content/activities/activity';
+import { Choices } from '../common/choices';
+import {
+  isEvaluated,
+  requestHint,
+  reset,
+  selectChoice,
+  submit,
+  slice,
+  initializeState,
+  ActivityDeliveryState,
+} from '../../../data/state/state';
+import { GradedPoints } from '../check_all_that_apply/delivery/components/GradedPoints';
+import { Radio } from '../common/authoring/icons/radio/Radio';
+import { SubmitButton } from '../check_all_that_apply/delivery/components/SubmitButton';
+import { configureStore } from 'state/store';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 
-type Evaluation = {
-  score: number;
-  outOf: number;
-  feedback: ActivityTypes.RichText;
-};
+export const store = configureStore({}, slice.reducer, 'CATA Delivery');
 
-interface ChoicesProps {
-  choices: IChoice[];
-  selected: Maybe<string>;
-  context: WriterContext;
-  onSelect: (id: string) => void;
-  isEvaluated: boolean;
-}
+export const MultipleChoiceComponent = (props: DeliveryElementProps<MCSchema>) => {
+  const state = useSelector((state: ActivityDeliveryState & any) => state);
+  const dispatch = useDispatch();
 
-const Choices = ({ choices, selected, context, onSelect, isEvaluated }: ChoicesProps) => {
-  return (
-    <div className="choices" aria-label="multiple choice choices">
-      {choices.map((choice, index) => (
-        <Choice
-          key={choice.id}
-          onClick={() => onSelect(choice.id)}
-          selected={selected.valueOr('') === choice.id}
-          choice={choice}
-          context={context}
-          isEvaluated={isEvaluated}
-          index={index}
-        />
-      ))}
-    </div>
-  );
-};
+  useEffect(() => {
+    dispatch(initializeState(props.model, props.state));
+  }, []);
 
-interface ChoiceProps {
-  choice: IChoice;
-  index: number;
-  selected: boolean;
-  context: WriterContext;
-  onClick: () => void;
-  isEvaluated: boolean;
-}
+  if (!state.model) {
+    return null;
+  }
 
-const Choice = ({ choice, index, selected, context, onClick, isEvaluated }: ChoiceProps) => {
-  return (
-    <div
-      key={choice.id}
-      aria-label={`choice ${index + 1}`}
-      onClick={isEvaluated ? undefined : onClick}
-      className={`choice ${selected ? 'selected' : ''}`}
-    >
-      <span className="choice-index">{index + 1}</span>
-      <HtmlContentModelRenderer text={choice.content} context={context} />
-    </div>
-  );
-};
-
-export const MultipleChoiceComponent = (props: DeliveryElementProps<MultipleChoiceModelSchema>) => {
-  const [model, setModel] = useState(props.model);
-  const [attemptState, setAttemptState] = useState(props.state);
-  const [hints, setHints] = useState(props.state.parts[0].hints);
-  const [hasMoreHints, setHasMoreHints] = useState(props.state.parts[0].hasMoreHints);
-  const [selected, setSelected] = useState(
-    props.state.parts[0].response === null
-      ? Maybe.nothing<string>()
-      : Maybe.just<string>((props.state.parts[0].response as any).input),
-  );
-
-  const { stem, choices } = model;
-
-  const isEvaluated = attemptState.score !== null;
+  const {
+    attemptState,
+    model: { stem, choices },
+    selectedChoices,
+    hints,
+    hasMoreHints,
+  } = state;
 
   const writerContext = defaultWriterContext({ sectionSlug: props.sectionSlug });
 
-  const onSelect = (id: string) => {
-    // Update local state
-    setSelected(Maybe.just<string>(id));
-
-    if (props.graded) {
-      // In summative context, post the student response to save it
-      props.onSaveActivity(attemptState.attemptGuid, [
-        { attemptGuid: attemptState.parts[0].attemptGuid, response: { input: id } },
-      ]);
-    } else {
-      // Auto-submit our student reponse in formative context
-      props
-        .onSubmitActivity(attemptState.attemptGuid, [
-          { attemptGuid: attemptState.parts[0].attemptGuid, response: { input: id } },
-        ])
-        .then((response: EvaluationResponse) => {
-          if (response.actions.length > 0) {
-            const action: FeedbackAction = response.actions[0] as FeedbackAction;
-
-            const { score, out_of, feedback, error } = action;
-            const parts = [Object.assign({}, attemptState.parts[0], { feedback, error })];
-            const updated = Object.assign({}, attemptState, { score, outOf: out_of, parts });
-            setAttemptState(updated);
-          }
-        });
-    }
-  };
-
-  const onRequestHint = () => {
-    props
-      .onRequestHint(attemptState.attemptGuid, attemptState.parts[0].attemptGuid)
-      .then((state: RequestHintResponse) => {
-        if (state.hint !== undefined) {
-          setHints([...hints, state.hint] as any);
-        }
-        setHasMoreHints(state.hasMoreHints);
-      });
-  };
-
-  const onReset = () => {
-    props.onResetActivity(attemptState.attemptGuid).then((state: ResetActivityResponse) => {
-      setSelected(Maybe.nothing<string>());
-      setAttemptState(state.attemptState);
-      setModel(state.model as MultipleChoiceModelSchema);
-      setHints([]);
-      setHasMoreHints(props.state.parts[0].hasMoreHints);
-    });
-  };
-
-  const evaluationSummary = isEvaluated ? (
-    <Evaluation key="evaluation" attemptState={attemptState} context={writerContext} />
-  ) : null;
-
-  const reset =
-    isEvaluated && !props.graded ? (
-      <div className="d-flex my-3">
-        <div className="flex-fill"></div>
-        <Reset hasMoreAttempts={attemptState.hasMoreAttempts} onClick={onReset} />
-      </div>
-    ) : null;
-
-  const ungradedDetails = props.graded
-    ? null
-    : [
-        evaluationSummary,
-        <Hints.Delivery
-          key="hints"
-          onClick={onRequestHint}
-          hints={hints}
-          hasMoreHints={hasMoreHints}
-          isEvaluated={isEvaluated}
-          context={writerContext}
-        />,
-      ];
-
-  const gradedDetails = props.graded && props.review ? [evaluationSummary] : null;
-
-  const correctnessIcon = attemptState.score === 0 ? <IconIncorrect /> : <IconCorrect />;
-
-  const gradedPoints =
-    props.graded && props.review
-      ? [
-          <div key="correct" className="text-info font-italic">
-            {correctnessIcon}
-            <span>Points: </span>
-            <span>{attemptState.score + ' out of ' + attemptState.outOf}</span>
-          </div>,
-        ]
-      : null;
-
   return (
-    <div className={`activity multiple-choice-activity ${isEvaluated ? 'evaluated' : ''}`}>
+    <div className={`activity cata-activity ${isEvaluated(state) ? 'evaluated' : ''}`}>
       <div className="activity-content">
         <Stem.Delivery stem={stem} context={writerContext} />
-        {gradedPoints}
-        <Choices
+        <GradedPoints
+          shouldShow={props.graded && props.review}
+          icon={attemptState.score === 0 ? <IconIncorrect /> : <IconCorrect />}
+          attemptState={attemptState}
+        />
+        <Choices.Delivery
+          unselectedIcon={<Radio.Unchecked />}
+          selectedIcon={<Radio.Checked />}
           choices={choices}
-          selected={selected}
-          onSelect={onSelect}
-          isEvaluated={isEvaluated}
+          selected={selectedChoices}
+          onSelect={(id) => dispatch(selectChoice(id, props.onSaveActivity))}
+          isEvaluated={isEvaluated(state)}
           context={writerContext}
         />
-        {ungradedDetails}
-        {gradedDetails}
+        <ResetButton
+          shouldShow={isEvaluated(state) && !props.graded}
+          disabled={!attemptState.hasMoreAttempts}
+          onClick={() => dispatch(reset(props.onResetActivity))}
+        />
+        <SubmitButton
+          shouldShow={!isEvaluated(state) && !props.graded}
+          disabled={selectedChoices.length === 0}
+          onClick={() => dispatch(submit(props.onSubmitActivity))}
+        />
+        <Hints.Delivery
+          shouldShow={!isEvaluated(state) && !props.graded}
+          key="hints"
+          onClick={() => dispatch(requestHint(props.onRequestHint))}
+          hints={hints}
+          hasMoreHints={hasMoreHints}
+          isEvaluated={isEvaluated(state)}
+          context={writerContext}
+        />
+        <Evaluation
+          shouldShow={isEvaluated(state) && (!props.graded || props.review)}
+          key="evaluation"
+          attemptState={attemptState}
+          context={writerContext}
+        />
       </div>
-      {reset}
     </div>
   );
 };
 
 // Defines the web component, a simple wrapper over our React component above
-export class MultipleChoiceDelivery extends DeliveryElement<MultipleChoiceModelSchema> {
-  render(mountPoint: HTMLDivElement, props: DeliveryElementProps<MultipleChoiceModelSchema>) {
-    ReactDOM.render(<MultipleChoiceComponent {...props} />, mountPoint);
+export class MultipleChoiceDelivery extends DeliveryElement<MCSchema> {
+  render(mountPoint: HTMLDivElement, props: DeliveryElementProps<MCSchema>) {
+    ReactDOM.render(
+      <Provider store={store}>
+        <MultipleChoiceComponent {...props} />
+      </Provider>,
+      mountPoint,
+    );
   }
 }
 
 // Register the web component:
 // eslint-disable-next-line
-const manifest = require('./manifest.json') as ActivityTypes.Manifest;
+const manifest = require('./manifest.json') as Manifest;
 window.customElements.define(manifest.delivery.element, MultipleChoiceDelivery);

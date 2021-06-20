@@ -8,6 +8,7 @@ import {
 import { HasTransformations } from 'components/activities/common/authoring/transformations/types';
 import { selectAllTransformations } from 'components/activities/common/authoring/transformations/slice';
 import { HasResponseMappings } from 'components/activities/common/authoring/responseChoices/responseChoicesSlice';
+import { RootActivityState } from 'components/activities/ActivityContext';
 
 const toggleAnswerChoiceShuffling = createAction<void>('settings/toggleAnswerChoiceShuffling');
 const toggleTargetedFeedback = createAction<void>('settings/toggleTargetedFeedback');

@@ -4,7 +4,7 @@ import { ModalDisplay } from 'components/modal/ModalDisplay';
 import { Provider } from 'react-redux';
 import { Maybe } from 'tsmonad';
 import { configureStore } from 'state/store';
-import { State } from 'state/index';
+import { initState, State } from 'state/index';
 
 export function defineApplication<T extends State>(Component: React.FunctionComponent<any>) {
   // TODO, allow a customized, per app state (both initial state and collection of reducers)
@@ -43,7 +43,7 @@ export function defineApplication<T extends State>(Component: React.FunctionComp
 
   (window as any).store = {
     configureStore: (json: any) => {
-      store = configureStore(json);
+      store = configureStore(initState(json));
     },
   };
 

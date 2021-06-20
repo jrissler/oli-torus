@@ -3,32 +3,9 @@ import { IResponse, makeResponse } from '../common/authoring/responses/types';
 import { HasChoices, IChoice, makeChoice } from '../common/choices/types';
 import { makeHint } from '../common/hints/types';
 import { makeStem } from '../common/stem/types';
-import { MultipleChoiceModelSchema } from './schema';
+import { MCSchema } from './schema';
 
-export const defaultMCModel: () => MultipleChoiceModelSchema = () => {
-  const choiceA = makeChoice('Choice A');
-  const choiceB = makeChoice('Choice B');
 
-  return {
-    stem: makeStem(''),
-    choices: [choiceA, choiceB],
-    authoring: {
-      parts: [
-        {
-          id: '1', // an MCQ only has one part, so it is safe to hardcode the id
-          scoringStrategy: ScoringStrategy.average,
-          responses: [
-            makeResponse(`input like {${choiceA.id}}`, 1, ''),
-            makeResponse(`input like {${choiceB.id}}`, 0, ''),
-          ],
-          hints: [makeHint(''), makeHint(''), makeHint('')],
-        },
-      ],
-      transformations: [],
-      previewText: '',
-    },
-  };
-};
 
 const isCorrect = (response: IResponse) => response.score === 1;
 

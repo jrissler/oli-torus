@@ -1,7 +1,7 @@
 import React from 'react';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { IStem } from '../types';
-import { RichText } from 'components/activities/types';
+import { RichText } from 'data/content/activities/activity';
+import { IStem } from 'data/content/activities/stem';
 
 interface Props {
   stem: IStem;

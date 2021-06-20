@@ -17,8 +17,8 @@
 export { OrderingDelivery } from './OrderingDelivery';
 export { OrderingAuthoring } from './OrderingAuthoring';
 
+import { CreationContext, Manifest } from 'data/content/activities/activity';
 // Registers the creation function:
-import { Manifest, CreationContext } from '../types';
 import { registerCreationFunc } from '../creation';
 import { OrderingModelSchema } from './schema';
 import { defaultOrderingModel } from './utils';

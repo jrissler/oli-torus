@@ -1,5 +1,12 @@
 import { Action, createSlice } from '@reduxjs/toolkit';
-import { HasTransformations, IOperation, ITransformation, makeTransformation } from './types';
+import { RootState } from 'apps/delivery/store/rootReducer';
+import { RootActivityState } from 'components/activities/ActivityContext';
+import {
+  HasTransformations,
+  IOperation,
+  ITransformation,
+  makeTransformation,
+} from 'data/content/activities/transformation';
 
 type State = ITransformation[];
 export const transformationsSlice = createSlice({

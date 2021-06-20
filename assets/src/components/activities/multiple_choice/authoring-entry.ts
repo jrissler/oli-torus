@@ -14,19 +14,18 @@
 //    full control over populating a new activity.
 
 // Fulfills 1. and 2. from above by exporting these components:
-export { MultipleChoiceDelivery } from './MultipleChoiceDelivery';
+export { MultipleChoiceDelivery } from './xMultipleChoiceDelivery';
 export { MultipleChoiceAuthoring } from './MultipleChoiceAuthoring';
 
+import { CreationContext, Manifest } from 'data/content/activities/activity';
 // Registers the creation function:
-import { Manifest, CreationContext } from '../types';
 import { registerCreationFunc } from '../creation';
-import { MultipleChoiceModelSchema } from './schema';
-import { defaultMCModel } from './utils';
+import { defaultMCModel, MCSchema } from './schema';
 
 // eslint-disable-next-line
 const manifest: Manifest = require('./manifest.json');
 
-function createFn(context: CreationContext): Promise<MultipleChoiceModelSchema> {
+function createFn(context: CreationContext): Promise<MCSchema> {
   return Promise.resolve(Object.assign({}, defaultMCModel()));
 }
 

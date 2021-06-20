@@ -1,7 +1,7 @@
 import React from 'react';
 import { Heading } from 'components/misc/Heading';
 import { RichTextEditor } from 'components/content/RichTextEditor';
-import { MultipleChoiceModelSchema } from '../schema';
+import { MCSchema } from '../schema';
 import { RichText } from '../../types';
 import { Description } from 'components/misc/Description';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
@@ -9,7 +9,7 @@ import { ProjectSlug } from 'data/types';
 import { classNames } from 'utils/classNames';
 
 interface FeedbackProps {
-  model: MultipleChoiceModelSchema;
+  model: MCSchema;
   editMode: boolean;
   onEditResponse: (id: string, content: RichText) => void;
   projectSlug: ProjectSlug;

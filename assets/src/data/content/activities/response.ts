@@ -1,7 +1,7 @@
-import { ResponseId } from 'components/activities/types';
-import { ID, Identifiable } from 'data/content/model';
 import guid from 'utils/guid';
-import { IFeedback, makeFeedback } from '../../feedback/types';
+import { ID, Identifiable } from '../model';
+import { PartId } from './activity';
+import { IFeedback, makeFeedback } from './feedback';
 
 export type IRule = string;
 export interface IResponse extends Identifiable {
@@ -20,7 +20,7 @@ export const makeResponse = (rule: string, score: number, text: ''): IResponse =
 });
 
 export interface UIResponse extends Identifiable {
-  partId: ID;
+  partId: PartId;
   rule: IRule;
   score: number;
   feedback: ID;

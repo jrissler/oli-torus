@@ -1,19 +1,7 @@
-import {
-  createEntityAdapter,
-  createSelector,
-  createSlice,
-  PayloadAction,
-  Update,
-} from '@reduxjs/toolkit';
-import { ResponseId } from 'components/activities/types';
+import { createSlice, PayloadAction, Update } from '@reduxjs/toolkit';
 import { ID } from 'data/content/model';
-import { schema } from 'normalizr';
-import { Maybe } from 'tsmonad';
-import { selectResponseById } from '../authoring/parts/slice';
-import { HasParts } from '../authoring/parts/types';
-import { UIResponse } from '../authoring/responses/types';
 import { update } from '../reduxUtils';
-import { IFeedback, UIFeedback } from './types';
+import { IFeedback } from './types';
 
 export const feedbackSlice = createSlice({
   name: 'feedback',

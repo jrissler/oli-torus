@@ -5,12 +5,10 @@ import {
   PayloadAction,
   Update,
 } from '@reduxjs/toolkit';
-import { HintId } from 'components/activities/types';
 import { ID } from 'data/content/model';
-import { IPart } from '../../authoring/parts/types';
 import { addOne, removeOne, updateOne } from '../../reduxUtils';
-import { HintMappings, IHint, UIHint } from '../types';
-import { omit } from 'ramda';
+import { HintId } from 'data/content/activities/activity';
+import { IHint } from 'data/content/activities/hint';
 
 export const hintsSlice = createSlice({
   name: 'hints',

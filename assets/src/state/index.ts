@@ -16,6 +16,7 @@ type AllActions = ModalActions | MediaActions | PreferencesActions | OtherAction
 
 export type Dispatch = ThunkDispatch<State, void, AllActions>;
 
+export type RootAppState = ReturnType<typeof rootReducer>;
 export const rootReducer = combineReducers<State>({
   media,
   modal,

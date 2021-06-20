@@ -1,19 +1,19 @@
-import { ChoiceId, RichText } from 'components/activities/types';
 import { connect } from 'react-redux';
 import { Unconnected } from './Unconnected';
 import { feedbackSlice } from '../slice';
 import { ID } from 'data/content/model';
 import { selectAllChoices } from '../../choices/authoring/slice';
-import { makeResponse } from '../../authoring/responses/types';
 import { makeEmptyRule } from 'components/activities/ordering/utils';
+import { selectResponseById } from '../../authoring/parts/slice';
+import { responsesSlice } from '../../authoring/responses/slice';
+import { ChoiceId, RichText } from 'data/content/activities/activity';
+import { makeResponse } from 'data/content/activities/response';
+import { HasParts } from 'data/content/activities/part';
 import {
   HasResponseMappings,
   responseMappingSlice,
   selectResponseMappingsByPartId,
 } from '../../authoring/responseChoices/responseChoicesSlice';
-import { selectResponseById } from '../../authoring/parts/slice';
-import { HasParts } from '../../authoring/parts/types';
-import { responsesSlice } from '../../authoring/responses/slice';
 
 export const Connected = connect(
   (state: HasParts & HasResponseMappings, ownProps: { partId: ID }) => {

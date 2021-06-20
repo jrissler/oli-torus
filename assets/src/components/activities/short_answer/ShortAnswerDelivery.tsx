@@ -9,7 +9,7 @@ import {
 } from '../DeliveryElement';
 import { InputType, ShortAnswerModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Reset } from '../common/delivery/Reset';
+import { ResetButton } from '../common/delivery/ResetButton';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { valueOr } from 'utils/common';
 import { IconCorrect, IconIncorrect } from 'components/misc/Icons';
@@ -136,7 +136,7 @@ export const ShortAnswerComponent = (props: DeliveryElementProps<ShortAnswerMode
     isEvaluated && !props.graded ? (
       <div className="d-flex">
         <div className="flex-fill"></div>
-        <Reset hasMoreAttempts={attemptState.hasMoreAttempts} onClick={onReset} />
+        <ResetButton hasMoreAttempts={attemptState.hasMoreAttempts} onClick={onReset} />
       </div>
     ) : null;
 

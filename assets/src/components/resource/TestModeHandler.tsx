@@ -1,9 +1,13 @@
 import React from 'react';
-import { ActivityModelSchema, ClientEvaluation, PartResponse } from 'components/activities/types';
 import * as Persistence from 'data/persistence/activity';
 import { RequestHintResponse } from 'components/activities/DeliveryElement';
 import { removeEmpty } from 'utils/common';
 import produce from 'immer';
+import {
+  ActivityModelSchema,
+  ClientEvaluation,
+  PartResponse,
+} from 'data/content/activities/activity';
 
 export const defaultState = (model: ActivityModelSchema) => {
   const parts = (model.authoring as any).parts.map((p: any) => ({

@@ -1,7 +1,7 @@
-import { ContentItem, ResponseId } from 'components/activities/types';
-import { Identifiable } from 'data/content/model';
-import { IsAction } from '../authoring/parts/types';
-import { makeContent } from '../authoring/utils';
+import { makeContent } from 'components/activities/common/authoring/utils';
+import { Identifiable } from '../model';
+import { ContentItem } from './activity';
+import { IsAction } from './part';
 
 export type IFeedback = ContentItem;
 
@@ -20,5 +20,3 @@ export interface FeedbackAction extends FeedbackActionCore, IsAction {
 }
 
 export const makeFeedback: (text: string) => IFeedback = makeContent;
-
-export type UIFeedback = IFeedback & { responseId: ResponseId };

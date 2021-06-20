@@ -1,11 +1,15 @@
-import { ChoiceId, ContentItem, HintId, ResponseId } from 'components/activities/types';
+import { ChoiceId, ContentItem, HintId, ResponseId } from 'data/content/activities/activity';
+import { HasChoices, IChoice } from 'data/content/activities/choice';
+import { HasHints, IHint } from 'data/content/activities/hint';
+import { HasParts } from 'data/content/activities/part';
+import { IResponse } from 'data/content/activities/response';
+import {
+  HasTransformations,
+  IOperation,
+  ITransformation,
+} from 'data/content/activities/transformation';
 import * as ContentModel from 'data/content/model';
 import guid from 'utils/guid';
-import { HasChoices, IChoice } from '../choices/types';
-import { HasHints, IHint } from '../hints/types';
-import { HasParts } from './parts/types';
-import { IResponse } from './responses/types';
-import { HasTransformations, IOperation, ITransformation } from './transformations/types';
 
 export function makeContent(text: string): ContentItem {
   return {
@@ -30,7 +34,6 @@ export const unsafeGetById = <T extends ContentModel.Identifiable>(slice: T[], i
 // Choices
 export type ChoiceMoveDirection = 'up' | 'down';
 export const getChoice = (schema: HasChoices, id: ChoiceId) =>
-
   unsafeGetById<IChoice>(schema.choices, id);
 export const getChoiceIndex = (model: HasChoices, id: ChoiceId) =>
   model.choices.findIndex((choice) => choice.id === id);

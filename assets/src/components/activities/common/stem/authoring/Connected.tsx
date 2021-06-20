@@ -1,7 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { RichText } from 'data/content/activities/activities';
+import { RootActivityState } from 'components/activities/ActivityContext';
+import { RichText } from 'data/content/activities/activity';
+import { HasStem } from 'data/content/activities/stem';
 import { connect } from 'react-redux';
-import { HasStem } from '../types';
 import { selectStem, stemSlice } from './slice';
 import { Unconnected } from './Unconnected';
 

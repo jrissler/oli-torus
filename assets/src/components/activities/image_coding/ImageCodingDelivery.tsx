@@ -9,7 +9,7 @@ import {
 } from '../DeliveryElement';
 import { ImageCodingModelSchema } from './schema';
 import * as ActivityTypes from '../types';
-import { Reset } from '../common/delivery/Reset';
+import { ResetButton } from '../common/delivery/ResetButton';
 import { Evaluation } from '../common/delivery/Evaluation';
 import { valueOr } from 'utils/common';
 import { Evaluator, EvalContext } from './Evaluator';
@@ -244,7 +244,7 @@ const ImageCoding = (props: ImageCodingDeliveryProps) => {
     isEvaluated && !props.graded ? (
       <div className="d-flex">
         <div className="flex-fill"></div>
-        <Reset hasMoreAttempts={attemptState.hasMoreAttempts} onClick={onReset} />
+        <ResetButton hasMoreAttempts={attemptState.hasMoreAttempts} onClick={onReset} />
       </div>
     ) : null;
 

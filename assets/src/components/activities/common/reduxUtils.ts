@@ -1,8 +1,11 @@
-import { PayloadAction, Update } from '@reduxjs/toolkit';
+import { Update } from '@reduxjs/toolkit';
 import { ID, Identifiable } from 'data/content/model';
+import { Maybe } from 'tsmonad';
 
-export const findById = <Entity extends Identifiable>(state: Entity[], idToFind: ID) =>
-  state.find(({ id }) => id === idToFind);
+export const findById = <Entity extends Identifiable>(state: Entity[], idToFind: string | number) =>
+  Maybe.maybe(state.find(({ id }) => id === idToFind)).valueOrThrow(
+    new Error('findById could not find entity with id ' + idToFind),
+  );
 
 export const addOne = <Entity extends Identifiable>(state: Entity[], entity: Entity) => {
   state.push(entity);
@@ -16,10 +19,7 @@ export const update = <Entity extends Identifiable>(state: Entity, changes: Part
   Object.assign(state, changes);
 
 export const updateOne = <Entity extends Identifiable>(state: Entity[], update: Update<Entity>) => {
-  Object.assign(
-    state.find(({ id }) => id === update.id),
-    update.changes,
-  );
+  Object.assign(findById(state, update.id), update.changes);
 };
 export const removeOne = <Entity extends Identifiable>(state: Entity[], id: ID) => {
   return state.filter((s) => s.id !== id);
