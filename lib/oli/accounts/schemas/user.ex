@@ -7,7 +7,7 @@ defmodule Oli.Accounts.User do
   use PowAssent.Ecto.Schema
 
   use Pow.Extension.Ecto.Schema,
-    extensions: [PowResetPassword, PowEmailConfirmation, PowInvitation]
+    extensions: [PowResetPassword, PowInvitation]
 
   import Ecto.Changeset
   import Oli.Utils
@@ -103,8 +103,7 @@ defmodule Oli.Accounts.User do
       :independent_learner,
       :research_opt_out,
       :state,
-      :locked_at,
-      :email_confirmed_at
+      :locked_at
     ])
     |> validate_required_if([:email], &is_independent_learner_not_guest/1)
     |> unique_constraint(:email, name: :users_email_independent_learner_index)

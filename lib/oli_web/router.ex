@@ -159,7 +159,7 @@ defmodule OliWeb.Router do
   end
 
   pipeline :registration_captcha do
-    plug(Oli.Plugs.RegistrationCaptcha)
+    # plug(Oli.Plugs.RegistrationCaptcha)
   end
 
   pipeline :pow_email_layout do

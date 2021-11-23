@@ -22,7 +22,7 @@ defmodule OliWeb.DeliveryController do
     ContextRoles.get_role(:context_instructor)
   ]
 
-  plug(Oli.Plugs.RegistrationCaptcha when action in [:process_create_and_link_account_user])
+  # plug(Oli.Plugs.RegistrationCaptcha when action in [:process_create_and_link_account_user])
 
   def index(conn, _params) do
     user = conn.assigns.current_user

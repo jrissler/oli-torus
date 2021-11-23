@@ -7,7 +7,7 @@ defmodule Oli.Accounts.Author do
   use PowAssent.Ecto.Schema
 
   use Pow.Extension.Ecto.Schema,
-    extensions: [PowResetPassword, PowEmailConfirmation, PowInvitation]
+    extensions: [PowResetPassword, PowInvitation]
 
   import Ecto.Changeset
   import Oli.Utils
@@ -59,8 +59,7 @@ defmodule Oli.Accounts.Author do
       :family_name,
       :picture,
       :system_role_id,
-      :locked_at,
-      :email_confirmed_at
+      :locked_at
     ])
     |> cast_embed(:preferences)
     |> default_system_role()
