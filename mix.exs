@@ -60,7 +60,7 @@ defmodule Oli.MixProject do
 
   defp elixirc_options(:dev), do: []
   defp elixirc_options(:test), do: []
-  defp elixirc_options(_), do: [warnings_as_errors: true]
+  defp elixirc_options(_), do: []
 
   # Specifies your project dependencies.
   #
