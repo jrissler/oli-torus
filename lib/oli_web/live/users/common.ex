@@ -9,7 +9,7 @@ defmodule OliWeb.Users.Common do
 
   def render_email_column(
         assigns,
-        %{email: email, email_confirmed_at: email_confirmed_at, locked_at: locked_at} = row,
+        %{email: email, locked_at: locked_at} = row,
         _
       ) do
     checkmark =
@@ -18,19 +18,11 @@ defmodule OliWeb.Users.Common do
           nil
 
         _ ->
-          if email_confirmed_at == nil do
-            ~F"""
-            <span data-toggle="tooltip" data-html="true" title={"<b>Confirmation Pending</b> sent to #{email}"}>
-              <i class="las la-paper-plane text-secondary"></i>
-            </span>
-            """
-          else
-            ~F"""
-            <span data-toggle="tooltip" data-html="true" title={"<b>Email Confirmed</b> on #{Timex.format!(email_confirmed_at, "{YYYY}-{M}-{D}")}"}>
-              <i class="las la-check text-success"></i>
-            </span>
-            """
-          end
+          ~F"""
+          <span data-toggle="tooltip" data-html="true" title="<b>Email Confirmed</b>">
+            <i class="las la-check text-success"></i>
+          </span>
+          """
       end
 
     ~F"""
