@@ -124,7 +124,7 @@ defmodule OliWeb.Users.AuthorsDetailView do
 
     user =
       socket.assigns.user
-      |> Author.noauth_changeset(%{email_confirmed_at: email_confirmed_at})
+      |> Author.noauth_changeset(%{})
       |> Repo.update!()
 
     {:noreply,

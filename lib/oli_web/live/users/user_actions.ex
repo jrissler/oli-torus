@@ -28,13 +28,6 @@ defmodule OliWeb.Users.Actions do
           <input type="hidden" name="id" value={@user.id} />
         </form>
 
-        {#if is_nil(@user.email_confirmed_at)}
-          <button type="submit" class="btn btn-primary" form={"resend-confirmation-#{@user.id}"}>Resend confirmation link</button>
-          <button class="btn btn-primary" phx-click="show_confirm_email_modal" phx-value-id={@user.id}>Confirm email</button>
-
-          <div class="dropdown-divider"></div>
-        {/if}
-
         {#if @for_author}
           {#if @user.system_role_id == SystemRole.role_id().admin}
             <button class="btn btn-warning" phx-click="show_revoke_admin_modal" phx-value-id={@user.id}>Revoke admin</button>

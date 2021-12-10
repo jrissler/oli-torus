@@ -70,7 +70,6 @@ defmodule OliWeb.Users.UsersDetailView do
           <ReadOnly label="Guest" value={boolean(@user.guest)}/>
           <ReadOnly label="Independent Learner" value={boolean(@user.independent_learner)}/>
           <ReadOnly label="Research Opt Out" value={boolean(@user.research_opt_out)}/>
-          <ReadOnly label="Email Confirmed" value={date(@user.email_confirmed_at)}/>
           <ReadOnly label="Created" value={date(@user.inserted_at)}/>
           <ReadOnly label="Last Updated" value={date(@user.updated_at)}/>
 
@@ -108,7 +107,7 @@ defmodule OliWeb.Users.UsersDetailView do
 
     user =
       socket.assigns.user
-      |> Oli.Accounts.User.noauth_changeset(%{email_confirmed_at: email_confirmed_at})
+      |> Oli.Accounts.User.noauth_changeset(%{})
       |> Repo.update!()
 
     {:noreply,
