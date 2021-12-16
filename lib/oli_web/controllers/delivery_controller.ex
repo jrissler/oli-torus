@@ -462,27 +462,28 @@ defmodule OliWeb.DeliveryController do
       Oli.Utils.Recaptcha.verify(g_recaptcha_response) == {:success, true}
   end
 
-  def create_user(conn, %{"g-recaptcha-response" => g_recaptcha_response}) do
-    if Oli.Utils.LoadTesting.enabled?() or recaptcha_verified?(g_recaptcha_response) do
-      section = conn.assigns.section
+  def create_user(conn, _) do
+    # if Oli.Utils.LoadTesting.enabled?() or recaptcha_verified?(g_recaptcha_response) do
+    section = conn.assigns.section
 
-      case current_or_guest_user(conn) do
-        {:ok, user} ->
-          Accounts.update_user_platform_roles(user, [
-            PlatformRoles.get_role(:institution_learner)
-          ])
+    case current_or_guest_user(conn) do
+      {:ok, user} ->
+        Accounts.update_user_platform_roles(user, [
+          PlatformRoles.get_role(:institution_learner)
+        ])
 
-          conn
-          |> OliWeb.Pow.PowHelpers.use_pow_config(:user)
-          |> Pow.Plug.create(user)
-          |> redirect(to: Routes.page_delivery_path(conn, :index, section.slug))
+        conn
+        |> OliWeb.Pow.PowHelpers.use_pow_config(:user)
+        |> Pow.Plug.create(user)
+        |> redirect(to: Routes.page_delivery_path(conn, :index, section.slug))
 
-        {:error, _} ->
-          render(conn, "enroll.html", error: "Something went wrong, please try again")
-      end
-    else
-      render(conn, "enroll.html", error: "ReCaptcha failed, please try again")
+      {:error, _} ->
+        render(conn, "enroll.html", error: "Something went wrong, please try again")
     end
+
+    # else
+    #   render(conn, "enroll.html", error: "ReCaptcha failed, please try again")
+    # end
   end
 
   defp current_or_guest_user(conn) do
