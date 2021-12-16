@@ -115,7 +115,6 @@ defmodule OliWeb.Users.UsersDetailView do
             </section>
 
             <ReadOnly label="Research Opt Out" value={boolean(@user.research_opt_out)}/>
-            <ReadOnly label="Email Confirmed" value={date(@user.email_confirmed_at)}/>
             <ReadOnly label="Created" value={date(@user.inserted_at)}/>
             <ReadOnly label="Last Updated" value={date(@user.updated_at)}/>
             <Submit class="float-right btn btn-md btn-primary mt-2">Save</Submit>
