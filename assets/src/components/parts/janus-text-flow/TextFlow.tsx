@@ -101,6 +101,16 @@ const TextFlow: React.FC<PartComponentProps<TextFlowModel>> = (props: any) => {
   const [scriptEnv, setScriptEnv] = useState<any>();
   const id: string = props.id;
 
+  const handleStylingChanges = () => {
+    const styleChanges: any = {};
+    if (width !== undefined) {
+      styleChanges.width = { value: width as number };
+    }
+    if (height != undefined && props.model.overrideHeight) {
+      styleChanges.height = { value: height as number };
+    }
+    props.onResize({ id: `${id}`, settings: styleChanges });
+  };
   const initialize = useCallback(async (pModel) => {
     // set defaults
 
@@ -118,7 +128,7 @@ const TextFlow: React.FC<PartComponentProps<TextFlowModel>> = (props: any) => {
       const flowEnv = new Environment(initResult.env);
       setScriptEnv(flowEnv);
     }
-
+    handleStylingChanges();
     setReady(true);
   }, []);
 
@@ -222,10 +232,6 @@ const TextFlow: React.FC<PartComponentProps<TextFlowModel>> = (props: any) => {
         bgColor = chroma(palette.fillColor || 0)
           .alpha(palette.fillAlpha || 0)
           .css();
-        // rgb(255,255,255)' means it's transparent so instead of rgb, we need to use 'rgba'. SS does the same. 'rgb' make it white brackground on the screen
-        if (bgColor === 'rgb(255,255,255)') {
-          bgColor = 'rgba(255,255,255,0)';
-        }
       }
       styles.backgroundColor = bgColor;
     }

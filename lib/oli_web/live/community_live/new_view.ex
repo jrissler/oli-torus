@@ -3,7 +3,7 @@ defmodule OliWeb.CommunityLive.NewView do
 
   alias Oli.Groups
   alias Oli.Groups.Community
-  alias OliWeb.Common.{Breadcrumb, FormContainer}
+  alias OliWeb.Common.{Breadcrumb, FormContainer, Params}
   alias OliWeb.CommunityLive.{Form, IndexView}
   alias OliWeb.Router.Helpers, as: Routes
 
@@ -37,10 +37,14 @@ defmodule OliWeb.CommunityLive.NewView do
   end
 
   def handle_event("save", %{"community" => params}, socket) do
-    case Groups.create_community(params) do
+    socket = clear_flash(socket)
+
+    case Groups.create_community(Params.trim(params)) do
       {:ok, _community} ->
-        socket = put_flash(socket, :info, "Community succesfully created.")
-        {:noreply, assign(socket, community: Groups.change_community(%Community{}))}
+        {:noreply,
+         socket
+         |> put_flash(:info, "Community successfully created.")
+         |> push_redirect(to: Routes.live_path(OliWeb.Endpoint, IndexView))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         socket =
