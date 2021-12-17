@@ -150,7 +150,6 @@ defmodule Oli.Accounts.User do
       :research_opt_out,
       :state,
       :locked_at,
-      :email_confirmation_token,
       :can_create_sections
     ])
     |> validate_required_if([:email], &is_independent_learner_not_guest/1)
