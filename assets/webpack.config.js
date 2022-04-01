@@ -4,9 +4,11 @@ const path = require('path');
 const glob = require('glob');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const globImporter = require('node-sass-glob-importer');
-const TerserPlugin = require('terser-webpack-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
+const MONACO_DIR = path.resolve(__dirname, './node_modules/monaco-editor');
 
 // Determines the entry points for the webpack by looking at activity
 // implementations in src/components/activities folder
@@ -94,9 +96,9 @@ const populateEntries = () => {
   if (
     Object.keys(merged).length !=
     Object.keys(initialEntries).length +
-      2 * foundActivities.length +
-      2 * foundParts.length +
-      foundThemes.length
+    2 * foundActivities.length +
+    2 * foundParts.length +
+    foundThemes.length
   ) {
     throw new Error(
       'Encountered a possible naming collision in activity or part manifests. Aborting.',
@@ -124,7 +126,7 @@ module.exports = (env, options) => ({
   devtool: 'source-map',
   optimization: {
     minimize: process.env.NODE_ENV == 'production',
-    minimizer: [new TerserPlugin()],
+    minimizer: [new ESBuildMinifyPlugin({ css: true })],
   },
   entry: populateEntries(),
   output: {
@@ -132,7 +134,7 @@ module.exports = (env, options) => ({
     libraryTarget: 'umd',
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss', '.css', '.ttf'],
     // Add webpack aliases for top level imports
     alias: {
       components: path.resolve(__dirname, 'src/components'),
@@ -153,9 +155,9 @@ module.exports = (env, options) => ({
         test: /\.js(x?)$/,
         include: path.resolve(__dirname, 'src'),
         use: {
-          loader: 'babel-loader',
+          loader: 'esbuild-loader',
           options: {
-            cache: true,
+            loader: 'jsx',
           },
         },
       },
@@ -164,16 +166,26 @@ module.exports = (env, options) => ({
         include: path.resolve(__dirname, 'src'),
         use: [
           {
-            loader: 'babel-loader',
+            loader: 'esbuild-loader',
             options: {
-              cacheDirectory: true,
+              loader: 'tsx',
             },
           },
-          { loader: 'ts-loader' },
         ],
       },
       {
+        test: /\.css$/,
+        include: MONACO_DIR,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.ttf$/,
+        include: MONACO_DIR,
+        use: ['file-loader']
+      },
+      {
         test: /\.[s]?css$/,
+        exclude: MONACO_DIR,
         use: [
           MiniCssExtractPlugin.loader,
           {
@@ -204,5 +216,6 @@ module.exports = (env, options) => ({
   plugins: [
     new MiniCssExtractPlugin({ filename: '../css/[name].css' }),
     new CopyWebpackPlugin({ patterns: [{ from: 'static/', to: '../' }] }),
+    new MonacoWebpackPlugin(),
   ],
 });

@@ -6,6 +6,7 @@ import { Purpose as PurposeType, ResourceContent, StructuredContent } from 'data
 import * as Immutable from 'immutable';
 import { Purpose } from 'components/content/Purpose';
 import { classNames } from 'utils/classNames';
+import { ActivityEditContext } from 'data/content/activity';
 
 const getDescription = (item: ResourceContent) => {
   return item.type === 'content' ? getContentDescription(item) : '';
@@ -50,12 +51,12 @@ export const ContentBlock = (props: ContentBlockProps) => {
 
   return (
     <div
-      className={classNames([
+      className={classNames(
         'content-block',
         'resource-content-frame',
         'card',
         `purpose-${props.contentItem.purpose}`,
-      ])}
+      )}
       draggable={props.editMode}
       onDragStart={(e) => props.onDragStart(e, id)}
       onDragEnd={props.onDragEnd}

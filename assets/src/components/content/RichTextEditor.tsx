@@ -1,22 +1,20 @@
 import { useAuthoringElementContext } from 'components/activities/AuthoringElement';
-import { RichText } from 'components/activities/types';
 import { ErrorBoundary } from 'components/common/ErrorBoundary';
-import { CommandContext } from 'components/editing/commands/interfaces';
+import { CommandContext } from 'components/editing/elements/commands/interfaces';
 import { Editor } from 'components/editing/editor/Editor';
 import { NormalizerContext } from 'components/editing/editor/normalizers/normalizer';
-import { getToolbarForContentType } from 'components/editing/toolbars/insertion/items';
 import { ProjectSlug } from 'data/types';
 import React from 'react';
-import { Editor as SlateEditor, Operation } from 'slate';
-import { ReactEditor } from 'slate-react';
+import { Descendant, Editor as SlateEditor, Operation } from 'slate';
 import { classNames } from 'utils/classNames';
+import { getToolbarForContentType } from 'components/editing/toolbar/utils';
 
 type Props = {
   projectSlug: ProjectSlug;
   editMode: boolean;
   className?: string;
-  value: RichText;
-  onEdit: (value: RichText, editor: SlateEditor & ReactEditor, operations: Operation[]) => void;
+  value: Descendant[];
+  onEdit: (value: Descendant[], editor: SlateEditor, operations: Operation[]) => void;
   placeholder?: string;
   onRequestMedia?: any;
   style?: React.CSSProperties;
@@ -29,7 +27,7 @@ export const RichTextEditor: React.FC<Props> = (props) => {
   const value = (props.value as any).model ? (props.value as any).model : props.value;
 
   return (
-    <div className={classNames(['rich-text-editor', props.className])}>
+    <div className={classNames('rich-text-editor', props.className)}>
       <ErrorBoundary>
         <Editor
           normalizerContext={props.normalizerContext}
@@ -37,10 +35,10 @@ export const RichTextEditor: React.FC<Props> = (props) => {
           editMode={props.editMode}
           value={value}
           onEdit={(value, editor, operations) => props.onEdit(value, editor, operations)}
-          toolbarItems={getToolbarForContentType(
-            props.onRequestMedia,
-            props.preventLargeContent ? 'small' : undefined,
-          )}
+          toolbarInsertDescs={getToolbarForContentType({
+            type: 'small',
+            onRequestMedia: props.onRequestMedia,
+          })}
           placeholder={props.placeholder}
           style={props.style}
         >

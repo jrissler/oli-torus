@@ -7,9 +7,11 @@ import {
   selectReadOnly,
   selectRevisionSlug,
   setShowDiagnosticsWindow,
+  setShowScoringOverview,
 } from '../store/app/slice';
 import AddComponentToolbar from './ComponentToolbar/AddComponentToolbar';
 import ComponentSearchContextMenu from './ComponentToolbar/ComponentSearchContextMenu';
+import UndoRedoToolbar from './ComponentToolbar/UndoRedoToolbar';
 
 interface HeaderNavProps {
   panelState: any;
@@ -38,6 +40,10 @@ const HeaderNav: React.FC<HeaderNavProps> = (props: HeaderNavProps) => {
     dispatch(setShowDiagnosticsWindow({ show: true }));
   };
 
+  const handleScoringOverviewClick = () => {
+    dispatch(setShowScoringOverview({ show: true }));
+  };
+
   return (
     paths && (
       <nav
@@ -51,6 +57,9 @@ const HeaderNav: React.FC<HeaderNavProps> = (props: HeaderNavProps) => {
         }}
       >
         <div className="btn-toolbar" role="toolbar">
+          <div className="btn-group pl-3 align-items-center" role="group" aria-label="Third group">
+            <UndoRedoToolbar />
+          </div>
           <div className="btn-group px-3 border-right align-items-center" role="group">
             <AddComponentToolbar />
             <ComponentSearchContextMenu />
@@ -68,6 +77,24 @@ const HeaderNav: React.FC<HeaderNavProps> = (props: HeaderNavProps) => {
               <span>
                 <button className="px-2 btn btn-link" onClick={() => window.open(url, windowName)}>
                   <img src={`${paths.images}/icons/icon-preview.svg`}></img>
+                </button>
+              </span>
+            </OverlayTrigger>
+            <OverlayTrigger
+              placement="bottom"
+              delay={{ show: 150, hide: 150 }}
+              overlay={
+                <Tooltip id="button-tooltip" style={{ fontSize: '12px' }}>
+                  Scoring Overview
+                </Tooltip>
+              }
+            >
+              <span>
+                <button className="px-2 btn btn-link" onClick={handleScoringOverviewClick}>
+                  <i
+                    className="fa fa-star"
+                    style={{ fontSize: 32, color: '#333', verticalAlign: 'middle' }}
+                  />
                 </button>
               </span>
             </OverlayTrigger>

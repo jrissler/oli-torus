@@ -11,7 +11,8 @@ import { createNew as createNewActivity } from '../../activities/actions/createN
 import { createNew as createNewGroup } from '../../groups/layouts/deck/actions/createNew';
 import { updateActivityPartInheritance } from '../../groups/layouts/deck/actions/updateActivityPartInheritance';
 import { updateActivityRules } from '../../groups/layouts/deck/actions/updateActivityRules';
-import { loadPage, PageSlice, PageState } from '../slice';
+import { loadPage, PageState } from '../slice';
+import PageSlice from '../name';
 import { savePage } from './savePage';
 
 export const initializeFromContext = createAsyncThunk(
@@ -35,6 +36,9 @@ export const initializeFromContext = createAsyncThunk(
     if (!params.context.content.model.length && !pageState.custom.themeId) {
       pageState.custom.themeId = 'torus-default-light';
       pageState.additionalStylesheets = ['/css/delivery_adaptive_themes_default_light.css'];
+    }
+    if (pageState.custom.maxScore === undefined) {
+      pageState.custom.maxScore = pageState.custom.totalScore;
     }
     dispatch(loadPage(pageState));
 
@@ -67,7 +71,7 @@ export const initializeFromContext = createAsyncThunk(
       const { payload: newGroup } = await dispatch(createNewGroup({ children: newSequence }));
 
       // write model to server now or else the above created activity will be orphaned
-      await dispatch(savePage());
+      await dispatch(savePage({ undoable: true }));
 
       pageModel = [newGroup];
     }

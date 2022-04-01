@@ -161,6 +161,16 @@ config :oli, OliWeb.Endpoint,
   secret_key_base: secret_key_base,
   live_view: [signing_salt: live_view_salt]
 
+if System.get_env("SSL_CERT_PATH") && System.get_env("SSL_KEY_PATH") do
+  config :oli, OliWeb.Endpoint,
+    https: [
+      port: 443,
+      otp_app: :oli,
+      keyfile: System.get_env("SSL_CERT_PATH", "priv/ssl/localhost.key"),
+      certfile: System.get_env("SSL_KEY_PATH", "priv/ssl/localhost.crt")
+    ]
+end
+
 # Configure Mnesia directory (used by pow persistent sessions)
 config :mnesia, :dir, to_charlist(System.get_env("MNESIA_DIR", ".mnesia"))
 
@@ -197,6 +207,31 @@ config :oli, :footer,
   link_1_text: System.get_env("FOOTER_LINK_1_TEXT", ""),
   link_2_location: System.get_env("FOOTER_LINK_2_LOCATION", ""),
   link_2_text: System.get_env("FOOTER_LINK_2_TEXT", "")
+
+# Configure if age verification checkbox appears on learner account creation
+config :oli, :age_verification, is_enabled: System.get_env("IS_AGE_VERIFICATION_ENABLED", "")
+
+# Configure libcluster for horizontal scaling
+# Take into account that different strategies could use different config options
+config :libcluster,
+  topologies: [
+    oli: [
+      strategy:
+        Module.concat([System.get_env("LIBCLUSTER_STRATEGY", "ClusterEC2.Strategy.Tags")]),
+      config: [
+        ec2_tagname: System.get_env("LIBCLUSTER_EC2_STRATEGY_TAG_NAME", ""),
+        ec2_tagvalue: System.get_env("LIBCLUSTER_EC2_STRATEGY_TAG_VALUE", "")
+      ]
+    ]
+  ]
+
+config :oli, :auth_providers,
+  google_client_id: System.get_env("GOOGLE_CLIENT_ID", ""),
+  google_client_secret: System.get_env("GOOGLE_CLIENT_SECRET", ""),
+  author_github_client_id: System.get_env("AUTHOR_GITHUB_CLIENT_ID", ""),
+  author_github_client_secret: System.get_env("AUTHOR_GITHUB_CLIENT_SECRET", ""),
+  user_github_client_id: System.get_env("USER_GITHUB_CLIENT_ID", ""),
+  user_github_client_secret: System.get_env("USER_GITHUB_CLIENT_SECRET", "")
 
 # ## Using releases (Elixir v1.9+)
 #

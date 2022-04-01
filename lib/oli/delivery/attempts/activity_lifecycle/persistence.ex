@@ -5,7 +5,8 @@ defmodule Oli.Delivery.Attempts.ActivityLifecycle.Persistence do
   alias Oli.Delivery.Evaluation.Actions.{
     FeedbackActionResult,
     NavigationActionResult,
-    StateUpdateActionResult
+    StateUpdateActionResult,
+    SubmissionActionResult
   }
 
   alias Oli.Delivery.Attempts.Core.PartAttempt
@@ -29,9 +30,24 @@ defmodule Oli.Delivery.Attempts.ActivityLifecycle.Persistence do
   def persist_evaluations({:ok, evaluations}, part_inputs, roll_up_fn) do
     evaluated_inputs = Enum.zip(part_inputs, evaluations)
 
-    case Enum.reduce_while(evaluated_inputs, {:ok, []}, &persist_single_evaluation/2) do
-      {:ok, results} -> roll_up_fn.({:ok, results})
+    case Enum.reduce_while(evaluated_inputs, {:ok, false, []}, &persist_single_evaluation/2) do
+      {:ok, _, results} -> roll_up_fn.({:ok, results})
       error -> error
+    end
+  end
+
+  def persist_evaluations({:ok, evaluations}, part_inputs, roll_up_fn, replace) do
+    case replace do
+      false ->
+        persist_evaluations({:ok, evaluations}, part_inputs, roll_up_fn)
+
+      true ->
+        evaluated_inputs = Enum.zip(part_inputs, evaluations)
+
+        case Enum.reduce_while(evaluated_inputs, {:ok, replace, []}, &persist_single_evaluation/2) do
+          {:ok, _, results} -> roll_up_fn.({:ok, results})
+          error -> error
+        end
     end
   end
 
@@ -40,16 +56,16 @@ defmodule Oli.Delivery.Attempts.ActivityLifecycle.Persistence do
 
   defp persist_single_evaluation(
          {_, {:ok, %NavigationActionResult{} = action_result}},
-         {:ok, results}
+         {:ok, replace, results}
        ) do
-    {:cont, {:ok, results ++ [action_result]}}
+    {:cont, {:ok, replace, results ++ [action_result]}}
   end
 
   defp persist_single_evaluation(
          {_, {:ok, %StateUpdateActionResult{} = action_result}},
-         {:ok, results}
+         {:ok, replace, results}
        ) do
-    {:cont, {:ok, results ++ [action_result]}}
+    {:cont, {:ok, replace, results ++ [action_result]}}
   end
 
   defp persist_single_evaluation(
@@ -60,17 +76,29 @@ defmodule Oli.Delivery.Attempts.ActivityLifecycle.Persistence do
              score: score,
              out_of: out_of
            } = feedback_action}},
-         {:ok, results}
+         {:ok, replace, results}
        ) do
     now = DateTime.utc_now()
 
+    query =
+      from(p in PartAttempt,
+        where: p.attempt_guid == ^attempt_guid
+      )
+
+    query =
+      if replace === false do
+        where(query, [p], is_nil(p.date_evaluated))
+      else
+        query
+      end
+
     case Repo.update_all(
-           from(p in PartAttempt,
-             where: p.attempt_guid == ^attempt_guid and is_nil(p.date_evaluated)
-           ),
+           query,
            set: [
              response: input,
+             lifecycle_state: :evaluated,
              date_evaluated: now,
+             date_submitted: now,
              score: score,
              out_of: out_of,
              feedback: feedback
@@ -80,7 +108,46 @@ defmodule Oli.Delivery.Attempts.ActivityLifecycle.Persistence do
         {:halt, {:error, :error}}
 
       {1, _} ->
-        {:cont, {:ok, results ++ [feedback_action]}}
+        {:cont, {:ok, replace, results ++ [feedback_action]}}
+
+      _ ->
+        {:halt, {:error, :error}}
+    end
+  end
+
+  defp persist_single_evaluation(
+         {%{attempt_guid: attempt_guid, input: input},
+          {:ok, %SubmissionActionResult{} = submission_action}},
+         {:ok, replace, results}
+       ) do
+    now = DateTime.utc_now()
+
+    query =
+      from(p in PartAttempt,
+        where: p.attempt_guid == ^attempt_guid
+      )
+
+    query =
+      if replace === false do
+        where(query, [p], is_nil(p.date_evaluated))
+      else
+        query
+      end
+
+    case Repo.update_all(
+           query,
+           set: [
+             response: input,
+             lifecycle_state: :submitted,
+             date_evaluated: nil,
+             date_submitted: now
+           ]
+         ) do
+      nil ->
+        {:halt, {:error, :error}}
+
+      {1, _} ->
+        {:cont, {:ok, replace, results ++ [submission_action]}}
 
       _ ->
         {:halt, {:error, :error}}

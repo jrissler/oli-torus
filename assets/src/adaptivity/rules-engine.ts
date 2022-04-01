@@ -22,6 +22,7 @@ import {
   evalAssignScript,
   evalScript,
   extractAllExpressionsFromText,
+  getExpressionStringForValue,
   getValue,
   looksLikeJson,
 } from './scripting';
@@ -65,23 +66,21 @@ const applyToEveryCondition = (top: TopLevelCondition | NestedCondition, callbac
 };
 
 const evaluateValueExpression = (value: string, env: Environment) => {
-  let result = value;
-  const looksLikeJSON = looksLikeJson(value);
-  // only if there is {} in it should it be processed, otherwise it's just a string
-  if (value.indexOf('{') === -1 || looksLikeJSON) {
+  if (typeof value !== 'string') {
     return value;
   }
-  // it might be that it's still just a string, if it's a JSON value (TODO, is this really something that would be authored?)
-  // handle {{{q:1498672976730:866|stage.unknownabosrbance.Current Display Value}-{q:1522195641637:1014|stage.slide13_y_intercept.value}}/{q:1498673825305:874|stage.slide13_slope.value}}
-  value = value.replace(/{{{/g, '(({').replace(/{{/g, '({').replace(/}}/g, '})');
-  try {
-    result = evalScript(value, env).result;
-  } catch (e) {
-    // TODO: this currently is good for when math is encountered
-    // should create a "looksLikeMath" check above?? the math that is the problem
-    // *might* always have a ^ in it... not sure...
-    // otherwise any time it fails above for any reason, the value will be treated as a normal string
-    console.warn(`[evaluateValueExpression] Error evaluating ${value} `, e);
+  const expr = getExpressionStringForValue({ type: CapiVariableTypes.STRING, value }, env);
+  let { result } = evalScript(expr, env);
+  if (result === value) {
+    try {
+      const evaluatedValue = evalScript(value, env);
+      const canEval = evaluatedValue?.result !== undefined && !evaluatedValue.result.message;
+      if (canEval) {
+        result = evaluatedValue.result;
+      }
+    } catch (ex) {
+      return result;
+    }
   }
   return result;
 };
@@ -107,30 +106,43 @@ const processRules = (rules: JanusRuleProperties[], env: Environment) => {
           typeof value === 'string' ? evaluateValueExpression(value, env) : value,
         );
       }
-      if (typeof ogValue === 'string') {
-        if (ogValue.indexOf('{') === -1) {
-          modifiedValue = ogValue;
-        } else if (condition?.operator === 'equalWithTolerance') {
-          //Usually the tolerance is 5.28,2 where 5.28 is actual value and 2 is the tolerance so we need to separate the value and send it in evaluateValueExpression()
-          //Also in case the tolerance is not specified and the value is 5.28 only, we need handle it so that it evaluates the actual value otherwise
-          // it will evaluated as ""
-          const actualValue =
-            ogValue.lastIndexOf(',') !== -1
-              ? ogValue.substring(0, ogValue.lastIndexOf(','))
-              : ogValue;
-          const toleranceValue = ogValue.substring(ogValue.lastIndexOf(',') + 1);
-          const evaluatedValue = evaluateValueExpression(actualValue, env);
-          modifiedValue = `${evaluatedValue},${toleranceValue}`;
-        } else {
-          const evaluatedValue = evaluateValueExpression(ogValue, env);
-          if (typeof evaluatedValue === 'string') {
-            //if the converted value is string then we don't have to stringify (e.g. if the evaluatedValue = L and we stringyfy it then the value becomes '"L"' instead if 'L'
-            // hence a trap state checking 'L' === 'L' returns false as the expression becomes 'L' === '"L"')
-            modifiedValue = evaluatedValue;
+      if (
+        condition?.operator === 'equalWithTolerance' ||
+        condition?.operator === 'notEqualWithTolerance'
+      ) {
+        //Usually the tolerance is 5.28,2 where 5.28 is actual value and 2 is the tolerance so we need to separate the value and send it in evaluateValueExpression()
+        //Also in case the tolerance is not specified and the value is 5.28 only, we need handle it so that it evaluates the actual value otherwise
+        // it will evaluated as ""
+        let actualValue = ogValue;
+        let toleranceValue = 0;
+        if (typeof ogValue === 'object') {
+          if (ogValue.length === 2) {
+            actualValue = ogValue[0];
+            toleranceValue = ogValue[1];
           } else {
-            //Need to stringify only if it was converted into object during evaluation process and we expect it to be string
-            modifiedValue = JSON.stringify(evaluateValueExpression(ogValue, env));
+            actualValue = ogValue;
           }
+        } else if (ogValue.lastIndexOf(',') !== -1) {
+          toleranceValue = ogValue.substring(ogValue.lastIndexOf(',') + 1);
+          actualValue = ogValue.substring(0, ogValue.lastIndexOf(','));
+        } else {
+          actualValue = ogValue;
+        }
+        const evaluatedValue = evaluateValueExpression(actualValue, env);
+        modifiedValue = `${evaluatedValue},${toleranceValue}`;
+      } else if (typeof ogValue === 'string' && ogValue.indexOf('{') === -1) {
+        modifiedValue = ogValue;
+      } else {
+        const evaluatedValue = evaluateValueExpression(ogValue, env);
+        if (typeof evaluatedValue === 'string') {
+          //if the converted value is string then we don't have to stringify (e.g. if the evaluatedValue = L and we stringyfy it then the value becomes '"L"' instead if 'L'
+          // hence a trap state checking 'L' === 'L' returns false as the expression becomes 'L' === '"L"')
+          modifiedValue = evaluatedValue;
+        } else if (typeof modifiedValue === 'number') {
+          return modifiedValue;
+        } else if (typeof ogValue === 'string') {
+          //Need to stringify only if it was converted into object during evaluation process and we expect it to be string
+          modifiedValue = JSON.stringify(evaluateValueExpression(ogValue, env));
         }
       }
       //if it type ===3 then it is a array. We need to wrap it in [] if it is not already wrapped.
@@ -291,9 +303,19 @@ export const getReferencedKeysInConditions = (conditions: any) => {
     ) {
       // value could have more than one reference inside it
       const exprs = extractAllExpressionsFromText(condition.value);
+      const expressions = condition.value.match(/{([^{^}]+)}/g);
       exprs.forEach((expr: string) => {
         if (expr.search(/app\.|variables\.|stage\.|session\./) !== -1) {
           references.add(expr);
+        }
+      });
+      expressions.forEach((expr: string) => {
+        if (expr.search(/app\.|variables\.|stage\.|session\./) !== -1) {
+          //we should remove the {}
+          const actualExp = expr.substring(1, expr.length - 1);
+          if (!references.has(actualExp)) {
+            references.add(expr.substring(1, expr.length - 1));
+          }
         }
       });
     }

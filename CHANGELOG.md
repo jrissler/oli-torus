@@ -2,7 +2,25 @@
 
 ## Unreleased
 
-## 0.18.4 (2022-01-11)
+### Bug Fixes
+
+- Fix inability to search in projects and users view
+- Properly handle the case that a section invite link leads to an unavailable section
+- Fix empty hints showing up in delivery mode
+- Fix table styling when words overflow bounds
+
+### Enhancements
+
+- Allow for student-specific gating exceptions
+- Display containers as pages with a table of contents
+- Logic-based gating
+- Allow learning objective attachment to pages
+- Instructor review of completed graded attempts
+- Allow gates to be defined in products
+- Hide subsequent purpose types for activities when the same purpose type is used in a series
+- Allow students to pay and apply codes during a grace period
+
+## 0.18.4 (2022-02-24)
 
 ### Bug Fixes
 
@@ -10,10 +28,32 @@
 - Fix enrollments view rendering problem in sections that require payment
 - Ensure score can never exceed out of for graded pages
 - Ensure multiple payment attempts is handled correctly
+- Handle cases where recaptcha payload is missing
+- Ensure user_id is unique in DataShop export
+- Only highlight failed grade sync cells when section is an LMS section
+- Fix adding image/audio in page editor
+- Fix add resource content positioning issues
+- Only allow admins to edit paywall settings
 
 ### Enhancements
 
 - Optimize rendering and storage by allowing attempts to only store transformed models when necessary
+- Adds support for Legacy OLI custom activities
+
+### Release Notes
+
+- Set up support for Legacy OLI activities as follows:
+  - Check out a copy of the repo https://github.com/Simon-Initiative/torus_superactivity to a local folder
+  - Configure torus oli.env file to include a variable named SUPER_ACTIVITY_FOLDER and set the variable to point to the folder above, e.g. SUPER_ACTIVITY_FOLDER=torus/superactivity
+  - Ensure the folder is readable to the running torus instance
+
+**Environment Configs**
+
+The following environment configs are now available:
+
+```
+SUPER_ACTIVITY_FOLDER    local folder location of static support files for Legacy activities
+```
 
 ## 0.18.3 (2021-12-27)
 

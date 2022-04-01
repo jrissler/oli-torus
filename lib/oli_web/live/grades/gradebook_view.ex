@@ -29,7 +29,8 @@ defmodule OliWeb.Grades.GradebookView do
   data options, :any
 
   def set_breadcrumbs(type, section) do
-    OliWeb.Sections.OverviewView.set_breadcrumbs(type, section)
+    type
+    |> OliWeb.Sections.OverviewView.set_breadcrumbs(section)
     |> breadcrumb(section)
   end
 
@@ -70,10 +71,11 @@ defmodule OliWeb.Grades.GradebookView do
         resource_accesses = fetch_resource_accesses(enrollments, section)
 
         {:ok, table_model} =
-          GradebookTableModel.new(enrollments, graded_pages, resource_accesses, section.slug)
+          GradebookTableModel.new(enrollments, graded_pages, resource_accesses, section)
 
         {:ok,
          assign(socket,
+           delivery_breadcrumb: true,
            breadcrumbs: set_breadcrumbs(type, section),
            section: section,
            total_count: total_count,
@@ -133,7 +135,7 @@ defmodule OliWeb.Grades.GradebookView do
         enrollments,
         socket.assigns.graded_pages,
         resource_accesses,
-        socket.assigns.section.slug
+        socket.assigns.section
       )
 
     total_count = determine_total(enrollments)

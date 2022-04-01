@@ -5,6 +5,7 @@ defmodule Oli.Groups do
 
   import Ecto.Query, warn: false
 
+  alias Ecto.Multi
   alias Oli.Accounts
   alias Oli.Accounts.{Author, User}
   alias Oli.Groups.{Community, CommunityAccount, CommunityInstitution, CommunityVisibility}
@@ -121,6 +122,43 @@ defmodule Oli.Groups do
 
   # ------------------------------------------------------------
   # Communities accounts
+
+  @doc """
+  Finds or creates a community account for a user. More efficient than using
+  many-to-many assoc.
+
+  ## Examples
+
+      iex> find_or_create_community_user_account(user_id, community_id)
+      {:ok, %CommunityAccount{}}
+
+      iex> find_or_create_community_user_account(bad_user_id, community_id)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def find_or_create_community_user_account(user_id, community_id) do
+    clauses = %{user_id: user_id, community_id: community_id}
+
+    res =
+      Multi.new()
+      |> Multi.run(:community_account, fn _, _ -> {:ok, get_community_account_by!(clauses)} end)
+      |> Multi.run(:new_community_account, &maybe_create_community_account(&1, &2, clauses))
+      |> Repo.transaction()
+
+    case res do
+      {:ok, %{new_community_account: community_account}} ->
+        {:ok, community_account}
+
+      {:error, _, changeset, _} ->
+        {:error, changeset}
+    end
+  end
+
+  defp maybe_create_community_account(_repo, %{community_account: nil}, clauses),
+    do: create_community_account(clauses)
+
+  defp maybe_create_community_account(_repo, %{community_account: community_account}, _clauses),
+    do: {:ok, community_account}
 
   @doc """
   Creates a community account.

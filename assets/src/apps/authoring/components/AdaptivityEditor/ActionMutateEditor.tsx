@@ -29,15 +29,11 @@ const ActionMutateEditor: React.FC<ActionMutateEditorProps> = (props) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
   const uuid = guid();
 
-  const targetRef = useRef<HTMLInputElement>(null);
   const typeRef = useRef<HTMLSelectElement>(null);
 
-  const handleTargetChange = (e: any) => {
-    const val = e.target.value;
-    if (val === target) {
-      // since using blur, don't need to update if there is no change
-      return;
-    }
+  useEffect(() => setTarget(action.params.target), [action.params.target]);
+
+  const handleTargetChange = (val: any) => {
     setTarget(val);
     setIsDirty(true);
   };
@@ -106,7 +102,7 @@ const ActionMutateEditor: React.FC<ActionMutateEditorProps> = (props) => {
       <div className="input-group input-group-sm flex-grow-1">
         <div className="input-group-prepend" title="target">
           <VariablePicker
-            targetRef={targetRef}
+            onTargetChange={(value) => handleTargetChange(value)}
             typeRef={typeRef}
             placement={OverlayPlacements.TOP}
             context="mutate"
@@ -116,11 +112,11 @@ const ActionMutateEditor: React.FC<ActionMutateEditorProps> = (props) => {
           type="text"
           className="form-control form-control-sm mr-2 flex-grow-1"
           id={`action-mutate-target-${uuid}`}
-          defaultValue={target}
-          onBlur={(e) => handleTargetChange(e)}
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+          onBlur={(e) => handleTargetChange(e.target.value)}
           title={target}
           placeholder="Target"
-          ref={targetRef}
         />
       </div>
       <label className="sr-only" htmlFor={`action-mutate-type-${uuid}`}>

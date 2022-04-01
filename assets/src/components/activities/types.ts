@@ -1,8 +1,11 @@
-import { create, ID, Identifiable, ModelElement, Selection } from 'data/content/model';
+import { ModelElement } from 'data/content/model/elements/types';
+import { ID, Identifiable } from 'data/content/model/other';
 import { ResourceContext } from 'data/content/resource';
 import { ResourceId } from 'data/types';
 import guid from 'utils/guid';
 import { PathOperation } from 'utils/pathOperations';
+import { Model } from 'data/content/model/elements/factories';
+import { NIL } from 'uuid';
 
 export type PostUndoable = (undoable: Undoable) => void;
 
@@ -43,13 +46,7 @@ export interface HasContent {
 export function makeContent(text: string, id?: string): { id: string; content: RichText } {
   return {
     id: id ? id : guid(),
-    content: [
-      create({
-        type: 'p',
-        children: [{ text }],
-        id: guid(),
-      }),
-    ],
+    content: [Model.p(text)],
   };
 }
 
@@ -95,6 +92,7 @@ export interface PartState {
   attemptGuid: string;
   attemptNumber: number;
   dateEvaluated: Date | null;
+  dateSubmitted: Date | null;
   score: number | null;
   outOf: number | null;
   response: any;
@@ -111,6 +109,7 @@ export interface ActivityState {
   attemptGuid: string;
   attemptNumber: number;
   dateEvaluated: Date | null;
+  dateSubmitted: Date | null;
   score: number | null;
   outOf: number | null;
   parts: PartState[];
@@ -175,10 +174,15 @@ export interface ConditionalOutcome extends Identifiable {
 export interface IsAction {
   attempt_guid: string;
   error?: string;
+  part_id: string;
 }
 
-export type Action = NavigationAction | FeedbackAction | StateUpdateAction;
-export type ActionDesc = NavigationActionDesc | FeedbackActionDesc | StateUpdateActionDesc;
+export type Action = NavigationAction | FeedbackAction | StateUpdateAction | SubmissionAction;
+export type ActionDesc =
+  | NavigationActionDesc
+  | FeedbackActionDesc
+  | StateUpdateActionDesc
+  | SubmissionActionDesc;
 
 export interface FeedbackActionCore {
   score: number;
@@ -193,6 +197,8 @@ export interface StateUpdateActionCore {
   // eslint-disable-next-line
   update: Object;
 }
+
+export interface SubmissionActionCore {}
 
 export interface NavigationActionDesc extends Identifiable, NavigationActionCore {
   type: 'NavigationActionDesc';
@@ -219,11 +225,21 @@ export interface StateUpdateAction extends StateUpdateActionCore, IsAction {
   type: 'StateUpdateAction';
 }
 
+export interface SubmissionActionDesc extends Identifiable, SubmissionActionCore {
+  type: 'SubmissionActionDesc';
+}
+
+export interface SubmissionAction extends SubmissionActionCore, IsAction {
+  type: 'SubmissionAction';
+}
+
 export interface Part extends Identifiable {
   responses: Response[];
   outcomes?: ConditionalOutcome[];
   hints: Hint[];
   scoringStrategy: ScoringStrategy;
+  gradingApproach?: GradingApproach;
+  outOf?: null | number;
 }
 
 export const makePart = (
@@ -234,6 +250,8 @@ export const makePart = (
   id?: ID,
 ): Part => ({
   id: id ? id : guid(),
+  gradingApproach: GradingApproach.automatic,
+  outOf: null,
   scoringStrategy: ScoringStrategy.average,
   responses,
   hints,
@@ -243,6 +261,11 @@ export interface HasParts {
   authoring: {
     parts: Part[];
   };
+}
+
+export enum GradingApproach {
+  'automatic' = 'automatic',
+  'manual' = 'manual',
 }
 
 export enum ScoringStrategy {

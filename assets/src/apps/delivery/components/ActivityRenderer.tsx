@@ -1,5 +1,5 @@
-/* eslint-disable react/prop-types */
-import { defaultGlobalEnv, getValue } from 'adaptivity/scripting';
+import { CapiVariableTypes } from 'adaptivity/capi';
+import { defaultGlobalEnv, getValue, templatizeText } from 'adaptivity/scripting';
 import {
   EvaluationResponse,
   PartActivityResponse,
@@ -16,29 +16,26 @@ import {
   StudentResponse,
   Success,
 } from 'components/activities/types';
+import * as Extrinsic from 'data/persistence/extrinsic';
 import { Environment } from 'janus-script';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { clone } from 'utils/common';
 import { contexts } from '../../../types/applicationContext';
+import { handleValueExpression } from '../layouts/deck/DeckLayoutFooter';
 import { selectCurrentActivityId } from '../store/features/activities/slice';
 import {
   CheckResults,
   selectHistoryNavigationActivity,
   selectInitPhaseComplete,
-  selectInitStateFacts,
   selectLastCheckResults,
   selectLastCheckTriggered,
   selectLastMutateChanges,
   selectLastMutateTriggered,
 } from '../store/features/adaptivity/slice';
-import { debounce } from 'lodash';
-import * as Extrinsic from 'data/persistence/extrinsic';
+import { selectCurrentActivityTree } from '../store/features/groups/selectors/deck';
 import { selectPreviewMode, selectUserId } from '../store/features/page/slice';
 import { NotificationType } from './NotificationContext';
-import { selectCurrentActivityTree } from '../store/features/groups/selectors/deck';
-import { templatizeText } from './TextParser';
-import { CapiVariableTypes } from 'adaptivity/capi';
 
 interface ActivityRendererProps {
   activity: ActivityModelSchema;
@@ -126,6 +123,7 @@ const ActivityRenderer: React.FC<ActivityRendererProps> = ({
     attemptGuid: 'foo',
     attemptNumber: 1,
     dateEvaluated: null,
+    dateSubmitted: null,
     score: null,
     outOf: null,
     parts: [],
@@ -137,6 +135,7 @@ const ActivityRenderer: React.FC<ActivityRendererProps> = ({
     attemptGuid: 'TODO1234',
     attemptNumber: 1,
     dateEvaluated: null,
+    dateSubmitted: null,
     score: null,
     outOf: null,
     response: '',
@@ -337,6 +336,64 @@ const ActivityRenderer: React.FC<ActivityRendererProps> = ({
     ref.current.notify(NotificationType.CHECK_STARTED, { ts: lastCheckTriggered });
   }, [lastCheckTriggered]);
 
+  const handleInitStateVars = (initState: any, snapshot: any) => {
+    const finalInitSnapshot = initState?.reduce((acc: any, initObject: any) => {
+      let key = initObject.target;
+      let updatedValue = initObject.value;
+      const value = initObject.value;
+      const typeOfOriginalValue = typeof value;
+      if (key.indexOf('stage') === 0) {
+        const lstVar = key.split('.');
+        if (lstVar?.length > 1) {
+          const ownerActivity = currentActivityTree?.find(
+            (activity) => !!activity.content.partsLayout.find((p: any) => p.id === lstVar[1]),
+          );
+          key = ownerActivity ? `${ownerActivity.id}|${key}` : `${key}`;
+        }
+      }
+      if (initObject.operator === 'bind to') {
+        initStateBindToFacts[initObject.target] = snapshot[key] || '';
+        return acc;
+      } else if (typeof value === 'string') {
+        if (
+          (typeof value === 'string' && value[0] === '{' && value[1] !== '"') ||
+          (value.indexOf('{') !== -1 && value.indexOf('}') !== -1)
+        ) {
+          //this is a expression so we get the value from snapshot because this was already evaluated in deck.ts
+          updatedValue = snapshot[key];
+        } else {
+          updatedValue = initObject.value;
+        }
+      } else {
+        updatedValue = initObject.value;
+      }
+      if (
+        initObject.type !== CapiVariableTypes.MATH_EXPR &&
+        updatedValue &&
+        updatedValue.toString().indexOf('{') !== -1 &&
+        updatedValue.toString().indexOf('}') !== -1
+      ) {
+        // need handle the value expression i.e. value = MISSION CONTROL: Search the surface of {q:1476902665616:794|stage.simIFrame.Globals.SelectedObject} for the astrocache.
+        // otherwise, it will never be replace with actual value on screen
+        updatedValue = handleValueExpression(
+          currentActivityTree,
+          initObject.value,
+          initObject.operator,
+        );
+      }
+      const evaluatedValue =
+        typeOfOriginalValue === 'string' &&
+        initObject.type !== CapiVariableTypes.MATH_EXPR &&
+        value.indexOf('{') !== -1 &&
+        value.indexOf('}') !== -1
+          ? templatizeText(updatedValue, snapshot, defaultGlobalEnv, true)
+          : updatedValue;
+      acc[initObject.target] = evaluatedValue;
+      return acc;
+    }, {});
+    return finalInitSnapshot;
+  };
+
   const notifyCheckComplete = async (results: CheckResults) => {
     if (!ref.current) {
       return;
@@ -371,20 +428,20 @@ const ActivityRenderer: React.FC<ActivityRendererProps> = ({
   // TODO: check if it needs to come from somewhere higher
   const currentActivityId = useSelector(selectCurrentActivityId);
   const initPhaseComplete = useSelector(selectInitPhaseComplete);
-  const initStateFacts = useSelector(selectInitStateFacts);
   const initStateBindToFacts: any = {};
   const currentActivityTree = useSelector(selectCurrentActivityTree);
   const updateGlobalState = async (snapshot: any, stateFacts: any) => {
-    const payloadData = {} as any;
-    Object.keys(stateFacts).map((fact: string) => {
+    const payloadData = stateFacts.reduce((data: any, fact: any) => {
+      const target = fact.target;
       // EverApp Information
-      if (fact.startsWith('app.')) {
-        const data = fact.split('.');
-        const objId = data.splice(2).join('.');
-        const value = snapshot[fact];
-        payloadData[data[1]] = { ...payloadData[data[1]], [objId]: value };
+      if (target.startsWith('app.')) {
+        const targetParts = target.split('.');
+        const objId = targetParts.splice(2).join('.');
+        const value = snapshot[target];
+        data[targetParts[1]] = { ...data[targetParts[1]], [objId]: value };
       }
-    });
+      return data;
+    }, {});
     await Extrinsic.updateGlobalUserState(payloadData, isPreviewMode);
   };
 
@@ -395,32 +452,18 @@ const ActivityRenderer: React.FC<ActivityRendererProps> = ({
     // so it needs to ask the parent for it.
     const { snapshot } = await onRequestLatestState();
 
-    updateGlobalState(snapshot, initStateFacts);
-    const finalInitSnapshot = Object.keys(initStateFacts).reduce((acc: any, key: string) => {
-      let target = key;
-      if (target.indexOf('stage') === 0) {
-        const lstVar = target.split('.');
-        if (lstVar?.length > 1) {
-          const ownerActivity = currentActivityTree?.find(
-            (activity) => !!activity.content.partsLayout.find((p: any) => p.id === lstVar[1]),
-          );
-          target = ownerActivity ? `${ownerActivity.id}|${target}` : `${target}`;
-        }
-      }
-      const operator = initStateFacts[key];
-      if (operator === 'bind to') {
-        initStateBindToFacts[key] = snapshot[target];
-      } else {
-        acc[target] = snapshot[target];
-      }
-      return acc;
-    }, {});
-
+    const currentActivity =
+      currentActivityTree && currentActivityTree.length > 0
+        ? currentActivityTree[currentActivityTree.length - 1]
+        : null;
+    const initState = currentActivity?.content?.custom?.facts || [];
+    updateGlobalState(snapshot, initState);
+    const finalInitSnapshot = handleInitStateVars(initState, snapshot);
     ref.current.notify(NotificationType.CONTEXT_CHANGED, {
       currentActivityId,
       mode: historyModeNavigation ? contexts.REVIEW : contexts.VIEWER,
       snapshot,
-      initStateFacts: finalInitSnapshot,
+      initStateFacts: finalInitSnapshot || {},
       domain: adaptivityDomain,
       initStateBindToFacts,
     });
@@ -441,12 +484,14 @@ const ActivityRenderer: React.FC<ActivityRendererProps> = ({
       mutateChanges,
     });
   };
+
   useEffect(() => {
     if (!mutationTriggered || !ref.current) {
       return;
     }
     notifyStateMutation();
   }, [mutationTriggered]);
+
   const handleStateChangeEvents = async (changes: any) => {
     if (!ref.current) {
       return;
@@ -468,12 +513,14 @@ const ActivityRenderer: React.FC<ActivityRendererProps> = ({
       }
     }
   };
+
   useEffect(() => {
     defaultGlobalEnv.addListener('change', handleStateChangeEvents);
     return () => {
       defaultGlobalEnv.removeListener('change', handleStateChangeEvents);
     };
   }, [activity.id]);
+
   const elementProps = {
     ref,
     graded: false,

@@ -189,6 +189,30 @@ config :oli, :footer,
   link_2_location: System.get_env("FOOTER_LINK_2_LOCATION", ""),
   link_2_text: System.get_env("FOOTER_LINK_2_TEXT", "")
 
+config :ex_json_schema,
+       :remote_schema_resolver,
+       {Oli.Utils.SchemaResolver, :resolve}
+
+# Configure if age verification checkbox appears on learner account creation
+config :oli, :age_verification, is_enabled: System.get_env("IS_AGE_VERIFICATION_ENABLED", "")
+
+# Configure libcluster for horizontal scaling
+# Take into account that different strategies could use different config options
+config :libcluster,
+  topologies: [
+    oli: [
+      strategy: Module.concat([System.get_env("LIBCLUSTER_STRATEGY", "Cluster.Strategy.Gossip")])
+    ]
+  ]
+
+config :oli, :auth_providers,
+  google_client_id: System.get_env("GOOGLE_CLIENT_ID", ""),
+  google_client_secret: System.get_env("GOOGLE_CLIENT_SECRET", ""),
+  author_github_client_id: System.get_env("AUTHOR_GITHUB_CLIENT_ID", ""),
+  author_github_client_secret: System.get_env("AUTHOR_GITHUB_CLIENT_SECRET", ""),
+  user_github_client_id: System.get_env("USER_GITHUB_CLIENT_ID", ""),
+  user_github_client_secret: System.get_env("USER_GITHUB_CLIENT_SECRET", "")
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

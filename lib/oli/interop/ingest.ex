@@ -3,6 +3,7 @@ defmodule Oli.Interop.Ingest do
   alias Oli.Publishing.ChangeTracker
   alias Oli.Interop.Scrub
   alias Oli.Resources.PageContent
+  alias Oli.Utils.SchemaResolver
 
   @project_key "_project"
   @hierarchy_key "_hierarchy"
@@ -33,58 +34,108 @@ defmodule Oli.Interop.Ingest do
     end
   end
 
-  # verify that an in memory archive is valid by ensuring that it contains the three
+  # verify that an in memory digest is valid by ensuring that it contains the three
   # required keys (files): the "_project", the "_hierarchy" and the "_media-manifest"
   defp is_valid_digest?(map) do
-    Map.has_key?(map, @project_key) && Map.has_key?(map, @hierarchy_key) &&
-      Map.has_key?(map, @media_key)
+    if Map.has_key?(map, @project_key) && Map.has_key?(map, @hierarchy_key) &&
+         Map.has_key?(map, @media_key) do
+      {:ok, map}
+    else
+      {:error, :invalid_digest}
+    end
   end
-  
+
+  # Validates all idrefs in the content of the resource map.
+  # Returns {:ok} if all refs are valid and {:error, [...invalid_refs]} if invalid idrefs are found.
+  defp validate_idrefs(map) do
+    all_id_refs =
+      Enum.reduce(map, [], fn {_file, content}, acc ->
+        find_all_id_refs(content) ++ acc
+      end)
+
+    invalid_idrefs =
+      Enum.filter(all_id_refs, fn id_ref ->
+        !Map.has_key?(map, id_ref)
+      end)
+
+    case invalid_idrefs do
+      [] ->
+        {:ok}
+
+      invalid_idrefs ->
+        {:error, {:invalid_idrefs, invalid_idrefs}}
+    end
+  end
+
+  defp find_all_id_refs(content) do
+    idrefs_recursive_desc(content, [])
+  end
+
+  defp idrefs_recursive_desc(el, idrefs) do
+    # if this element contains an idref, add it to the list
+
+    idrefs =
+      case el do
+        %{"idref" => idref} ->
+          [idref | idrefs]
+
+        _ ->
+          idrefs
+      end
+
+    # if this element contains children, recursively process them, otherwise return the list
+    case el do
+      %{"children" => children} ->
+        Enum.reduce(children, idrefs, fn c, acc ->
+          idrefs_recursive_desc(c, acc)
+        end)
+
+      _ ->
+        idrefs
+    end
+  end
+
   # Process the unzipped entries of the archive
   def process(entries, as_author) do
     {resource_map, _error_map} = to_map(entries)
 
-    # Proceed only if the archive is valid
-    if is_valid_digest?(resource_map) do
-      Repo.transaction(fn _ ->
-        project_details = Map.get(resource_map, @project_key)
-        media_details = Map.get(resource_map, @media_key)
-        hierarchy_details = Map.get(resource_map, @hierarchy_key)
-
-        with {:ok, %{project: project, resource_revision: root_revision}} <-
-               create_project(project_details, as_author),
-             {:ok, tag_map} <- create_tags(project, resource_map, as_author),
-             {:ok, objective_map} <- create_objectives(project, resource_map, tag_map, as_author),
-             {:ok, {activity_map, _}} <-
-               create_activities(project, resource_map, objective_map, tag_map, as_author),
-             {:ok, {page_map, _}} <-
-               create_pages(
-                 project,
-                 resource_map,
-                 activity_map,
-                 objective_map,
-                 tag_map,
-                 as_author
-               ),
-             {:ok, _} <- create_media(project, media_details),
-             {:ok, _} <-
-               create_hierarchy(
-                 project,
-                 root_revision,
-                 page_map,
-                 tag_map,
-                 hierarchy_details,
-                 as_author
-               ),
-             {:ok, _} <- Oli.Ingest.RewireLinks.rewire_all_hyperlinks(page_map, project) do
-          project
-        else
-          {:error, error} -> Repo.rollback(error)
-        end
-      end)
-    else
-      {:error, :invalid_digest}
-    end
+    Repo.transaction(fn _ ->
+      with {:ok, _} <- is_valid_digest?(resource_map),
+           {:ok} <- validate_idrefs(resource_map),
+           project_details <- Map.get(resource_map, @project_key),
+           media_details <- Map.get(resource_map, @media_key),
+           hierarchy_details <- Map.get(resource_map, @hierarchy_key),
+           {:ok, %{project: project, resource_revision: root_revision}} <-
+             create_project(project_details, as_author),
+           {:ok, tag_map} <- create_tags(project, resource_map, as_author),
+           {:ok, objective_map} <- create_objectives(project, resource_map, tag_map, as_author),
+           {:ok, {activity_map, _}} <-
+             create_activities(project, resource_map, objective_map, tag_map, as_author),
+           {:ok, {page_map, _}} <-
+             create_pages(
+               project,
+               resource_map,
+               activity_map,
+               objective_map,
+               tag_map,
+               as_author
+             ),
+           {:ok, _} <- create_media(project, media_details),
+           {:ok, _} <-
+             create_hierarchy(
+               project,
+               root_revision,
+               page_map,
+               tag_map,
+               hierarchy_details,
+               as_author
+             ),
+           {:ok, _} <- Oli.Ingest.RewireLinks.rewire_all_hyperlinks(page_map, project) do
+        project
+      else
+        {:error, error} -> Repo.rollback(error)
+      end
+    end)
   end
 
   defp get_registration_map() do
@@ -120,7 +171,7 @@ defmodule Oli.Interop.Ingest do
     end)
   end
 
-  defp create_activities(project, resource_map, _, tag_map, as_author) do
+  defp create_activities(project, resource_map, objective_map, tag_map, as_author) do
     registration_map = get_registration_map()
 
     {changes, activities} =
@@ -131,7 +182,14 @@ defmodule Oli.Interop.Ingest do
 
     Repo.transaction(fn ->
       case Enum.reduce_while(activities, %{}, fn {id, activity}, map ->
-             case create_activity(project, activity, as_author, registration_map, tag_map) do
+             case create_activity(
+                    project,
+                    activity,
+                    as_author,
+                    registration_map,
+                    tag_map,
+                    objective_map
+                  ) do
                {:ok, revision} -> {:cont, Map.put(map, id, revision)}
                {:error, e} -> {:halt, {:error, e}}
              end
@@ -183,9 +241,15 @@ defmodule Oli.Interop.Ingest do
       |> Enum.map(fn k -> {k, Map.get(resource_map, k)} end)
       |> Enum.filter(fn {_, content} -> Map.get(content, "type") == "Objective" end)
 
+    with_children =
+      Enum.filter(objectives, fn {_, o} -> Map.get(o, "objectives", []) |> Enum.count() > 0 end)
+
+    without_children =
+      Enum.filter(objectives, fn {_, o} -> Map.get(o, "objectives", []) |> Enum.count() == 0 end)
+
     Repo.transaction(fn ->
-      case Enum.reduce_while(objectives, %{}, fn {id, o}, map ->
-             case create_objective(project, o, tag_map, as_author) do
+      case Enum.reduce_while(without_children ++ with_children, %{}, fn {id, o}, map ->
+             case create_objective(project, o, tag_map, as_author, map) do
                {:ok, revision} -> {:cont, Map.put(map, id, revision)}
                {:error, e} -> {:halt, {:error, e}}
              end
@@ -209,69 +273,179 @@ defmodule Oli.Interop.Ingest do
   end
 
   defp rewire_activity_references(content, activity_map) do
-    PageContent.map(content, fn e ->
+    PageContent.map_reduce(content, {:ok, []}, fn e, {status, invalid_refs} ->
       case e do
         %{"type" => "activity-reference", "activity_id" => original} = ref ->
-          Map.put(ref, "activity_id", retrieve(activity_map, original).resource_id)
+          case retrieve(activity_map, original) do
+            nil ->
+              {ref, {:error, [original | invalid_refs]}}
+
+            retrieved ->
+              {Map.put(ref, "activity_id", retrieved.resource_id), {status, invalid_refs}}
+          end
 
         other ->
-          other
+          {other, {status, invalid_refs}}
       end
     end)
+    |> case do
+      {mapped, {:ok, _}} ->
+        {:ok, mapped}
+
+      {_mapped, {:error, invalid_refs}} ->
+        {:error, {:rewire_activity_references, invalid_refs}}
+    end
+  end
+
+  defp rewire_bank_selections(content, tag_map) do
+    PageContent.map_reduce(content, {:ok, []}, fn e, {status, invalid_refs} ->
+      case e do
+        %{"type" => "selection", "logic" => logic} = ref ->
+          case logic do
+            %{"conditions" => %{"children" => [%{"fact" => "tags", "value" => originals}]}} ->
+              Enum.reduce(originals, {[], {:ok, []}}, fn o, {ids, {status, invalid_ids}} ->
+                case retrieve(tag_map, o) do
+                  nil ->
+                    {ids, {:error, [o | invalid_ids]}}
+
+                  retrieved ->
+                    {[retrieved.resource_id | ids], {status, invalid_ids}}
+                end
+              end)
+              |> case do
+                {ids, {:ok, _}} ->
+                  children = [%{"fact" => "tags", "value" => ids, "operator" => "equals"}]
+                  conditions = Map.put(logic["conditions"], "children", children)
+                  logic = Map.put(logic, "conditions", conditions)
+
+                  {Map.put(ref, "logic", logic), {status, invalid_refs}}
+
+                {_, {:error, invalid_ids}} ->
+                  {ref, {status, invalid_ids ++ invalid_refs}}
+              end
+
+            _ ->
+              {ref, {status, invalid_refs}}
+          end
+
+        other ->
+          {other, {status, invalid_refs}}
+      end
+    end)
+    |> case do
+      {mapped, {:ok, _}} ->
+        {:ok, mapped}
+
+      {_mapped, {:error, invalid_refs}} ->
+        {:error, {:rewire_bank_selections, invalid_refs}}
+    end
   end
 
   # Create one page
   defp create_page(project, page, activity_map, objective_map, tag_map, as_author) do
-    content =
-      Map.get(page, "content")
-      |> rewire_activity_references(activity_map)
+    with content <- Map.get(page, "content"),
+         :ok <- validate_json(content, SchemaResolver.schema("page-content.schema.json")),
+         {:ok, content} <- rewire_activity_references(content, activity_map),
+         {:ok, content} <- rewire_bank_selections(content, tag_map) do
+      graded = Map.get(page, "isGraded", false)
 
-    %{
-      tags: transform_tags(page, tag_map),
-      title: Map.get(page, "title"),
-      content: content,
-      author_id: as_author.id,
-      objectives: %{
-        "attached" =>
-          Enum.map(page["objectives"], fn id ->
-            case Map.get(objective_map, id) do
-              nil -> nil
-              r -> r.resource_id
-            end
-          end)
-          |> Enum.filter(fn f -> !is_nil(f) end)
-      },
-      resource_type_id: Oli.Resources.ResourceType.get_id_by_type("page"),
-      scoring_strategy_id: Oli.Resources.ScoringStrategy.get_id_by_type("average"),
-      graded: false
-    }
-    |> create_resource(project)
+      %{
+        tags: transform_tags(page, tag_map),
+        title: Map.get(page, "title"),
+        content: content,
+        author_id: as_author.id,
+        objectives: %{
+          "attached" =>
+            Enum.map(page["objectives"], fn id ->
+              case Map.get(objective_map, id) do
+                nil -> nil
+                r -> r.resource_id
+              end
+            end)
+            |> Enum.filter(fn f -> !is_nil(f) end)
+        },
+        resource_type_id: Oli.Resources.ResourceType.get_id_by_type("page"),
+        scoring_strategy_id: Oli.Resources.ScoringStrategy.get_id_by_type("average"),
+        graded: graded,
+        max_attempts:
+          if graded do
+            5
+          else
+            0
+          end
+      }
+      |> create_resource(project)
+    end
   end
 
-  defp create_activity(project, activity, as_author, registration_by_subtype, tag_map) do
-    objectives =
-      activity["content"]["authoring"]["parts"]
-      |> Enum.map(fn %{"id" => id} -> id end)
-      |> Enum.reduce(%{}, fn e, m -> Map.put(m, e, []) end)
+  defp validate_json(json, schema) do
+    case ExJsonSchema.Validator.validate(schema, json) do
+      :ok ->
+        :ok
 
-    title =
-      case Map.get(activity, "title") do
-        nil -> Map.get(activity, "subType")
-        "" -> Map.get(activity, "subType")
-        title -> title
-      end
+      {:error, errors} ->
+        {:error, {:invalid_json, schema, errors, json}}
+    end
+  end
 
-    %{
-      tags: transform_tags(activity, tag_map),
-      title: title,
-      content: Map.get(activity, "content"),
-      author_id: as_author.id,
-      objectives: objectives,
-      resource_type_id: Oli.Resources.ResourceType.get_id_by_type("activity"),
-      activity_type_id: Map.get(registration_by_subtype, Map.get(activity, "subType")),
-      scoring_strategy_id: Oli.Resources.ScoringStrategy.get_id_by_type("average")
-    }
-    |> create_resource(project)
+  defp create_activity(
+         project,
+         activity,
+         as_author,
+         registration_by_subtype,
+         tag_map,
+         objective_map
+       ) do
+    with :ok <- validate_json(activity, SchemaResolver.schema("activity.schema.json")) do
+
+      title =
+        case Map.get(activity, "title") do
+          nil -> Map.get(activity, "subType")
+          "" -> Map.get(activity, "subType")
+          title -> title
+        end
+
+      scope =
+        case Map.get(activity, "scope", "embedded") do
+          str when str in ~w(embedded banked) -> String.to_existing_atom(str)
+          _ -> :embedded
+        end
+
+      %{
+        scope: scope,
+        tags: transform_tags(activity, tag_map),
+        title: title,
+        content: Map.get(activity, "content"),
+        author_id: as_author.id,
+        objectives: process_activity_objectives(activity, objective_map),
+        resource_type_id: Oli.Resources.ResourceType.get_id_by_type("activity"),
+        activity_type_id: Map.get(registration_by_subtype, Map.get(activity, "subType")),
+        scoring_strategy_id: Oli.Resources.ScoringStrategy.get_id_by_type("average")
+      }
+      |> create_resource(project)
+    end
+  end
+
+  defp process_activity_objectives(activity, objective_map) do
+    case Map.get(activity, "objectives", []) do
+      map when is_map(map) ->
+        Map.keys(map)
+        |> Enum.reduce(%{}, fn k, m ->
+          mapped =
+            Map.get(activity, "objectives")[k]
+            |> Enum.map(fn id -> Map.get(objective_map, id).resource_id end)
+
+          Map.put(m, k, mapped)
+        end)
+
+      list when is_list(list) ->
+        activity["content"]["authoring"]["parts"]
+        |> Enum.map(fn %{"id" => id} -> id end)
+        |> Enum.reduce(%{}, fn e, m ->
+          objectives = Enum.map(list, fn id -> Map.get(objective_map, id).resource_id end)
+          Map.put(m, e, objectives)
+        end)
+    end
   end
 
   defp create_tag(project, tag, as_author) do
@@ -286,7 +460,7 @@ defmodule Oli.Interop.Ingest do
     |> create_resource(project)
   end
 
-  defp create_objective(project, objective, tag_map, as_author) do
+  defp create_objective(project, objective, tag_map, as_author, objective_map) do
     title =
       case Map.get(objective, "title") do
         nil -> "Empty"
@@ -300,6 +474,9 @@ defmodule Oli.Interop.Ingest do
       content: %{},
       author_id: as_author.id,
       objectives: %{},
+      children:
+        Map.get(objective, "objectives", [])
+        |> Enum.map(fn id -> Map.get(objective_map, id).resource_id end),
       resource_type_id: Oli.Resources.ResourceType.get_id_by_type("objective")
     }
     |> create_resource(project)
@@ -396,7 +573,7 @@ defmodule Oli.Interop.Ingest do
   # Convert the list of tuples of unzipped entries into a map
   # where the keys are the ids (with the .json extension dropped)
   # and the values are the JSON content, parsed into maps
-  defp to_map(entries) do
+  def to_map(entries) do
     Enum.reduce(entries, {%{}, %{}}, fn {file, content}, {resource_map, error_map} ->
       id_from_file = fn file ->
         file
@@ -421,8 +598,13 @@ defmodule Oli.Interop.Ingest do
 
           {Map.put(resource_map, id, decoded), error_map}
 
-        {:error, reason} ->
-          {resource_map, Map.put(error_map, id_from_file.(file), reason)}
+        _ ->
+          {resource_map,
+           Map.put(
+             error_map,
+             id_from_file.(file),
+             "failed to decode file '#{id_from_file.(file)}'"
+           )}
       end
     end)
   end
@@ -441,6 +623,46 @@ defmodule Oli.Interop.Ingest do
 
   def prettify_error({:error, :empty_project_title}) do
     "Project title cannot be empty in #{@project_key}.json"
+  end
+
+  def prettify_error({:error, {:invalid_idrefs, invalid_idrefs}}) do
+    invalid_idrefs_str = Enum.join(invalid_idrefs, ", ")
+
+    case Enum.count(invalid_idrefs) do
+      1 ->
+        "Project contains an invalid idref reference: #{invalid_idrefs_str}"
+
+      count ->
+        "Project contains #{count} invalid idref references: #{invalid_idrefs_str}"
+    end
+  end
+
+  def prettify_error({:error, {:rewire_activity_references, invalid_refs}}) do
+    invalid_refs_str = Enum.join(invalid_refs, ", ")
+
+    case Enum.count(invalid_refs) do
+      1 ->
+        "Project contains an invalid activity reference: #{invalid_refs_str}"
+
+      count ->
+        "Project contains #{count} invalid activity references: #{invalid_refs_str}"
+    end
+  end
+
+  def prettify_error({:error, {:rewire_bank_selections, invalid_refs}}) do
+    invalid_refs_str = Enum.join(invalid_refs, ", ")
+
+    case Enum.count(invalid_refs) do
+      1 ->
+        "Project contains an invalid activity bank selection reference: #{invalid_refs_str}"
+
+      count ->
+        "Project contains #{count} invalid activity bank selection references: #{invalid_refs_str}"
+    end
+  end
+
+  def prettify_error({:error, {:invalid_json, schema, _errors, json}}) do
+    "Invalid JSON found in '#{json["id"]}' according to schema #{schema.schema["$id"]}"
   end
 
   def prettify_error({:error, error}) do

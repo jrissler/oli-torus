@@ -1,5 +1,6 @@
 import { createSelector, createSlice, PayloadAction, Slice } from '@reduxjs/toolkit';
 import { RootState } from '../../rootReducer';
+import AdaptivitySlice from './name';
 
 export interface CheckResults {
   timestamp: number;
@@ -21,7 +22,6 @@ export interface AdaptivityState {
   lastMutateChanges: any;
   initPhaseComplete: any; // timestamp
   historyModeNavigation: boolean;
-  initStateFacts: any;
 }
 
 const initialState: AdaptivityState = {
@@ -44,11 +44,10 @@ const initialState: AdaptivityState = {
   lastMutateChanges: null,
   initPhaseComplete: null,
   historyModeNavigation: false,
-  initStateFacts: [],
 };
 
 const slice: Slice<AdaptivityState> = createSlice({
-  name: 'adaptivity',
+  name: AdaptivitySlice,
   initialState,
   reducers: {
     setIsGoodFeedback: (state, action: PayloadAction<{ isGood: boolean }>) => {
@@ -86,13 +85,8 @@ const slice: Slice<AdaptivityState> = createSlice({
     setInitPhaseComplete(state) {
       state.initPhaseComplete = Date.now();
     },
-    setInitStateFacts(state, action: PayloadAction<{ facts: any }>) {
-      state.initStateFacts = action.payload.facts;
-    },
   },
 });
-
-export const AdaptivitySlice = slice.name;
 
 export const {
   setIsGoodFeedback,
@@ -144,10 +138,6 @@ export const selectLastCheckResults = createSelector(
 export const selectHistoryNavigationActivity = createSelector(
   selectState,
   (state: AdaptivityState) => state.historyModeNavigation,
-);
-export const selectInitStateFacts = createSelector(
-  selectState,
-  (state: AdaptivityState) => state.initStateFacts,
 );
 export const selectLastMutateTriggered = createSelector(
   selectState,

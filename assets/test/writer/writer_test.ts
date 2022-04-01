@@ -74,7 +74,7 @@ describe('parser', () => {
       screen.getByText((content, element) => {
         return (
           element?.tagName.toLowerCase() === 'ol' &&
-          [...element.childNodes.values()].every((node) => node.nodeName.toLowerCase() === 'li')
+          Array.from(element.childNodes).every((node) => node.nodeName.toLowerCase() === 'li')
         );
       }),
     ).toBeTruthy();
@@ -83,7 +83,7 @@ describe('parser', () => {
       screen.getByText((content, element) => {
         return (
           element?.tagName.toLowerCase() === 'ul' &&
-          [...element.childNodes.values()].every((node) => node.nodeName.toLowerCase() === 'li')
+          Array.from(element.childNodes).every((node) => node.nodeName.toLowerCase() === 'li')
         );
       }),
     ).toBeTruthy();
@@ -94,16 +94,6 @@ describe('parser', () => {
           element?.tagName.toLowerCase() === 'iframe' &&
           element.getAttribute('src') === 'https://www.youtube.com/embed/fhdCslFcKFU' &&
           content === ''
-        );
-      }),
-    ).toBeTruthy();
-
-    expect(
-      screen.getByText((content, element) => {
-        return (
-          element?.tagName.toLowerCase() === 'pre' &&
-          element?.firstChild?.nodeName.toLowerCase() === 'code' &&
-          !!element?.firstChild.textContent?.includes('import fresh-pots')
         );
       }),
     ).toBeTruthy();

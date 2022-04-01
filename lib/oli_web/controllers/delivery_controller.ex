@@ -2,13 +2,15 @@ defmodule OliWeb.DeliveryController do
   use OliWeb, :controller
 
   alias Oli.Delivery.Sections
-  alias Oli.Delivery.Sections.{Section, SectionInvites}
+  alias Oli.Delivery.Sections.Section
   alias Oli.Publishing
   alias Oli.Institutions
   alias Lti_1p3.Tool.{PlatformRoles, ContextRoles}
   alias Oli.Accounts
   alias Oli.Accounts.Author
   alias Oli.Repo
+  alias Lti_1p3.Tool.Services.AGS
+  alias Lti_1p3.Tool.Services.NRPS
 
   import Oli.Utils
 
@@ -370,7 +372,11 @@ defmodule OliWeb.DeliveryController do
           institution_id: institution.id,
           lti_1p3_deployment_id: deployment.id,
           blueprint_id: blueprint.id,
-          amount: amount
+          amount: amount,
+          grade_passback_enabled: AGS.grade_passback_enabled?(lti_params),
+          line_items_service_url: AGS.get_line_items_url(lti_params),
+          nrps_enabled: NRPS.nrps_enabled?(lti_params),
+          nrps_context_memberships_url: NRPS.get_context_memberships_url(lti_params)
         })
 
       # Enroll this user with their proper roles (instructor)
@@ -394,7 +400,11 @@ defmodule OliWeb.DeliveryController do
           context_id: lti_params["https://purl.imsglobal.org/spec/lti/claim/context"]["id"],
           institution_id: institution.id,
           base_project_id: publication.project_id,
-          lti_1p3_deployment_id: deployment.id
+          lti_1p3_deployment_id: deployment.id,
+          grade_passback_enabled: AGS.grade_passback_enabled?(lti_params),
+          line_items_service_url: AGS.get_line_items_url(lti_params),
+          nrps_enabled: NRPS.nrps_enabled?(lti_params),
+          nrps_context_memberships_url: NRPS.get_context_memberships_url(lti_params)
         })
 
       {:ok, %Section{id: section_id}} = Sections.create_section_resources(section, publication)
@@ -406,13 +416,6 @@ defmodule OliWeb.DeliveryController do
 
       section
     end)
-  end
-
-  def signout(conn, _params) do
-    conn
-    |> use_pow_config(:user)
-    |> Pow.Plug.delete()
-    |> redirect(to: Routes.static_page_path(conn, :index))
   end
 
   def signin(conn, %{"section" => section}) do
@@ -429,60 +432,65 @@ defmodule OliWeb.DeliveryController do
     |> redirect(to: Routes.pow_registration_path(conn, :new, section: section))
   end
 
-  def enroll(conn, _params) do
-    section =
-      conn.assigns.section
-      |> Oli.Repo.preload([:base_project])
+  def show_enroll(conn, _params) do
+    case Sections.available?(conn.assigns.section) do
+      {:available, section} ->
+        # redirect to course index if user is already signed in and enrolled
+        with {:ok, user} <- conn.assigns.current_user |> trap_nil,
+             true <- Sections.is_enrolled?(user.id, section.slug) do
+          redirect(conn, to: Routes.page_delivery_path(conn, :index, section.slug))
+        else
+          _ ->
+            section = Oli.Repo.preload(section, [:base_project])
 
-    # redirect to course index if user is already signed in and enrolled
-    with {:ok, user} <- conn.assigns.current_user |> trap_nil,
-         true <- Sections.is_enrolled?(user.id, section.slug) do
-      redirect(conn, to: Routes.page_delivery_path(conn, :index, section.slug))
-    else
-      _ ->
-        render(conn, "enroll.html", section: section)
+            render(conn, "enroll.html", section: section)
+        end
+
+      {:unavailable, reason} ->
+        conn
+        |> render_section_unavailable(reason)
     end
   end
 
-  def enroll_independent(conn, %{"section_invite_slug" => invite_slug}) do
-    section_invite = SectionInvites.get_section_invite(invite_slug)
+  def process_enroll(conn, params) do
+    g_recaptcha_response = Map.get(params, "g-recaptcha-response", "")
 
-    if !SectionInvites.link_expired?(section_invite) do
-      conn
-      |> assign(:section, SectionInvites.get_section_by_invite_slug(invite_slug))
-      |> enroll(%{})
-    else
-      conn
-      |> redirect(to: Routes.live_path(OliWeb.Endpoint, OliWeb.Sections.InvalidSectionInviteView))
-    end
-  end
-
-  defp recaptcha_verified?(g_recaptcha_response) do
-    g_recaptcha_response != "" and
-      Oli.Utils.Recaptcha.verify(g_recaptcha_response) == {:success, true}
-  end
-
-  def create_user(conn, %{"g-recaptcha-response" => g_recaptcha_response}) do
     if Oli.Utils.LoadTesting.enabled?() or recaptcha_verified?(g_recaptcha_response) do
-      section = conn.assigns.section
+      with {:available, section} <- Sections.available?(conn.assigns.section),
+           {:ok, user} <- current_or_guest_user(conn),
+           user <- Repo.preload(user, [:platform_roles]) do
+        if Sections.is_enrolled?(user.id, section.slug) do
+          redirect(conn, to: Routes.page_delivery_path(conn, :index, section.slug))
+        else
+          Sections.enroll(user.id, section.id, [ContextRoles.get_role(:context_learner)])
 
-      case current_or_guest_user(conn) do
-        {:ok, user} ->
-          Accounts.update_user_platform_roles(user, [
-            PlatformRoles.get_role(:institution_learner)
-          ])
+          Accounts.update_user_platform_roles(
+            user,
+            Lti_1p3.DataProviders.EctoProvider.Marshaler.from(user.platform_roles)
+            |> MapSet.new()
+            |> MapSet.put(PlatformRoles.get_role(:institution_learner))
+            |> MapSet.to_list()
+          )
 
           conn
           |> OliWeb.Pow.PowHelpers.use_pow_config(:user)
           |> Pow.Plug.create(user)
           |> redirect(to: Routes.page_delivery_path(conn, :index, section.slug))
-
-        {:error, _} ->
+        end
+      else
+        _error ->
           render(conn, "enroll.html", error: "Something went wrong, please try again")
       end
     else
       render(conn, "enroll.html", error: "ReCaptcha failed, please try again")
     end
+  end
+
+  def enroll_independent(conn, %{"section_invite_slug" => _invite_slug} = params),
+    do: show_enroll(conn, params)
+
+  defp recaptcha_verified?(g_recaptcha_response) do
+    Oli.Utils.Recaptcha.verify(g_recaptcha_response) == {:success, true}
   end
 
   defp current_or_guest_user(conn) do
@@ -503,5 +511,13 @@ defmodule OliWeb.DeliveryController do
       _ ->
         false
     end
+  end
+
+  defp render_section_unavailable(conn, reason) do
+    conn
+    |> put_view(OliWeb.DeliveryView)
+    |> put_status(403)
+    |> render("section_unavailable.html", reason: reason)
+    |> halt()
   end
 end

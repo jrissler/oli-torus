@@ -4,7 +4,9 @@ defmodule Oli.AccountsTest do
   import Oli.Factory
 
   alias Oli.Accounts
-  alias Oli.Accounts.Author
+  alias Oli.Accounts.{Author, User}
+  alias Oli.Groups
+  alias Oli.Groups.CommunityAccount
 
   describe "authors" do
     test "system role defaults to author", %{} do
@@ -76,7 +78,8 @@ defmodule Oli.AccountsTest do
       sub: "some sub",
       picture: "some picture",
       password: "some_pass123",
-      password_confirmation: "some_pass123"
+      password_confirmation: "some_pass123",
+      age_verified: true
     }
     @update_attrs %{
       email: "some_updated_email@example.com",
@@ -105,6 +108,38 @@ defmodule Oli.AccountsTest do
 
     test "create_user/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Accounts.create_user(@invalid_attrs)
+    end
+
+    test "verification_changeset/2 runs age verification check when enabled" do
+      Config.Reader.read!("test/config/age_verification_config.exs")
+      |> Application.put_all_env()
+
+      assert %Ecto.Changeset{
+               errors: [
+                 age_verified:
+                   {"You must verify you are old enough to access our site in order to continue",
+                    [validation: :acceptance]}
+               ]
+             } =
+               User.verification_changeset(
+                 %User{},
+                 Map.merge(@valid_attrs, %{
+                   age_verified: false
+                 })
+               )
+
+      assert %Ecto.Changeset{errors: []} = User.verification_changeset(%User{}, @valid_attrs)
+
+      Config.Reader.read!("test/config/config.exs")
+      |> Application.put_all_env()
+
+      assert %Ecto.Changeset{errors: []} =
+               User.verification_changeset(
+                 %User{},
+                 Map.merge(@valid_attrs, %{
+                   age_verified: false
+                 })
+               )
     end
 
     test "update_user/2 with valid data updates the user", %{user: user} do
@@ -163,6 +198,73 @@ defmodule Oli.AccountsTest do
 
       assert %Author{community_admin_count: 2} =
                Accounts.get_author_with_community_admin_count(community_account.author_id)
+    end
+
+    test "setup_sso_user/2 returns the created user and associates it to the given community" do
+      community = insert(:community)
+      fields = %{"sub" => "sub", "cognito:username" => "username", "email" => "email"}
+      {:ok, user} = Accounts.setup_sso_user(fields, community.id)
+
+      assert user.sub == "sub"
+      assert user.preferred_username == "username"
+      assert user.email == "email"
+      assert user.can_create_sections
+
+      assert %CommunityAccount{} =
+               Groups.get_community_account_by!(%{user_id: user.id, community_id: community.id})
+    end
+
+    test "setup_sso_user/2 returns an error and rollbacks the insertions when data is invalid" do
+      fields = %{"sub" => "sub", "cognito:username" => "username", "email" => "email"}
+
+      assert {:error,
+              %Ecto.Changeset{
+                errors: [
+                  community_id:
+                    {"does not exist",
+                     [
+                       constraint: :foreign,
+                       constraint_name: "communities_accounts_community_id_fkey"
+                     ]}
+                ]
+              }} = Accounts.setup_sso_user(fields, 0)
+
+      refute Accounts.get_user_by(%{sub: "sub", email: "email"})
+    end
+
+    test "setup_sso_author/2 creates author and user if do not exist and associates user to the given community" do
+      community = insert(:community)
+      fields = %{"sub" => "sub", "cognito:username" => "username", "email" => "email"}
+      {:ok, author} = Accounts.setup_sso_author(fields, community.id)
+
+      assert author.name == "username"
+      assert author.email == "email"
+
+      user = Accounts.get_user_by(%{email: "email"})
+      assert user.sub == "sub"
+      assert user.preferred_username == "username"
+      assert user.email == "email"
+      assert user.can_create_sections
+
+      assert %CommunityAccount{} =
+               Groups.get_community_account_by!(%{user_id: user.id, community_id: community.id})
+
+      assert user.author_id == author.id
+    end
+
+    test "setup_sso_author/2 links user with author when they have the same email" do
+      community = insert(:community)
+      user = insert(:user)
+      author = insert(:author, email: user.email)
+
+      fields = %{"sub" => user.sub, "cognito:username" => "username", "email" => user.email}
+      {:ok, returned_author} = Accounts.setup_sso_author(fields, community.id)
+
+      assert returned_author == author
+
+      returned_user = Accounts.get_user_by(%{email: user.email})
+      assert returned_user.email == user.email
+      assert returned_user.author_id == returned_author.id
     end
   end
 

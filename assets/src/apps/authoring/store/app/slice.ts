@@ -1,13 +1,17 @@
 import { createSelector, createSlice, PayloadAction, Slice } from '@reduxjs/toolkit';
+import { AdaptiveRule } from 'apps/authoring/components/AdaptiveRulesList/AdaptiveRulesList';
+import { selectCurrentActivity } from 'apps/delivery/store/features/activities/slice';
 import {
   savePartState,
   savePartStateToTree,
 } from 'apps/delivery/store/features/attempt/actions/savePart';
+
 import { RightPanelTabs } from '../../components/RightMenu/RightMenu';
 import { saveActivity } from '../activities/actions/saveActivity';
 import { savePage } from '../page/actions/savePage';
 import { RootState } from '../rootReducer';
 import { acquireEditingLock } from './actions/locking';
+import { AppSlice } from './name';
 
 interface PartComponentRegistration {
   slug: string;
@@ -51,6 +55,7 @@ export interface AppState {
   copiedPart: any | null;
   readonly: boolean;
   showDiagnosticsWindow: boolean;
+  showScoringOverview: boolean;
 }
 
 const initialState: AppState = {
@@ -71,6 +76,7 @@ const initialState: AppState = {
   copiedPart: null,
   readonly: true,
   showDiagnosticsWindow: false,
+  showScoringOverview: false,
 };
 
 export interface AppConfig {
@@ -84,7 +90,7 @@ export interface AppConfig {
 }
 
 const slice: Slice<AppState> = createSlice({
-  name: 'mainApp',
+  name: AppSlice,
   initialState,
   reducers: {
     setInitialConfig(state, action: PayloadAction<AppConfig>) {
@@ -124,7 +130,7 @@ const slice: Slice<AppState> = createSlice({
       state.rightPanelActiveTab = action.payload.rightPanelActiveTab;
     },
     setCurrentRule(state, action: PayloadAction<{ currentRule: any }>) {
-      state.currentRule = action.payload.currentRule;
+      state.currentRule = action?.payload?.currentRule?.id ?? action?.payload?.currentRule;
     },
     setCopiedPart(state, action: PayloadAction<{ copiedPart: any }>) {
       state.copiedPart = action.payload.copiedPart;
@@ -134,6 +140,9 @@ const slice: Slice<AppState> = createSlice({
     },
     setShowDiagnosticsWindow(state, action: PayloadAction<{ show: boolean }>) {
       state.showDiagnosticsWindow = action.payload.show;
+    },
+    setShowScoringOverview(state, action: PayloadAction<{ show: boolean }>) {
+      state.showScoringOverview = action.payload.show;
     },
   },
   extraReducers: (builder) => {
@@ -158,8 +167,6 @@ const slice: Slice<AppState> = createSlice({
   },
 });
 
-export const AppSlice = slice.name;
-
 export const {
   setInitialConfig,
   setPanelState,
@@ -171,6 +178,7 @@ export const {
   setCopiedPart,
   setReadonly,
   setShowDiagnosticsWindow,
+  setShowScoringOverview,
 } = slice.actions;
 
 export const selectState = (state: RootState): AppState => state[AppSlice] as AppState;
@@ -194,10 +202,18 @@ export const selectRightPanelActiveTab = createSelector(
   selectState,
   (state: AppState) => state.rightPanelActiveTab,
 );
-export const selectCurrentRule = createSelector(
+export const selectCurrentRuleId = createSelector(
   selectState,
   (state: AppState) => state.currentRule,
 );
+
+export const selectCurrentRule = createSelector(
+  selectCurrentRuleId,
+  selectCurrentActivity,
+  (id: any, activity: any) =>
+    activity?.authoring.rules.find((rule: AdaptiveRule) => rule.id === id) ?? id,
+);
+
 export const selectCopiedPart = createSelector(selectState, (state: AppState) => state.copiedPart);
 
 export const selectVisible = createSelector(selectState, (state: AppState) => state.visible);
@@ -222,6 +238,11 @@ export const selectReadOnly = createSelector(selectState, (state: AppState) => s
 export const selectShowDiagnosticsWindow = createSelector(
   selectState,
   (state: AppState) => state.showDiagnosticsWindow,
+);
+
+export const selectShowScoringOverview = createSelector(
+  selectState,
+  (state: AppState) => state.showScoringOverview,
 );
 
 export default slice.reducer;

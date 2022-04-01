@@ -8,10 +8,12 @@ module.exports = {
     '^editor/(.*)': '<rootDir>/src/editor/$1',
     '^utils/(.*)': '<rootDir>/src/utils/$1',
     '\\.[s]css': 'identity-obj-proxy',
+    'monaco-editor': '<rootDir>/__mocks__/monaco.mock.js',
   },
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
+  transformIgnorePatterns: ['node_modules/(?!monaco-editor/.*)'],
   preset: 'ts-jest',
   globals: {
     'ts-jest': {
@@ -22,4 +24,5 @@ module.exports = {
   collectCoverage: true,
   cacheDirectory: './node_modules/.cache/jest',
   setupFilesAfterEnv: ['<rootDir>/setup-tests.js'],
+  testEnvironment: 'jest-environment-jsdom',
 };

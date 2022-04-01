@@ -1,7 +1,7 @@
 defmodule OliWeb.Pow.PowHelpers do
   alias PowAssent.Plug
 
-  alias Phoenix.{HTML, HTML.Link, Naming}
+  alias Phoenix.{HTML, HTML.Link, HTML.Tag, Naming}
   alias PowAssent.Phoenix.AuthorizationController
 
   def get_pow_config(:user) do
@@ -21,16 +21,7 @@ defmodule OliWeb.Pow.PowHelpers do
       web_mailer_module: OliWeb,
       pow_assent: [
         user_identities_context: OliWeb.Pow.UserIdentities,
-        providers: [
-          google: [
-            client_id: System.get_env("GOOGLE_CLIENT_ID"),
-            client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
-            strategy: Assent.Strategy.Google,
-            authorization_params: [
-              scope: "email profile"
-            ]
-          ]
-        ]
+        providers: providers_config_list(:user)
       ]
     ]
   end
@@ -52,26 +43,7 @@ defmodule OliWeb.Pow.PowHelpers do
       web_mailer_module: OliWeb,
       pow_assent: [
         user_identities_context: OliWeb.Pow.AuthorIdentities,
-        providers: [
-          google: [
-            client_id: System.get_env("GOOGLE_CLIENT_ID"),
-            client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
-            strategy: Assent.Strategy.Google,
-            authorization_params: [
-              scope: "email profile"
-            ],
-            session_params: ["type"]
-          ],
-          github: [
-            client_id: System.get_env("GITHUB_CLIENT_ID"),
-            client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
-            strategy: Assent.Strategy.Github,
-            authorization_params: [
-              scope: "read:user user:email"
-            ],
-            session_params: ["type"]
-          ]
-        ]
+        providers: providers_config_list(:author)
       ]
     ]
   end
@@ -85,13 +57,8 @@ defmodule OliWeb.Pow.PowHelpers do
   end
 
   def current_pow_config(conn) do
-    case Pow.Plug.fetch_config(conn) do
-      nil ->
-        nil
-
-      pow_config ->
-        Keyword.get(pow_config, :user)
-    end
+    Pow.Plug.fetch_config(conn)
+    |> Keyword.get(:user)
   end
 
   ## provider_links forked from original pow_assent codebase to support custom styling for providers ##
@@ -148,7 +115,13 @@ defmodule OliWeb.Pow.PowHelpers do
     opts =
       Keyword.merge(opts, class: "btn btn-md #{provider_class(provider)} btn-block social-signin")
 
-    Link.link([icon, msg], opts)
+    provider_name = provider_name(provider, downcase: true)
+
+    msg_box = Tag.content_tag(:div, msg, class: provider_name <> "-text-container")
+
+    button_box = Tag.content_tag(:div, [icon, msg_box], class: provider_name <> "-auth-container")
+
+    Link.link(button_box, opts)
   end
 
   defp invitation_token_query_params(%{assigns: %{invited_user: %{invitation_token: token}}}),
@@ -185,16 +158,26 @@ defmodule OliWeb.Pow.PowHelpers do
     opts =
       Keyword.merge(opts, class: "btn btn-md #{provider_class(provider)} btn-block social-signin")
 
-    Link.link([icon, msg], opts)
+    provider_name = provider_name(provider, downcase: true)
+
+    msg_box = Tag.content_tag(:div, msg, class: provider_name <> "-text-container")
+
+    button_box = Tag.content_tag(:div, [icon, msg_box], class: provider_name <> "-auth-container")
+
+    Link.link(button_box, opts)
   end
 
   def provider_icon(provider) do
     case provider do
       :google ->
-        HTML.raw("<i class=\"fab fa-google fa-lg mr-2\"></i>")
+        HTML.raw(
+          "<div class=\"#{provider_name(provider, downcase: true)}-icon-container\"><img class=\"#{provider_name(provider, downcase: true)}-icon\" src=\"/images/icons/google-icon.svg\"/></div>"
+        )
 
       :github ->
-        HTML.raw("<i class=\"fab fa-github fa-lg mr-2\"></i>")
+        HTML.raw(
+          "<div class=\"#{provider_name(provider, downcase: true)}-icon-container\"><i class=\"fab fa-github #{provider_name(provider, downcase: true)}-icon\"></i></div>"
+        )
 
       _ ->
         HTML.raw(nil)
@@ -203,8 +186,7 @@ defmodule OliWeb.Pow.PowHelpers do
 
   def provider_class(provider) do
     provider
-    |> Naming.humanize()
-    |> String.downcase()
+    |> provider_name(downcase: true)
     |> (&"provider-#{&1}").()
   end
 
@@ -213,4 +195,62 @@ defmodule OliWeb.Pow.PowHelpers do
     |> Naming.humanize()
     |> String.upcase()
   end
+
+  def provider_name(provider, downcase: true) do
+    provider
+    |> Naming.humanize()
+    |> String.downcase()
+  end
+
+  defp providers_config_list(user_type) do
+    []
+    |> maybe_add_provider(:github, user_type)
+    |> maybe_add_provider(:google, user_type)
+  end
+
+  defp maybe_add_provider(providers_list, provider, user_type) do
+    prefix =
+      if provider == :github do
+        "#{user_type}_#{provider}"
+      else
+        provider
+      end
+
+    client_id = Application.fetch_env!(:oli, :auth_providers)[:"#{prefix}_client_id"]
+    client_secret = Application.fetch_env!(:oli, :auth_providers)[:"#{prefix}_client_secret"]
+
+    if blank?(client_id) or blank?(client_secret) do
+      providers_list
+    else
+      Keyword.put(providers_list, provider, provider_config(provider, client_id, client_secret))
+    end
+  end
+
+  defp provider_config(:google, client_id, client_secret) do
+    [
+      client_id: client_id,
+      client_secret: client_secret,
+      strategy: Assent.Strategy.Google,
+      authorization_params: [
+        scope: "email profile"
+      ],
+      session_params: ["type"]
+    ]
+  end
+
+  defp provider_config(:github, client_id, client_secret) do
+    [
+      client_id: client_id,
+      client_secret: client_secret,
+      strategy: Assent.Strategy.Github,
+      authorization_params: [
+        scope: "read:user user:email"
+      ],
+      session_params: ["type"]
+    ]
+  end
+
+  defp blank?(nil), do: true
+  defp blank?(""), do: true
+  defp blank?(_), do: false
 end

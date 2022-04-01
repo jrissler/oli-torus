@@ -19,6 +19,12 @@ defmodule OliWeb.Products.DetailsView do
   prop author, :any
   prop is_admin, :boolean
 
+  def set_breadcrumbs(section),
+    do: [Breadcrumb.new(%{
+      full_title: section.title,
+      link: Routes.live_path(OliWeb.Endpoint, __MODULE__, section.slug)
+    })]
+
   def mount(
         %{"product_id" => product_slug},
         %{"current_author_id" => author_id} = session,
@@ -60,7 +66,7 @@ defmodule OliWeb.Products.DetailsView do
           </div>
         </div>
         <div class="col-md-8">
-          <Edit product={@product} changeset={@changeset} available_brands={@available_brands}/>
+          <Edit product={@product} changeset={@changeset} available_brands={@available_brands} is_admin={@is_admin}/>
         </div>
       </div>
       <div class="row py-5 border-bottom">

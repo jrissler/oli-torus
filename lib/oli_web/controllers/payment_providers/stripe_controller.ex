@@ -1,17 +1,17 @@
 defmodule OliWeb.PaymentProviders.StripeController do
   use OliWeb, :controller
-  require Logger
+
+  import Oli.Utils
   import OliWeb.Api.Helpers
+
+  alias Oli.Delivery.{Paywall, Sections}
   alias Oli.Delivery.Paywall.Providers.Stripe
   alias OliWeb.Router.Helpers, as: Routes
-  alias Oli.Delivery.Sections
-  alias Oli.Delivery.Paywall
-  import Oli.Utils
+
+  require Logger
 
   @doc """
-  Render the page to show a student that they do not have access because
-  of the paywall state.  This is the route that the enforce paywall plug
-  redirects to.
+  Renders the page to start the direct payment processing flow via stripe.
   """
   def show(conn, section, user, %{amount: decimal} = amount) do
     Logger.debug("StripeController:show", %{
@@ -75,12 +75,12 @@ defmodule OliWeb.PaymentProviders.StripeController do
           reason: reason
         })
 
-      _ ->
-        Logger.error("StripeController could not finalize payment")
+      e ->
+        {_, msg} = Oli.Utils.log_error("Could not finalize stripe payment", e)
 
         json(conn, %{
           result: "failure",
-          reason: "Could not finalize payment"
+          reason: msg
         })
     end
   end
@@ -128,13 +128,9 @@ defmodule OliWeb.PaymentProviders.StripeController do
 
             json(conn, %{clientSecret: client_secret})
 
-          {:error, reason} when is_binary(reason) ->
-            Logger.error("StripeController:init_intent failed. #{reason}")
-            error(conn, 500, reason)
-
-          _ ->
-            Logger.error("StripeController:init_intent failed.")
-            error(conn, 500, "Intent creation failed")
+          e ->
+            {_, msg} = Oli.Utils.log_error("StripeController:init_intent failed.", e)
+            error(conn, 500, msg)
         end
       else
         e ->
